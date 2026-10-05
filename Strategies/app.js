@@ -1,6 +1,6 @@
 class StrategyCalculator {
     constructor() {
-        this.appContainer = document.getElementById('strategy-app'); // falls vorhanden
+        this.appContainer = document.getElementById('strategy-app');
         this.config = {
             defaultCapital: 139836.51,
             defaultRate: 0.04, // Historischer Tagesdurchschnitt
@@ -19,7 +19,8 @@ class StrategyCalculator {
             resBalance: document.getElementById('res-balance'),
             resProfit: document.getElementById('res-profit'),
             resGrowth: document.getElementById('res-growth'),
-            presetBtns: document.querySelectorAll('.preset-btn')
+            presetBtns: document.querySelectorAll('.preset-btn'),
+            tradesBody: document.getElementById('trades-table-body') // Wichtig für die Tabelle
         };
 
         this.init();
@@ -30,6 +31,7 @@ class StrategyCalculator {
         this.setupCalculator();
         this.initChart();
         this.calculate();
+        this.loadLiveTrades(); // Live-Daten beim Start laden
     }
 
     setupCalculator() {
@@ -148,7 +150,6 @@ class StrategyCalculator {
         let labels = ['0'];
         let dataPoints = [principal];
 
-        // Tägliche Reinvestition (Zinseszinsformel)
         for (let i = 1; i <= days; i++) {
             currentBalance *= (1 + (rate / 100));
             labels.push(i.toString());
@@ -168,6 +169,44 @@ class StrategyCalculator {
             this.chartInstance.data.datasets[0].data = dataPoints;
             this.chartInstance.update();
         }
+    }
+
+    async loadLiveTrades() {
+        try {
+            // Korrekte URL mit dem /api/live-trades Pfad von deinem Render-Backend
+            const response = await fetch('https://tagmarkets-backend.onrender.com/api/live-trades');
+            const trades = await response.json();
+            this.renderTradesTable(trades);
+        } catch (error) {
+            console.warn("Live-Trades konnten nicht geladen werden:", error);
+            if (this.dom.tradesBody) {
+                this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-rose-400">Fehler beim Laden der Live-Daten.</td></tr>`;
+            }
+        }
+    }
+
+    renderTradesTable(trades) {
+        if (!this.dom.tradesBody || !trades || trades.length === 0) return;
+
+        let html = '';
+        trades.forEach(t => {
+            const profitVal = parseFloat(t.profit || 0);
+            const isProfit = profitVal >= 0;
+            const profitClass = isProfit ? 'text-emerald-400' : 'text-rose-400';
+            const action = (t.action || 'BUY').toUpperCase();
+            const actionClass = action === 'BUY' ? 'text-sky-400' : 'text-purple-400';
+            
+            html += `
+                <tr class="hover:bg-cardBg/40 transition-colors">
+                    <td class="p-4 text-zinc-400">${t.date || 'Live'}</td>
+                    <td class="p-4 font-bold text-white">${t.asset || 'XAUUSD'}</td>
+                    <td class="p-4 ${actionClass} font-semibold">${action}</td>
+                    <td class="p-4 text-zinc-400">${parseFloat(t.volume || 1).toFixed(2)} Lots</td>
+                    <td class="p-4 text-right font-bold ${profitClass}">${isProfit ? '+' : ''}$${profitVal.toFixed(2)}</td>
+                </tr>
+            `;
+        });
+        this.dom.tradesBody.innerHTML = html;
     }
 }
 
