@@ -4,25 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TAG Markets | AI Trading Portfolios</title>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
-                    colors: {
-                        darkBg: '#040914',
-                        cardBg: '#0A101C',
-                        cardBorder: '#1A2436',
-                        accentCyan: '#00E5FF'
-                    }
+                    colors: { darkBg: '#040914', cardBg: '#0A101C', cardBorder: '#1A2436', accentCyan: '#00E5FF' }
                 }
             }
         }
@@ -35,14 +28,12 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
-
     <!-- Header -->
     <header class="w-full border-b border-cardBorder px-6 py-4 flex justify-between items-center bg-darkBg/90 backdrop-blur-md sticky top-0 z-50">
         <div class="flex items-center gap-3">
             <h1 class="text-xl font-extrabold tracking-tight text-white">TAG<span class="text-accentCyan">MARKETS</span></h1>
         </div>
         <div class="flex items-center gap-4">
-            <!-- Language Toggle -->
             <button id="langToggle" class="text-xs font-bold text-zinc-400 hover:text-white px-2 py-1 border border-cardBorder rounded transition-colors">
                 EN
             </button>
@@ -61,7 +52,7 @@
             <span data-i18n="heroTitle1">Fakten,</span> <span class="text-accentCyan" data-i18n="heroTitle2">keine Versprechen.</span>
         </h2>
         <p class="text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto mb-12" data-i18n="heroSub">
-            Jeder Trade, jeden Monat — öffentlich verifizierbar. Greife auf unsere Live-Konten zu und analysiere die echte Historie, direkt über die verbundene Broker-Schnittstelle.
+            Jeder Trade, jeden Monat — öffentlich verifizierbar. Analysiere die echte Historie direkt über die verbundene Broker-Schnittstelle.
         </p>
 
         <!-- Dynamisches Strategie-Grid -->
@@ -116,7 +107,7 @@
                 if(i18n[currentLang][key]) el.innerHTML = i18n[currentLang][key];
             });
             document.getElementById('langToggle').innerText = currentLang === 'de' ? 'EN' : 'DE';
-            renderGrid(); 
+            renderGrid();
         }
 
         document.getElementById('langToggle').addEventListener('click', () => {
@@ -124,14 +115,13 @@
             updateLang();
         });
 
-        // Hinzugefügte Win Rate und Trades Count für die Startseite
         const strategiesData = [
             {
                 id: "sonic-ai",
                 name: "Sonic AI",
                 asset: "XAUUSD",
                 descKey: "descSonic",
-                gain: "+30.11%",
+                gain: "+29.23%",
                 drawdown: "0.86%",
                 winRate: "82.4%",
                 tradesCount: "640",
