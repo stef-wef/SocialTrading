@@ -31,7 +31,7 @@ class StrategyCalculator {
         this.setupCalculator();
         this.initChart();
         this.calculate();
-        this.loadLiveTrades(); // Lädt die echten Live-Daten vom Backend
+        this.loadTrades(); 
     }
 
     setupCalculator() {
@@ -171,15 +171,16 @@ class StrategyCalculator {
         }
     }
 
-    async loadLiveTrades() {
+    async loadTrades() {
         try {
-            const response = await fetch('https://tagmarkets-backend.onrender.com/api/live-trades');
+            // Lädt die verifizierten Trades direkt aus der exportierten JSON-Datei
+            const response = await fetch('../trades.json'); // oder direkt './trades.json' je nach Pfad
             const trades = await response.json();
             this.renderTradesTable(trades);
         } catch (error) {
-            console.warn("Live-Trades konnten nicht geladen werden:", error);
+            console.warn("Trades konnten nicht geladen werden:", error);
             if (this.dom.tradesBody) {
-                this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-400 font-mono">Verbindung zum Live-Server fehlgeschlagen.</td></tr>`;
+                this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-400 font-mono">Fehler beim Laden der Historie.</td></tr>`;
             }
         }
     }
@@ -193,20 +194,20 @@ class StrategyCalculator {
         }
 
         let html = '';
-        // Zeige die letzten Trades an
-        trades.slice(0, 15).forEach(t => {
+        // Zeigt die historisch echten Trades an
+        trades.slice(0, 20).forEach(t => {
             const profitVal = parseFloat(t.profit || 0);
             const isProfit = profitVal >= 0;
             const profitClass = isProfit ? 'text-emerald-400' : 'text-rose-400';
-            const action = (t.action || 'BUY').toUpperCase();
+            const action = (t.action || 'Buy').toUpperCase();
             const actionClass = action === 'BUY' ? 'text-sky-400' : 'text-purple-400';
             
             html += `
                 <tr class="hover:bg-cardBg/40 transition-colors">
-                    <td class="p-4 text-zinc-400">${t.date || t.closeDate || 'Live'}</td>
-                    <td class="p-4 font-bold text-white">${t.symbol || t.asset || 'XAUUSD'}</td>
+                    <td class="p-4 text-zinc-400">${t.date || 'Verifiziert'}</td>
+                    <td class="p-4 font-bold text-white">${t.asset || 'XAUUSD'}</td>
                     <td class="p-4 ${actionClass} font-semibold">${action}</td>
-                    <td class="p-4 text-zinc-400">${parseFloat(t.lots || t.volume || 1).toFixed(2)} Lots</td>
+                    <td class="p-4 text-zinc-400">${parseFloat(t.volume || 1).toFixed(2)} Lots</td>
                     <td class="p-4 text-right font-bold ${profitClass}">${isProfit ? '+' : ''}$${profitVal.toFixed(2)}</td>
                 </tr>
             `;
