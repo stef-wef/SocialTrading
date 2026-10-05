@@ -1,295 +1,261 @@
 <!DOCTYPE html>
-<html lang="de" class="antialiased">
+<html lang="de" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonic AI | Performance & Projection</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonic AI - TagMarkets Performance</title>
     
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        bgMain: '#050505',
-                        boxBg: '#0f0f11',
-                        boxBorder: '#1f1f22',
-                        accent: '#CBFD5F',
-                        textMuted: '#8b8b93'
+                        tm: {
+                            bg: '#0F1014',       
+                            card: '#16171B',     
+                            border: '#27282D',   
+                            lime: '#D0F65C',     
+                            textMain: '#EAEAEA',
+                            textMuted: '#94959A'
+                        }
                     }
                 }
             }
         }
     </script>
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-        body { background-color: #050505; color: #ffffff; }
+        html, body {
+            background-color: #0F1014 !important; 
+            color: #EAEAEA !important;
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
         ::-webkit-scrollbar { display: none; }
-        .glass-nav { background: rgba(5, 5, 5, 0.7); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-        
-        /* Premium Range Slider */
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; height: 24px; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .bento-card {
+            background-color: #16171B !important;
+            border: 1px solid #27282D !important;
+            border-radius: 1.25rem;
+        }
+
+        /* Angepasste Slider (Weißer Thumb wie auf dem Screenshot) */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            height: 24px;
+        }
         input[type=range]:focus { outline: none; }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%;
-            background: #CBFD5F; cursor: pointer; margin-top: -7px;
-            box-shadow: 0 0 12px rgba(203, 253, 95, 0.4); transition: transform 0.1s;
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #ffffff; /* Weißer Punkt */
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            transition: transform 0.1s ease;
         }
         input[type=range]::-webkit-slider-thumb:active { transform: scale(1.15); }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #27272a; border-radius: 999px; }
-        
-        /* Hide number arrows */
-        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #27282D;
+            border-radius: 999px;
+        }
+
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col pb-20">
+<body class="p-4 md:p-8">
 
-    <!-- Navigation -->
-    <header class="fixed top-0 w-full z-50 glass-nav px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center gap-4">
-            <a href="../index.html" class="w-10 h-10 rounded-xl bg-boxBg border border-boxBorder flex items-center justify-center text-textMuted hover:text-white hover:border-textMuted transition-all">
-                <i class="fa-solid fa-arrow-left"></i>
-            </a>
-            <div>
-                <h1 class="text-lg font-bold tracking-tight text-white">SONIC <span class="text-accent">AI</span></h1>
-            </div>
-        </div>
-        <a href="https://www.myfxbook.com/members/SonicExperts/sonic-ai/12076857" target="_blank" class="px-4 py-2 bg-boxBorder hover:bg-[#2a2a2e] rounded-full text-xs font-semibold transition-colors flex items-center gap-2">
-            <i class="fa-solid fa-shield-check text-accent"></i> MyFXBook Verified
-        </a>
-    </header>
+    <div class="max-w-7xl mx-auto space-y-6">
 
-    <main class="w-full max-w-6xl mx-auto px-6 mt-32 space-y-6">
-
-        <!-- Bento Grid: Hero & Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            
-            <!-- Intro Box (Spans 2 cols) -->
-            <div class="md:col-span-2 bg-boxBg border border-boxBorder rounded-[2rem] p-8 flex flex-col justify-center relative overflow-hidden">
-                <div class="absolute -right-10 -top-10 w-40 h-40 bg-accent/5 rounded-full blur-3xl"></div>
-                <h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Fakten, keine Versprechen.</h2>
-                <p class="text-textMuted leading-relaxed">
-                    Jeder Trade, jeden Monat – öffentlich verifizierbar auf MyFXBook. 
-                    Sonic AI ist nicht darauf ausgelegt, über Nacht reich zu machen, sondern mit kontrolliertem Risiko konstant zu wachsen.
-                </p>
-            </div>
-
-            <!-- Stat Boxes -->
-            <div class="bg-boxBg border border-boxBorder rounded-[2rem] p-6 flex flex-col justify-between">
-                <div class="flex items-center gap-2 text-textMuted mb-4">
-                    <i class="fa-solid fa-arrow-trend-up"></i> <span class="text-xs uppercase font-semibold tracking-wider">Gesamtrendite</span>
-                </div>
+        <!-- HEADER -->
+        <header class="bento-card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="flex items-center gap-5">
+                <a href="../index.html" class="w-11 h-11 rounded-full border border-tm-border flex items-center justify-center text-tm-textMuted hover:text-white hover:border-tm-textMuted transition-all">
+                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                </a>
                 <div>
-                    <p class="text-4xl font-extrabold text-white">+28.77%</p>
-                    <p class="text-xs text-textMuted mt-1">Seit Auflage</p>
+                    <h1 class="text-3xl font-bold tracking-tight">SONIC <span class="text-tm-lime">AI</span></h1>
+                    <p class="text-sm text-tm-textMuted mt-0.5">Automated Trading Strategy Overview</p>
                 </div>
             </div>
 
-            <div class="bg-boxBg border border-boxBorder rounded-[2rem] p-6 flex flex-col justify-between">
-                <div class="flex items-center gap-2 text-textMuted mb-4">
-                    <i class="fa-solid fa-shield-halved"></i> <span class="text-xs uppercase font-semibold tracking-wider">Strategie Drawdown</span>
-                </div>
-                <div>
-                    <p class="text-4xl font-extrabold text-white">0.86%</p>
-                    <p class="text-xs text-textMuted mt-1">Max. Risiko (1x)</p>
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="https://www.myfxbook.com/members/SonicExperts/sonic-ai/12076857" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 rounded-lg border border-tm-border hover:bg-[#1E1F24] transition-colors text-sm font-medium">
+                    <i data-lucide="bar-chart-2" class="w-4 h-4 text-tm-textMuted"></i> Myfxbook ansehen
+                </a>
+                <div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-950/30 border border-green-800 text-green-400 text-sm font-medium">
+                    <i data-lucide="check-circle-2" class="w-4 h-4"></i> Track Record Verified
                 </div>
             </div>
+        </header>
 
-            <div class="bg-boxBg border border-boxBorder rounded-[2rem] p-6 flex flex-col justify-between">
-                <div class="flex items-center gap-2 text-textMuted mb-4">
-                    <i class="fa-solid fa-list-check"></i> <span class="text-xs uppercase font-semibold tracking-wider">Live Trades</span>
-                </div>
-                <div>
-                    <p class="text-4xl font-extrabold text-white">595</p>
-                    <p class="text-xs text-textMuted mt-1">Öffentlich sichtbar</p>
-                </div>
+        <!-- KPI ROW -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bento-card p-5 flex flex-col justify-center">
+                <span class="text-[11px] text-tm-textMuted font-semibold uppercase tracking-wider mb-1">Broker</span>
+                <span class="text-xl font-bold">TAG Markets</span>
             </div>
-
-            <div class="bg-boxBg border border-boxBorder rounded-[2rem] p-6 flex flex-col justify-between">
-                <div class="flex items-center gap-2 text-textMuted mb-4">
-                    <i class="fa-solid fa-calendar-check"></i> <span class="text-xs uppercase font-semibold tracking-wider">Ø Monatlich</span>
-                </div>
-                <div>
-                    <p class="text-4xl font-extrabold text-accent">+1.14%</p>
-                    <p class="text-xs text-textMuted mt-1">Verifizierter Schnitt</p>
-                </div>
+            <div class="bento-card p-5 flex flex-col justify-center">
+                <span class="text-[11px] text-tm-textMuted font-semibold uppercase tracking-wider mb-1">Konto-Typ</span>
+                <span class="text-xl font-bold">Real (USD)</span>
             </div>
-            
-            <!-- MyFXBook Widget Box (Spans 2 cols) -->
-            <div class="md:col-span-2 bg-boxBg border border-boxBorder rounded-[2rem] p-6 flex flex-col">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-semibold text-white">Live Tracking</span>
-                    <button onclick="refreshWidget()" class="text-xs text-textMuted hover:text-white transition-colors bg-[#1a1a1d] px-3 py-1.5 rounded-lg border border-boxBorder">
-                        <i class="fa-solid fa-arrows-rotate mr-1" id="refresh-icon"></i> Refresh
-                    </button>
-                </div>
-                <div class="w-full h-full min-h-[160px] overflow-hidden rounded-xl border border-boxBorder bg-black flex items-center justify-center p-2">
-                    <a href="https://www.myfxbook.com/members/SonicExperts/sonic-ai/12076857" target="_blank" class="w-full flex justify-center">
-                        <img id="myfxbook-img" src="https://widgets.myfxbook.com/widgets/12076857/large.jpg" alt="Sonic AI Stats" class="max-w-full rounded-lg">
-                    </a>
-                </div>
+            <div class="bento-card p-5 flex flex-col justify-center">
+                <span class="text-[11px] text-tm-textMuted font-semibold uppercase tracking-wider mb-1">Hebel (Leverage)</span>
+                <span class="text-xl font-bold">1:500</span>
+            </div>
+            <div class="bento-card p-5 flex flex-col justify-center">
+                <span class="text-[11px] text-tm-textMuted font-semibold uppercase tracking-wider mb-1">Haupt-Asset</span>
+                <span class="text-xl font-bold text-tm-lime">Gold (XAU/USD)</span>
             </div>
         </div>
 
-        <!-- Profit Projection Engine (Der neue Rechner) -->
-        <div class="mt-12 bg-boxBg border border-boxBorder rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden">
-            <!-- Background Glow -->
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-64 bg-accent/5 blur-[100px] pointer-events-none"></div>
-
-            <div class="mb-10 text-center max-w-2xl mx-auto">
-                <h2 class="text-3xl font-extrabold text-white mb-3">Profit Projection Engine</h2>
-                <p class="text-textMuted text-sm">Mathematische Hochrechnung basierend auf dem Zinseszinseffekt (Compounding). Die historische Performance ist keine Garantie für zukünftige Ergebnisse.</p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
+        <!-- MAIN GRID (Rechner & Chart) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- RECHNER (Nimmt 4 Spalten ein) -->
+            <div class="bento-card p-6 lg:p-8 flex flex-col lg:col-span-4">
+                <div class="flex items-center gap-3 mb-2">
+                    <i data-lucide="calculator" class="w-5 h-5 text-tm-textMuted"></i>
+                    <h2 class="text-xl font-bold">Zinseszins-Rechner</h2>
+                </div>
+                <p class="text-sm text-tm-textMuted mb-8 pb-6 border-b border-tm-border/50">Berechne das Potenzial durch tägliche Reinvestition.</p>
                 
-                <!-- Links: Eingaben -->
-                <div class="lg:col-span-5 space-y-10 relative z-10">
+                <div class="space-y-8 flex-1">
                     
-                    <!-- Kapital -->
+                    <!-- Startkapital -->
                     <div>
                         <div class="flex justify-between items-center mb-4">
-                            <label class="text-sm font-semibold text-textMuted uppercase tracking-wider">Initiales Kapital</label>
-                            <div class="flex items-center bg-[#1a1a1d] border border-boxBorder rounded-xl px-3 py-1.5 focus-within:border-accent transition-colors">
-                                <span class="text-textMuted mr-1">$</span>
-                                <input type="number" id="num-start" min="100" max="100000" step="100" value="10000" class="w-24 bg-transparent text-white font-bold text-right outline-none text-lg">
+                            <label class="text-[15px] text-tm-textMuted">Startkapital (USD)</label>
+                            <div class="flex items-center bg-[#0F1014] border border-tm-border rounded-lg px-3 py-1.5 focus-within:border-tm-lime transition-colors">
+                                <span class="text-tm-textMuted mr-1">$</span>
+                                <input type="number" id="input-start-num" min="100" max="100000" step="100" value="10000" class="w-24 bg-transparent text-white font-bold text-right outline-none text-lg">
                             </div>
                         </div>
                         <input type="range" id="input-start" min="100" max="100000" step="500" value="10000">
-                        <div class="flex gap-2 mt-4">
-                            <button onclick="setInvestment(5000)" class="flex-1 py-1.5 rounded-lg bg-[#1a1a1d] hover:bg-[#252529] border border-boxBorder text-xs text-textMuted transition-colors">$5k</button>
-                            <button onclick="setInvestment(10000)" class="flex-1 py-1.5 rounded-lg bg-[#1a1a1d] hover:bg-[#252529] border border-boxBorder text-xs text-textMuted transition-colors">$10k</button>
-                            <button onclick="setInvestment(50000)" class="flex-1 py-1.5 rounded-lg bg-[#1a1a1d] hover:bg-[#252529] border border-boxBorder text-xs text-textMuted transition-colors">$50k</button>
+                        <div class="grid grid-cols-3 gap-2 mt-4">
+                            <button onclick="setPrincipal(5000)" class="py-2 rounded-lg bg-transparent border border-tm-border text-sm text-tm-textMuted hover:text-white hover:bg-tm-border/50 transition-all">$5k</button>
+                            <button onclick="setPrincipal(10000)" class="py-2 rounded-lg bg-transparent border border-tm-border text-sm text-tm-textMuted hover:text-white hover:bg-tm-border/50 transition-all">$10k</button>
+                            <button onclick="setPrincipal(50000)" class="py-2 rounded-lg bg-transparent border border-tm-border text-sm text-tm-textMuted hover:text-white hover:bg-tm-border/50 transition-all">$50k</button>
                         </div>
                     </div>
 
-                    <!-- Täglicher Profit -->
+                    <!-- Tagesrendite -->
                     <div>
-                        <div class="flex justify-between items-end mb-4">
-                            <label class="text-sm font-semibold text-textMuted uppercase tracking-wider">Ø Tagesrendite</label>
-                            <span class="text-xl font-bold text-accent" id="display-rate">0.50%</span>
+                        <div class="flex justify-between items-center mb-4">
+                            <label class="text-[15px] text-tm-textMuted">Ø Tagesrendite</label>
+                            <span class="text-xl font-bold text-tm-lime" id="display-rate">1.50%</span>
                         </div>
-                        <input type="range" id="input-rate" min="0.1" max="2.0" step="0.05" value="0.5">
+                        <input type="range" id="input-rate" min="0.1" max="2.0" step="0.05" value="1.50">
                     </div>
 
                     <!-- Laufzeit -->
                     <div>
-                        <div class="flex justify-between items-end mb-4">
-                            <label class="text-sm font-semibold text-textMuted uppercase tracking-wider">Handelstage</label>
+                        <div class="flex justify-between items-center mb-4">
+                            <label class="text-[15px] text-tm-textMuted">Laufzeit (Handelstage)</label>
                             <span class="text-xl font-bold text-white" id="display-days">90 Tage</span>
                         </div>
                         <input type="range" id="input-days" min="10" max="365" step="5" value="90">
                     </div>
                 </div>
 
-                <!-- Rechts: Auswertung & Chart -->
-                <div class="lg:col-span-7 flex flex-col relative z-10">
+                <div class="mt-8 pt-8 border-t border-tm-border/50">
+                    <p class="text-sm text-tm-textMuted mb-1">Projiziertes Endguthaben:</p>
+                    <p class="text-[40px] leading-tight font-extrabold text-tm-lime tracking-tight" id="calc-final">$38,133.92</p>
                     
-                    <div class="grid grid-cols-2 gap-4 mb-8">
-                        <div class="bg-accent/10 border border-accent/20 rounded-2xl p-6">
-                            <p class="text-xs text-accent uppercase font-bold tracking-wider mb-2">Projiziertes Endguthaben</p>
-                            <p class="text-4xl md:text-5xl font-extrabold text-white tracking-tight" id="calc-final">$15,668.50</p>
+                    <div class="flex justify-between items-center mt-4 bg-[#0F1014] p-4 rounded-xl border border-tm-border">
+                        <div>
+                            <p class="text-xs text-tm-textMuted mb-1">Reingewinn</p>
+                            <p class="text-base text-white font-bold" id="calc-profit">+$28,133.92</p>
                         </div>
-                        <div class="bg-[#1a1a1d] border border-boxBorder rounded-2xl p-6 flex flex-col justify-center">
-                            <p class="text-xs text-textMuted uppercase font-bold tracking-wider mb-2">Reingewinn</p>
-                            <div class="flex items-baseline gap-3">
-                                <p class="text-2xl md:text-3xl font-bold text-white" id="calc-profit">+$5,668.50</p>
-                                <p class="text-sm font-bold text-accent" id="calc-percent">+56.68%</p>
-                            </div>
+                        <div class="text-right">
+                            <p class="text-xs text-tm-textMuted mb-1">Wachstum</p>
+                            <p class="text-base font-bold text-tm-lime" id="calc-percent">+281.34%</p>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <div class="flex-1 w-full min-h-[250px] relative bg-[#1a1a1d]/50 rounded-2xl border border-boxBorder p-4">
-                        <canvas id="dailyChart"></canvas>
+            <!-- CHART (Nimmt 8 Spalten ein) -->
+            <div class="lg:col-span-8 flex flex-col">
+                <div class="bento-card p-6 flex flex-col flex-1 min-h-[400px]">
+                    <div class="flex items-center gap-2 mb-6 pb-4 border-b border-tm-border/50">
+                        <i data-lucide="trending-up" class="w-5 h-5 text-tm-textMuted"></i>
+                        <h2 class="text-lg font-bold">Projektionsverlauf</h2>
+                    </div>
+                    <div class="flex-1 w-full relative">
+                        <canvas id="projectionChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-    </main>
+        <!-- TRADE HISTORIE -->
+        <div class="bento-card p-6 overflow-hidden">
+            <div class="flex items-center justify-between mb-4 pb-4 border-b border-tm-border/50">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="list" class="w-5 h-5 text-tm-textMuted"></i>
+                    <h2 class="text-lg font-bold">Aktuelle Live-Trades (Auszug)</h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-tm-lime animate-pulse"></span>
+                    <span class="text-xs text-tm-textMuted">Live API</span>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="text-tm-textMuted border-b border-tm-border/50">
+                            <th class="pb-3 font-medium">Datum / Zeit</th>
+                            <th class="pb-3 font-medium">Paar</th>
+                            <th class="pb-3 font-medium">Typ</th>
+                            <th class="pb-3 font-medium text-right">Volumen</th>
+                            <th class="pb-3 font-medium text-right">Profit / Verlust</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trades-body">
+                        <!-- Wird via API generiert -->
+                        <tr>
+                            <td colspan="5" class="py-8 text-center text-tm-textMuted">
+                                <i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto mb-2 opacity-50"></i>
+                                Verbinde zu API...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-    <script>
-        // Myfxbook Cache-Buster
-        function refreshWidget() {
-            const img = document.getElementById('myfxbook-img');
-            const icon = document.getElementById('refresh-icon');
-            if (icon) icon.classList.add('fa-spin');
-            img.src = "https://widgets.myfxbook.com/widgets/12076857/large.jpg?t=" + new Date().getTime();
-            setTimeout(() => { if (icon) icon.classList.remove('fa-spin'); }, 800);
-        }
+    </div>
 
-        // Chart.js Setup
-        let dailyChartInstance = null;
-
-        function initChart() {
-            const ctx = document.getElementById('dailyChart').getContext('2d');
-            let gradient = ctx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, 'rgba(203, 253, 95, 0.4)');
-            gradient.addColorStop(1, 'rgba(203, 253, 95, 0.0)');
-
-            dailyChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: { labels: [], datasets: [{ data: [], borderColor: '#CBFD5F', backgroundColor: gradient, borderWidth: 3, pointRadius: 0, pointHoverRadius: 6, pointBackgroundColor: '#CBFD5F', fill: true, tension: 0.4 }] },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: { backgroundColor: '#0f0f11', titleColor: '#8b8b93', bodyColor: '#ffffff', bodyFont: { size: 16, weight: 'bold' }, borderColor: '#1f1f22', borderWidth: 1, padding: 12, displayColors: false, callbacks: { title: (ctx) => 'Tag ' + ctx[0].label, label: (ctx) => '$' + ctx.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}) } }
-                    },
-                    scales: {
-                        x: { display: false },
-                        y: { position: 'right', grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false }, ticks: { color: '#8b8b93', font: { size: 11 }, maxTicksLimit: 5, callback: (val) => val >= 1000 ? '$' + (val/1000).toFixed(0) + 'k' : '$' + val } }
-                    },
-                    interaction: { mode: 'nearest', axis: 'x', intersect: false }
-                }
-            });
-        }
-
-        // Berechnung & UI Update
-        const sliderStart = document.getElementById('input-start'), numStart = document.getElementById('num-start');
-        const sliderRate = document.getElementById('input-rate'), sliderDays = document.getElementById('input-days');
-
-        function setInvestment(amount) { sliderStart.value = amount; numStart.value = amount; calculateDailyCompound(); }
-
-        function calculateDailyCompound() {
-            let principal = parseFloat(sliderStart.value);
-            if (isNaN(principal) || principal < 100) principal = 100;
-            if (principal > 100000) principal = 100000;
-
-            const dailyRate = parseFloat(sliderRate.value), days = parseInt(sliderDays.value);
-            document.getElementById('display-rate').innerText = dailyRate.toFixed(2) + '%';
-            document.getElementById('display-days').innerText = days + ' Tage';
-
-            let currentBalance = principal, labels = ['0'], dataPoints = [principal];
-            for (let i = 1; i <= days; i++) {
-                currentBalance *= (1 + (dailyRate / 100));
-                labels.push(i.toString()); dataPoints.push(currentBalance);
-            }
-
-            const finalBalance = dataPoints[dataPoints.length - 1], netProfit = finalBalance - principal, growthPercentage = (netProfit / principal) * 100;
-
-            document.getElementById('calc-final').innerText = '$' + finalBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('calc-profit').innerText = '+$' + netProfit.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('calc-percent').innerText = '+' + growthPercentage.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
-
-            if (dailyChartInstance) { dailyChartInstance.data.labels = labels; dailyChartInstance.data.datasets[0].data = dataPoints; dailyChartInstance.update(); }
-        }
-
-        window.onload = () => {
-            initChart(); refreshWidget(); calculateDailyCompound();
-            sliderStart.addEventListener('input', () => { numStart.value = sliderStart.value; calculateDailyCompound(); });
-            numStart.addEventListener('input', () => { let v = parseFloat(numStart.value); if(!isNaN(v)){ if(v>100000)v=100000; sliderStart.value = v; calculateDailyCompound(); }});
-            sliderRate.addEventListener('input', calculateDailyCompound); sliderDays.addEventListener('input', calculateDailyCompound);
-        };
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
