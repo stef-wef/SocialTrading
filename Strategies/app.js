@@ -20,7 +20,7 @@ class StrategyCalculator {
             resProfit: document.getElementById('res-profit'),
             resGrowth: document.getElementById('res-growth'),
             presetBtns: document.querySelectorAll('.preset-btn'),
-            tradesBody: document.getElementById('trades-table-body') // Wichtig für die Tabelle
+            tradesBody: document.getElementById('trades-table-body')
         };
 
         this.init();
@@ -31,7 +31,7 @@ class StrategyCalculator {
         this.setupCalculator();
         this.initChart();
         this.calculate();
-        this.loadLiveTrades(); // Live-Daten beim Start laden
+        this.loadLiveTrades(); // Lädt die echten Live-Daten vom Backend
     }
 
     setupCalculator() {
@@ -173,23 +173,28 @@ class StrategyCalculator {
 
     async loadLiveTrades() {
         try {
-            // Korrekte URL mit dem /api/live-trades Pfad von deinem Render-Backend
             const response = await fetch('https://tagmarkets-backend.onrender.com/api/live-trades');
             const trades = await response.json();
             this.renderTradesTable(trades);
         } catch (error) {
             console.warn("Live-Trades konnten nicht geladen werden:", error);
             if (this.dom.tradesBody) {
-                this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-rose-400">Fehler beim Laden der Live-Daten.</td></tr>`;
+                this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-400 font-mono">Verbindung zum Live-Server fehlgeschlagen.</td></tr>`;
             }
         }
     }
 
     renderTradesTable(trades) {
-        if (!this.dom.tradesBody || !trades || trades.length === 0) return;
+        if (!this.dom.tradesBody) return;
+        
+        if (!trades || trades.length === 0) {
+            this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-zinc-500 font-mono">Keine Trades verfügbar.</td></tr>`;
+            return;
+        }
 
         let html = '';
-        trades.forEach(t => {
+        // Zeige die letzten Trades an
+        trades.slice(0, 15).forEach(t => {
             const profitVal = parseFloat(t.profit || 0);
             const isProfit = profitVal >= 0;
             const profitClass = isProfit ? 'text-emerald-400' : 'text-rose-400';
@@ -198,10 +203,10 @@ class StrategyCalculator {
             
             html += `
                 <tr class="hover:bg-cardBg/40 transition-colors">
-                    <td class="p-4 text-zinc-400">${t.date || 'Live'}</td>
-                    <td class="p-4 font-bold text-white">${t.asset || 'XAUUSD'}</td>
+                    <td class="p-4 text-zinc-400">${t.date || t.closeDate || 'Live'}</td>
+                    <td class="p-4 font-bold text-white">${t.symbol || t.asset || 'XAUUSD'}</td>
                     <td class="p-4 ${actionClass} font-semibold">${action}</td>
-                    <td class="p-4 text-zinc-400">${parseFloat(t.volume || 1).toFixed(2)} Lots</td>
+                    <td class="p-4 text-zinc-400">${parseFloat(t.lots || t.volume || 1).toFixed(2)} Lots</td>
                     <td class="p-4 text-right font-bold ${profitClass}">${isProfit ? '+' : ''}$${profitVal.toFixed(2)}</td>
                 </tr>
             `;
