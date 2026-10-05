@@ -161,9 +161,9 @@ class StrategyCalculator {
             let dailyProfit = currentBalance * (rate / 100);
             
             if (mode === 'reinvest') {
-                currentBalance += dailyProfit; // Tägliches Reinvestieren (Zinseszins)
+                currentBalance += dailyProfit; 
             } else {
-                totalPayouts += dailyProfit; // Tägliches Auszahlen
+                totalPayouts += dailyProfit; 
             }
 
             labels.push(i.toString());
@@ -187,7 +187,6 @@ class StrategyCalculator {
 
     async loadTrades() {
         try {
-            // Da Sonic.html in /strategies liegt, gehen wir einen Ordner hoch und in den /data Ordner
             const response = await fetch('../data/trades.json');
             if (!response.ok) throw new Error("trades.json nicht gefunden");
             const trades = await response.json();
@@ -195,7 +194,7 @@ class StrategyCalculator {
         } catch (error) {
             console.error("Fehler beim Laden der trades.json:", error);
             if (this.dom.tradesBody) {
-                this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-400 font-mono">Fehler beim Laden der Trade-Historie aus dem /data Ordner.</td></tr>`;
+                this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-400 font-mono">Fehler beim Laden der Trade-Historie.</td></tr>`;
             }
         }
     }
@@ -209,19 +208,22 @@ class StrategyCalculator {
         }
 
         let html = '';
-        trades.slice(0, 20).forEach(t => {
-            const profitVal = parseFloat(t.profit || 0);
+        // Filtere nur echte Buy/Sell Trades heraus (ignoriere evtl. Einzahlungen)
+        const validTrades = trades.filter(t => t.Action === 'Buy' || t.Action === 'Sell');
+
+        validTrades.slice(0, 20).forEach(t => {
+            const profitVal = parseFloat(t.Profit || 0);
             const isProfit = profitVal >= 0;
             const profitClass = isProfit ? 'text-emerald-400' : 'text-rose-400';
-            const action = (t.action || 'Buy').toUpperCase();
+            const action = (t.Action || 'Buy').toUpperCase();
             const actionClass = action === 'BUY' ? 'text-sky-400' : 'text-purple-400';
             
             html += `
                 <tr class="hover:bg-cardBg/40 transition-colors">
-                    <td class="p-4 text-zinc-400">${t.date || 'Verifiziert'}</td>
-                    <td class="p-4 font-bold text-white">${t.asset || 'XAUUSD'}</td>
+                    <td class="p-4 text-zinc-400">${t["Close Date"] || t["Open Date"] || 'Verifiziert'}</td>
+                    <td class="p-4 font-bold text-white">${t.Symbol || 'XAUUSD'}</td>
                     <td class="p-4 ${actionClass} font-semibold">${action}</td>
-                    <td class="p-4 text-zinc-400">${parseFloat(t.volume || 1).toFixed(2)} Lots</td>
+                    <td class="p-4 text-zinc-400">${parseFloat(t["Units/Lots"] || 1).toFixed(2)} Lots</td>
                     <td class="p-4 text-right font-bold ${profitClass}">${isProfit ? '+' : ''}$${profitVal.toFixed(2)}</td>
                 </tr>
             `;
