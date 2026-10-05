@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonic AI | Performance & Rechner (bis 100'000 $)</title>
+    <title>Sonic AI | Performance & Rechner</title>
     
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -55,7 +55,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* Custom Range Slider */
+        /* Custom Range Slider Styling (Wie im Screenshot) */
         input[type=range] {
             -webkit-appearance: none;
             width: 100%;
@@ -100,10 +100,10 @@
 </head>
 <body class="min-h-screen flex flex-col pb-12">
 
-    <!-- Top Navigation mit Zurück-Link zu index.html -->
+    <!-- Top Navigation (WICHTIG: '../Index.html' wegen neuem Ordner) -->
     <header class="fixed top-0 left-0 right-0 z-50 glass-header px-4 py-3 flex justify-between items-center md:px-8">
         <div class="flex items-center gap-4">
-            <a href="index.html" class="p-2 rounded-xl bg-brand-card hover:bg-brand-cardHover border border-brand-border text-brand-textMuted hover:text-white transition-colors flex items-center justify-center text-sm" title="Zurück zur Übersicht">
+            <a href="../Index.html" class="p-2 rounded-xl bg-brand-card hover:bg-brand-cardHover border border-brand-border text-brand-textMuted hover:text-white transition-colors flex items-center justify-center text-sm">
                 <i class="fa-solid fa-chevron-left mr-1.5 text-xs"></i> Alle Strategien
             </a>
             <div class="flex items-center gap-2.5">
@@ -118,76 +118,36 @@
         </a>
     </header>
 
-    <!-- Main Content Container -->
     <main class="flex-1 w-full max-w-md mx-auto md:max-w-4xl px-4 mt-24 space-y-6">
 
-        <!-- Intro / Status Card -->
-        <div class="bg-brand-card border border-brand-border rounded-2xl p-5 shadow-lg relative overflow-hidden">
-            <div class="absolute -right-4 -top-4 w-28 h-28 bg-brand-accent opacity-5 blur-3xl rounded-full"></div>
-            
-            <div class="flex justify-between items-start mb-4">
-                <div>
-                    <div class="inline-block px-2.5 py-0.5 rounded-full bg-brand-accent/10 border border-brand-accent/20 text-brand-accent text-[11px] font-bold mb-2">
-                        LIVE STRATEGIE
-                    </div>
-                    <h2 class="text-xl md:text-2xl font-bold text-white mb-1">Sonic AI Overview</h2>
-                    <p class="text-sm text-brand-textMuted">Vollautomatisierter Gold-Handel (XAU/USD) auf TAG Markets</p>
-                </div>
-                <span class="flex h-3 w-3 relative">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-accent opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-brand-accent"></span>
-                </span>
-            </div>
-
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
-                <div class="bg-brand-bg rounded-xl p-3 border border-brand-border">
-                    <p class="text-[11px] text-brand-textMuted uppercase font-semibold mb-1">Broker</p>
-                    <p class="text-sm font-bold text-white">TAG Markets</p>
-                </div>
-                <div class="bg-brand-bg rounded-xl p-3 border border-brand-border">
-                    <p class="text-[11px] text-brand-textMuted uppercase font-semibold mb-1">Hebel</p>
-                    <p class="text-sm font-bold text-white">1:500 (Live)</p>
-                </div>
-                <div class="bg-brand-bg rounded-xl p-3 border border-brand-border">
-                    <p class="text-[11px] text-brand-textMuted uppercase font-semibold mb-1">Asset</p>
-                    <p class="text-sm font-bold text-brand-accent">Gold (XAU/USD)</p>
-                </div>
-                <div class="bg-brand-bg rounded-xl p-3 border border-brand-border">
-                    <p class="text-[11px] text-brand-textMuted uppercase font-semibold mb-1">Status</p>
-                    <p class="text-sm font-bold text-white">Vollautomatisiert</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Live Myfxbook Data Card (Mit Auto-Cache-Buster & Refresh-Button) -->
+        <!-- Myfxbook Live Data -->
         <div class="bg-brand-card border border-brand-border rounded-2xl p-5 shadow-lg">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-chart-line text-brand-accent"></i>
-                    <h2 class="text-base font-bold text-white">Live Performance Daten (Myfxbook)</h2>
+                    <h2 class="text-base font-bold text-white">Sonic AI Myfxbook Stats</h2>
                 </div>
-                <button onclick="refreshWidget()" title="Myfxbook Bild neu laden" class="text-xs text-brand-textMuted hover:text-brand-accent transition-colors flex items-center gap-1.5 px-3 py-1 rounded-lg bg-brand-bg border border-brand-border">
+                <button onclick="refreshWidget()" class="text-xs text-brand-textMuted hover:text-brand-accent transition-colors flex items-center gap-1.5 px-3 py-1 rounded-lg bg-brand-bg border border-brand-border">
                     <i class="fa-solid fa-arrows-rotate" id="refresh-icon"></i> <span>Aktualisieren</span>
                 </button>
             </div>
             
             <p class="text-xs text-brand-textMuted mb-4 leading-relaxed">
-                Diese Grafik wird direkt von Myfxbook synchronisiert. Klicke auf das Widget, um den vollständigen Track Record und alle Trade-Historien direkt auf Myfxbook zu prüfen.
+                Diese Grafik wird direkt von Myfxbook synchronisiert.
             </p>
             
-            <!-- Widget Image mit dynamischem Zeitstempel -->
             <div class="w-full overflow-hidden rounded-xl bg-brand-bg border border-brand-border flex justify-center p-3 relative">
                 <a href="https://www.myfxbook.com/members/SonicExperts/sonic-ai/12076857" target="_blank" rel="noopener noreferrer" class="w-full flex justify-center">
                     <img id="myfxbook-img" 
                          src="https://widgets.myfxbook.com/widgets/12076857/large.jpg" 
-                         alt="Sonic AI Myfxbook Stats" 
+                         alt="Sonic AI Stats" 
                          class="max-w-full h-auto rounded-lg shadow-md transition-opacity duration-300"
                          style="min-height: 190px;">
                 </a>
             </div>
         </div>
 
-        <!-- The "Daily Compounding" Rechner (Bis 100'000 $) -->
+        <!-- Investitions- & Zinseszinsrechner -->
         <div class="bg-brand-card border border-brand-border rounded-2xl p-5 shadow-lg md:col-span-2">
             
             <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -198,7 +158,7 @@
                     <p class="text-sm text-brand-textMuted mt-1">Berechne das Potenzial bei täglicher Reinvestition (Daily Compounding).</p>
                 </div>
                 <div class="self-start sm:self-auto">
-                    <span class="text-xs bg-brand-accent/10 text-brand-accent border border-brand-accent/30 px-3 py-1 rounded-full font-bold">
+                    <span class="text-xs bg-[#162013] text-brand-accent border border-brand-accent/30 px-3 py-1 rounded-full font-bold">
                         Skala bis $100'000
                     </span>
                 </div>
@@ -208,22 +168,19 @@
                 <!-- Inputs Area -->
                 <div class="space-y-6 bg-brand-bg p-5 rounded-2xl border border-brand-border">
                     
-                    <!-- Input 1: Startkapital (Slider + Direktes Zahlenfeld + Quick-Buttons) -->
+                    <!-- Investitionsbetrag -->
                     <div>
                         <div class="flex justify-between items-center mb-3">
                             <label for="num-start" class="text-sm font-semibold text-brand-textMuted">Investitionsbetrag</label>
-                            <!-- Direktes Eingabefeld -->
                             <div class="flex items-center bg-brand-card border border-brand-border rounded-lg px-2.5 py-1 focus-within:border-brand-accent">
                                 <span class="text-sm text-brand-textMuted mr-1">$</span>
-                                <input type="number" id="num-start" min="100" max="100000" step="100" value="1000"
+                                <input type="number" id="num-start" min="100" max="100000" step="100" value="100000"
                                        class="w-24 bg-transparent text-white font-bold text-right outline-none text-base">
                             </div>
                         </div>
 
-                        <!-- Range Slider bis 100'000 $ -->
-                        <input type="range" id="input-start" min="100" max="100000" step="500" value="1000">
+                        <input type="range" id="input-start" min="100" max="100000" step="500" value="100000">
 
-                        <!-- Schnellauswahl-Pills (Quick-Buttons) -->
                         <div class="grid grid-cols-6 gap-1.5 mt-3">
                             <button type="button" onclick="setInvestment(1000)" class="text-[11px] py-1 rounded-md bg-brand-card hover:bg-brand-cardHover border border-brand-border text-brand-textMuted hover:text-white transition-colors">$1k</button>
                             <button type="button" onclick="setInvestment(5000)" class="text-[11px] py-1 rounded-md bg-brand-card hover:bg-brand-cardHover border border-brand-border text-brand-textMuted hover:text-white transition-colors">$5k</button>
@@ -234,16 +191,16 @@
                         </div>
                     </div>
 
-                    <!-- Input 2: Täglicher Profit -->
+                    <!-- Täglicher Profit -->
                     <div>
                         <div class="flex justify-between items-end mb-3">
                             <label class="text-sm font-semibold text-brand-textMuted">Täglicher Ziel-Profit (Schnitt)</label>
-                            <span class="text-lg font-bold text-brand-accent bg-brand-card border border-brand-border px-3 py-1 rounded-lg" id="display-rate">0.50%</span>
+                            <span class="text-lg font-bold text-brand-accent bg-brand-card border border-brand-border px-3 py-1 rounded-lg" id="display-rate">1.00%</span>
                         </div>
-                        <input type="range" id="input-rate" min="0.1" max="2.0" step="0.05" value="0.5">
+                        <input type="range" id="input-rate" min="0.1" max="2.0" step="0.05" value="1.00">
                     </div>
 
-                    <!-- Input 3: Tage -->
+                    <!-- Tage -->
                     <div>
                         <div class="flex justify-between items-end mb-3">
                             <label class="text-sm font-semibold text-brand-textMuted">Laufzeit (Handelstage)</label>
@@ -255,20 +212,18 @@
 
                 <!-- Outputs & Chart Area -->
                 <div class="flex flex-col">
-                    <!-- Results Box -->
                     <div class="grid grid-cols-2 gap-3 mb-6">
                         <div class="bg-[#141e12] border border-brand-accent/30 rounded-xl p-4">
                             <p class="text-xs text-brand-textMuted font-medium mb-1">Endguthaben</p>
-                            <p class="text-2xl md:text-3xl font-extrabold text-brand-accent tracking-tight" id="calc-final">$1,566.85</p>
+                            <p class="text-2xl md:text-3xl font-extrabold text-brand-accent tracking-tight" id="calc-final">$244,863.81</p>
                         </div>
                         <div class="bg-brand-bg border border-brand-border rounded-xl p-4">
                             <p class="text-xs text-brand-textMuted font-medium mb-1">Reingewinn</p>
-                            <p class="text-xl md:text-2xl font-bold text-white" id="calc-profit">+$566.85</p>
-                            <p class="text-xs text-brand-accent font-semibold mt-1" id="calc-percent">+56.68%</p>
+                            <p class="text-xl md:text-2xl font-bold text-white" id="calc-profit">+$144,863.81</p>
+                            <p class="text-xs text-brand-accent font-semibold mt-1" id="calc-percent">+144.86%</p>
                         </div>
                     </div>
 
-                    <!-- Chart Canvas -->
                     <div class="flex-1 w-full relative min-h-[220px]">
                         <canvas id="dailyChart"></canvas>
                     </div>
@@ -276,26 +231,15 @@
             </div>
         </div>
 
-        <!-- Call to Action / Footer -->
-        <div class="text-center pt-4 pb-8 space-y-3">
-            <a href="index.html" class="inline-flex items-center gap-2 text-xs font-semibold text-brand-textMuted hover:text-brand-accent transition-colors">
-                <i class="fa-solid fa-arrow-left"></i> Zurück zu allen Strategien
-            </a>
-            <p class="text-[10px] text-brand-textMuted leading-relaxed max-w-sm mx-auto">
-                Der Handel mit Hebelprodukten birgt ein hohes Risiko. Vergangene Performance ist kein verlässlicher Indikator für zukünftige Ergebnisse.
-            </p>
-        </div>
-
     </main>
 
     <script>
-        // --- 1. Myfxbook Cache-Buster & Auto-Refresh ---
+        // Myfxbook Cache-Buster
         function refreshWidget() {
             const img = document.getElementById('myfxbook-img');
             const icon = document.getElementById('refresh-icon');
             if (icon) icon.classList.add('fa-spin');
             
-            // Neuer Zeitstempel erzwingt frisches Laden ohne Browser-Cache
             img.src = "https://widgets.myfxbook.com/widgets/12076857/large.jpg?t=" + new Date().getTime();
             
             setTimeout(() => {
@@ -303,12 +247,11 @@
             }, 800);
         }
 
-        // --- 2. Chart.js Setup ---
+        // Chart.js Setup
         let dailyChartInstance = null;
 
         function initChart() {
             const ctx = document.getElementById('dailyChart').getContext('2d');
-            
             let gradient = ctx.createLinearGradient(0, 0, 0, 220);
             gradient.addColorStop(0, 'rgba(203, 253, 95, 0.35)');
             gradient.addColorStop(1, 'rgba(203, 253, 95, 0.0)');
@@ -359,10 +302,7 @@
                         y: {
                             display: true,
                             position: 'right',
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.05)',
-                                drawBorder: false,
-                            },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
                             ticks: {
                                 color: '#a1a1aa',
                                 font: { size: 10 },
@@ -375,16 +315,12 @@
                             }
                         }
                     },
-                    interaction: {
-                        mode: 'nearest',
-                        axis: 'x',
-                        intersect: false
-                    }
+                    interaction: { mode: 'nearest', axis: 'x', intersect: false }
                 }
             });
         }
 
-        // --- 3. Synchronisation & Berechnung ---
+        // Berechnung & UI Update
         const sliderStart = document.getElementById('input-start');
         const numStart = document.getElementById('num-start');
         const sliderRate = document.getElementById('input-rate');
@@ -404,11 +340,9 @@
             const dailyRate = parseFloat(sliderRate.value);
             const days = parseInt(sliderDays.value);
 
-            // Labels aktualisieren
             document.getElementById('display-rate').innerText = dailyRate.toFixed(2) + '%';
             document.getElementById('display-days').innerText = days + ' Tage';
 
-            // Zinseszins-Kurve berechnen
             let currentBalance = principal;
             let labels = ['0'];
             let dataPoints = [principal];
@@ -423,12 +357,10 @@
             const netProfit = finalBalance - principal;
             const growthPercentage = (netProfit / principal) * 100;
 
-            // DOM Resultate updaten
             document.getElementById('calc-final').innerText = '$' + finalBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById('calc-profit').innerText = '+$' + netProfit.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById('calc-percent').innerText = '+' + growthPercentage.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
 
-            // Chart aktualisieren
             if (dailyChartInstance) {
                 dailyChartInstance.data.labels = labels;
                 dailyChartInstance.data.datasets[0].data = dataPoints;
@@ -436,19 +368,15 @@
             }
         }
 
-        // Event-Listener
         window.onload = () => {
             initChart();
-            refreshWidget(); // Initial mit Timestamp laden
+            refreshWidget();
             calculateDailyCompound();
 
-            // Slider -> Number Input
             sliderStart.addEventListener('input', () => {
                 numStart.value = sliderStart.value;
                 calculateDailyCompound();
             });
-
-            // Number Input -> Slider
             numStart.addEventListener('input', () => {
                 let val = parseFloat(numStart.value);
                 if (!isNaN(val)) {

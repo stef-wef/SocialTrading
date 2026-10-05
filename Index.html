@@ -86,145 +86,122 @@
             </p>
         </div>
 
-        <!-- Strategy Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-            <!-- Card 1: Sonic AI (Aktiv & Verlinkt) -->
-            <div class="bg-brand-card border-2 border-brand-accent/40 hover:border-brand-accent rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group">
-                <div class="absolute -right-6 -top-6 w-32 h-32 bg-brand-accent/10 blur-3xl rounded-full"></div>
-                
-                <div>
-                    <!-- Badge Header -->
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#CBFD5F] to-[#8eb833] flex items-center justify-center shadow-[0_0_15px_rgba(203,253,95,0.25)]">
-                            <i class="fa-solid fa-bolt text-brand-bg text-2xl"></i>
-                        </div>
-                        <span class="px-2.5 py-1 bg-brand-accent/15 text-brand-accent text-xs font-bold rounded-full border border-brand-accent/30 flex items-center gap-1.5">
-                            <i class="fa-solid fa-circle-check text-[10px]"></i> Live & Verifiziert
-                        </span>
-                    </div>
-
-                    <!-- Titel & Beschreibung -->
-                    <h3 class="text-2xl font-bold text-white group-hover:text-brand-accent transition-colors">Sonic AI</h3>
-                    <p class="text-xs text-brand-textMuted mt-1 mb-5">
-                        Vollautomatisierter Hochfrequenz- & Swing-Algorithmus für Gold (XAU/USD).
-                    </p>
-
-                    <!-- Key Data -->
-                    <div class="space-y-2 mb-6">
-                        <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
-                            <span class="text-brand-textMuted">Handelspaar</span>
-                            <span class="font-semibold text-white">XAU/USD (Gold)</span>
-                        </div>
-                        <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
-                            <span class="text-brand-textMuted">Broker / Hebel</span>
-                            <span class="font-semibold text-white">TAG Markets (1:500)</span>
-                        </div>
-                        <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
-                            <span class="text-brand-textMuted">Track Record</span>
-                            <span class="font-semibold text-brand-accent flex items-center gap-1">
-                                <i class="fa-solid fa-shield-check"></i> Myfxbook Verified
-                            </span>
-                        </div>
-                        <div class="flex justify-between items-center text-xs py-1.5">
-                            <span class="text-brand-textMuted">Rechner</span>
-                            <span class="font-semibold text-white">Bis 100'000 $</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Call to action button zu sonic.html -->
-                <a href="sonic.html" class="w-full py-3 px-4 bg-brand-accent hover:bg-brand-accentDark text-brand-bg font-bold rounded-xl text-center text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#cbfd5f]/15">
-                    Strategie & Rechner öffnen <i class="fa-solid fa-arrow-right text-xs"></i>
-                </a>
+        <!-- Dynamisches Strategy Cards Grid -->
+        <div id="strategy-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Loading Spinner (wird durch JS ersetzt) -->
+            <div class="col-span-full flex justify-center py-12">
+                <i class="fa-solid fa-circle-notch fa-spin text-3xl text-brand-accent"></i>
             </div>
-
-            <!-- Card 2: Placeholder für weitere Strategie (z.B. Quantum FX) -->
-            <div class="bg-brand-card border border-brand-border rounded-2xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between opacity-75 hover:opacity-100 transition-all">
-                <div>
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-brand-bg border border-brand-border flex items-center justify-center text-brand-textMuted">
-                            <i class="fa-solid fa-chart-line text-xl"></i>
-                        </div>
-                        <span class="px-2.5 py-1 bg-brand-bg text-brand-textMuted text-xs font-semibold rounded-full border border-brand-border">
-                            In Vorbereitung
-                        </span>
-                    </div>
-
-                    <h3 class="text-xl font-bold text-white">Quantum FX</h3>
-                    <p class="text-xs text-brand-textMuted mt-1 mb-5">
-                        Diversifiziertes Multi-Währungspaar Portfolio mit konservativem Drawdown-Management.
-                    </p>
-
-                    <div class="space-y-2 mb-6">
-                        <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
-                            <span class="text-brand-textMuted">Handelspaar</span>
-                            <span class="font-semibold text-white">EUR/USD, GBP/USD</span>
-                        </div>
-                        <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
-                            <span class="text-brand-textMuted">Broker</span>
-                            <span class="font-semibold text-white">TAG Markets</span>
-                        </div>
-                        <div class="flex justify-between items-center text-xs py-1.5">
-                            <span class="text-brand-textMuted">Status</span>
-                            <span class="font-semibold text-brand-textMuted">Auditing</span>
-                        </div>
-                    </div>
-                </div>
-
-                <button disabled class="w-full py-3 px-4 bg-brand-border text-brand-textMuted font-semibold rounded-xl text-center text-sm cursor-not-allowed">
-                    Demnächst verfügbar
-                </button>
-            </div>
-
-            <!-- Card 3: Placeholder für Index Strategy -->
-            <div class="bg-brand-card border border-brand-border rounded-2xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between opacity-75 hover:opacity-100 transition-all">
-                <div>
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-brand-bg border border-brand-border flex items-center justify-center text-brand-textMuted">
-                            <i class="fa-solid fa-network-wired text-xl"></i>
-                        </div>
-                        <span class="px-2.5 py-1 bg-brand-bg text-brand-textMuted text-xs font-semibold rounded-full border border-brand-border">
-                            In Vorbereitung
-                        </span>
-                    </div>
-
-                    <h3 class="text-xl font-bold text-white">Apex Indices</h3>
-                    <p class="text-xs text-brand-textMuted mt-1 mb-5">
-                        Trendfolgestrategie auf globalen Aktienindizes mit intelligenter Volatilitätsanpassung.
-                    </p>
-
-                    <div class="space-y-2 mb-6">
-                        <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
-                            <span class="text-brand-textMuted">Märkte</span>
-                            <span class="font-semibold text-white">US30, NAS100</span>
-                        </div>
-                        <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
-                            <span class="text-brand-textMuted">Broker</span>
-                            <span class="font-semibold text-white">TAG Markets</span>
-                        </div>
-                        <div class="flex justify-between items-center text-xs py-1.5">
-                            <span class="text-brand-textMuted">Status</span>
-                            <span class="font-semibold text-brand-textMuted">Backtesting</span>
-                        </div>
-                    </div>
-                </div>
-
-                <button disabled class="w-full py-3 px-4 bg-brand-border text-brand-textMuted font-semibold rounded-xl text-center text-sm cursor-not-allowed">
-                    Demnächst verfügbar
-                </button>
-            </div>
-
         </div>
 
     </main>
 
-    <!-- Footer -->
     <footer class="text-center py-6 border-t border-brand-border px-4">
         <p class="text-[11px] text-brand-textMuted leading-relaxed max-w-xl mx-auto">
-            <strong>Risikohinweis:</strong> Der Handel mit Devisen und CFDs auf Margin birgt erhebliche Risiken und ist möglicherweise nicht für alle Anleger geeignet. Vergangene Ergebnisse garantieren keine zukünftigen Renditen.
+            <strong>Risikohinweis:</strong> Der Handel mit Devisen und CFDs auf Margin birgt erhebliche Risiken und ist möglicherweise nicht für alle Anleger geeignet.
         </p>
     </footer>
 
+    <!-- API & Render Logik -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // 1. Deine API URL (Wenn du eine echte API hast, trage sie hier ein)
+            // const API_URL = 'https://api.deinedomain.com/strategies';
+
+            // 2. Simulierte API Datenstruktur (Wird als JSON von deiner API kommen)
+            const apiDataMock = [
+                {
+                    "id": "sonic-ai",
+                    "name": "Sonic AI",
+                    "description": "Vollautomatisierter Hochfrequenz- & Swing-Algorithmus für Gold (XAU/USD).",
+                    "asset": "XAU/USD (Gold)",
+                    "broker": "TAG Markets",
+                    "leverage": "1:500",
+                    "isLive": true,
+                    "folderPath": "Strategies/Sonic.html", // Angepasste Ordnerstruktur
+                    "icon": "fa-bolt"
+                }
+                // Wenn du hier ein zweites Objekt hinzufügst, erscheint sofort eine zweite Karte!
+            ];
+
+            // 3. Funktion zum Abrufen der Daten
+            async function fetchStrategies() {
+                try {
+                    // Echter Fetch Aufruf wäre:
+                    // const response = await fetch(API_URL);
+                    // return await response.json();
+                    
+                    // Für jetzt nutzen wir die simulierten Daten mit 500ms Ladeverzögerung für den Effekt:
+                    return new Promise(resolve => setTimeout(() => resolve(apiDataMock), 500));
+                } catch (error) {
+                    console.error("Fehler beim Laden der Strategien:", error);
+                    return [];
+                }
+            }
+
+            // 4. Render Funktion für das Grid
+            async function renderGrid() {
+                const grid = document.getElementById('strategy-grid');
+                const strategies = await fetchStrategies();
+
+                if(strategies.length === 0) {
+                    grid.innerHTML = '<p class="text-center text-brand-textMuted col-span-full">Aktuell sind keine Strategien verfügbar.</p>';
+                    return;
+                }
+
+                // Grid leeren (Lade-Spinner entfernen)
+                grid.innerHTML = '';
+
+                // Durch die API-Daten iterieren und HTML generieren
+                strategies.forEach(strat => {
+                    const cardHTML = `
+                        <div class="bg-brand-card border-2 border-brand-accent/40 hover:border-brand-accent rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group">
+                            <div class="absolute -right-6 -top-6 w-32 h-32 bg-brand-accent/10 blur-3xl rounded-full"></div>
+                            
+                            <div>
+                                <div class="flex justify-between items-start mb-4">
+                                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#CBFD5F] to-[#8eb833] flex items-center justify-center shadow-[0_0_15px_rgba(203,253,95,0.25)]">
+                                        <i class="fa-solid ${strat.icon} text-brand-bg text-2xl"></i>
+                                    </div>
+                                    ${strat.isLive ? `
+                                    <span class="px-2.5 py-1 bg-brand-accent/15 text-brand-accent text-xs font-bold rounded-full border border-brand-accent/30 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-circle-check text-[10px]"></i> Live & Verifiziert
+                                    </span>` : ''}
+                                </div>
+
+                                <h3 class="text-2xl font-bold text-white group-hover:text-brand-accent transition-colors">${strat.name}</h3>
+                                <p class="text-xs text-brand-textMuted mt-1 mb-5">${strat.description}</p>
+
+                                <div class="space-y-2 mb-6">
+                                    <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
+                                        <span class="text-brand-textMuted">Handelspaar</span>
+                                        <span class="font-semibold text-white">${strat.asset}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
+                                        <span class="text-brand-textMuted">Broker / Hebel</span>
+                                        <span class="font-semibold text-white">${strat.broker} (${strat.leverage})</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
+                                        <span class="text-brand-textMuted">Track Record</span>
+                                        <span class="font-semibold text-brand-accent flex items-center gap-1">
+                                            <i class="fa-solid fa-shield-check"></i> Myfxbook Verified
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <a href="${strat.folderPath}" class="w-full py-3 px-4 bg-brand-accent hover:bg-brand-accentDark text-brand-bg font-bold rounded-xl text-center text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#cbfd5f]/15">
+                                Strategie öffnen <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </a>
+                        </div>
+                    `;
+                    grid.insertAdjacentHTML('beforeend', cardHTML);
+                });
+            }
+
+            renderGrid();
+        });
+    </script>
 </body>
 </html>
