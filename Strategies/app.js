@@ -14,7 +14,7 @@ class StrategyCalculator {
             capSlider: document.getElementById('calc-capital-slider'),
             rateSlider: document.getElementById('calc-rate-slider'),
             daysSlider: document.getElementById('calc-days-slider'),
-            modeSelect: document.getElementById('calc-mode-select'), // Reinvestieren vs. Auszahlen
+            modeSelect: document.getElementById('calc-mode-select'),
             dispRate: document.getElementById('display-rate'),
             dispDays: document.getElementById('display-days'),
             resBalance: document.getElementById('res-balance'),
@@ -147,7 +147,7 @@ class StrategyCalculator {
         let principal = parseFloat(this.dom.capInput.value) || 0;
         let rate = parseFloat(this.dom.rateSlider.value) || 0;
         let days = parseInt(this.dom.daysSlider.value) || 0;
-        let mode = this.dom.modeSelect ? this.dom.modeSelect.value : 'reinvest'; // 'reinvest' oder 'payout'
+        let mode = this.dom.modeSelect ? this.dom.modeSelect.value : 'reinvest';
 
         if (this.dom.dispRate) this.dom.dispRate.innerText = rate.toFixed(2) + '%';
         if (this.dom.dispDays) this.dom.dispDays.innerText = days + ' Tage';
@@ -163,7 +163,7 @@ class StrategyCalculator {
             if (mode === 'reinvest') {
                 currentBalance += dailyProfit; // Tägliches Reinvestieren (Zinseszins)
             } else {
-                totalPayouts += dailyProfit; // Gewinne werden täglich ausgezahlt, Kapital bleibt gleich
+                totalPayouts += dailyProfit; // Tägliches Auszahlen
             }
 
             labels.push(i.toString());
@@ -187,23 +187,15 @@ class StrategyCalculator {
 
     async loadTrades() {
         try {
-            // Absoluter oder korrekter relativer Pfad zur trades.json im Hauptverzeichnis
-            const response = await fetch('/trades.json');
+            // Da Sonic.html in /strategies liegt, gehen wir einen Ordner hoch und in den /data Ordner
+            const response = await fetch('../data/trades.json');
             if (!response.ok) throw new Error("trades.json nicht gefunden");
             const trades = await response.json();
             this.renderTradesTable(trades);
         } catch (error) {
-            console.warn("Versuche alternativen Pfad für trades.json...", error);
-            try {
-                // Fallback für Unterordner
-                const response = await fetch('trades.json');
-                const trades = await response.json();
-                this.renderTradesTable(trades);
-            } catch (err) {
-                console.error("Fehler beim Laden der trades.json:", err);
-                if (this.dom.tradesBody) {
-                    this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-400 font-mono">Fehler beim Laden der Trade-Historie.</td></tr>`;
-                }
+            console.error("Fehler beim Laden der trades.json:", error);
+            if (this.dom.tradesBody) {
+                this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-400 font-mono">Fehler beim Laden der Trade-Historie aus dem /data Ordner.</td></tr>`;
             }
         }
     }
