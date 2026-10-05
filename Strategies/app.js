@@ -43,7 +43,6 @@ const translations = {
         
         ledgerTitle1: "Die komplette Trade-Historie,",
         ledgerTitle2: "Zeile für Zeile.",
-        colDate: "Datum",
         colAsset: "Instrument",
         colType: "Typ",
         colVol: "Volumen",
@@ -92,7 +91,6 @@ const translations = {
         
         ledgerTitle1: "A live trade ledger,",
         ledgerTitle2: "line by line.",
-        colDate: "Date",
         colAsset: "Instrument",
         colType: "Type",
         colVol: "Volume",
@@ -103,7 +101,8 @@ const translations = {
 class DualEngineApp {
     constructor() {
         this.rawTrades = []; 
-        this.chartInstance = null;
+        this.projChart = null;
+        this.btChart = null;
         this.currentLang = 'de';
         
         this.rates = { cons: 0.0588, avg: 0.19152, opt: 0.3528 };
@@ -158,10 +157,10 @@ class DualEngineApp {
         }
         this.applyTranslations();
 
-        if (!this.dom.projDepInput) return; // Nur wenn auf Sonic.html
+        if (!this.dom.projDepInput) return;
 
         this.setupListeners();
-        this.initBacktestChart();
+        this.initCharts();
         this.calcProjection();
         this.loadTrades(); 
     }
@@ -189,24 +188,68 @@ class DualEngineApp {
             });
         };
 
-        // Projection Engine Listeners
+        // Projection
         syncSliderInput(this.dom.projDepSlider, this.dom.projDepInput, () => this.calcProjection());
         syncSliderInput(this.dom.projTopSlider, this.dom.projTopInput, () => this.calcProjection());
         syncSliderInput(this.dom.projMoSlider, this.dom.projMoInput, () => this.calcProjection());
 
-        // Backtest Engine Listeners
+        // Backtest
         syncSliderInput(this.dom.btDepSlider, this.dom.btDepInput, () => this.calcBacktest());
         this.dom.btStart.addEventListener('change', () => this.calcBacktest());
         this.dom.btEnd.addEventListener('change', () => this.calcBacktest());
         this.dom.btMode.addEventListener('change', () => this.calcBacktest());
         
-        // Stats Filter Listener
-        const triggerStats = () => { this.updateStatsAndTable(); };
+        // Stats
+        const triggerStats = () => this.updateStatsAndTable();
         if(this.dom.statStart) this.dom.statStart.addEventListener('change', triggerStats);
         if(this.dom.statEnd) this.dom.statEnd.addEventListener('change', triggerStats);
     }
 
-    // --- PROJECTION ENGINE LOGIK ---
+    initCharts() {
+        Chart.defaults.font.family = "'JetBrains Mono', monospace";
+        Chart.defaults.color = '#64748B';
+
+        const createChart = (canvasId, color, gStart, gEnd) => {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return null;
+            const ctx = canvas.getContext('2d');
+            let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, gStart); gradient.addColorStop(1, gEnd);
+
+            return new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [{ 
+                    data: [], borderColor: color, backgroundColor: gradient, 
+                    borderWidth: 2, pointRadius: 0, pointHoverRadius: 6,
+                    pointBackgroundColor: '#040914', pointBorderColor: color, pointBorderWidth: 2,
+                    fill: true, tension: 0.1 
+                }]},
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0A101C', titleColor: '#94A3B8', bodyColor: '#FFFFFF',
+                            borderColor: '#1A2436', borderWidth: 1, padding: 12, displayColors: false,
+                            callbacks: { label: (ctx) => '$' + ctx.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255, 255, 255, 0.02)', drawBorder: false }, ticks: { maxTicksLimit: 6 } },
+                        y: { position: 'right', grid: { color: 'rgba(255, 255, 255, 0.04)', drawBorder: false }, border: { dash: [4, 4] },
+                             ticks: { maxTicksLimit: 6, callback: (val) => val >= 1000 ? '$' + (val/1000).toFixed(1) + 'k' : '$' + val }
+                        }
+                    },
+                    interaction: { mode: 'index', intersect: false }
+                }
+            });
+        };
+
+        this.projChart = createChart('projectionChart', '#00E5FF', 'rgba(0, 229, 255, 0.2)', 'rgba(0, 229, 255, 0.0)');
+        this.btChart = createChart('backtestChart', '#34D399', 'rgba(52, 211, 153, 0.2)', 'rgba(52, 211, 153, 0.0)');
+    }
+
+    // --- PROJECTION LOGIK ---
     simulateProj(deposit, topup, months, rate) {
         let balance = deposit;
         let invested = deposit;
@@ -238,6 +281,21 @@ class DualEngineApp {
         this.dom.projConsBal.innerText = this.formatMoney(resCons.balance);
         this.dom.projOptBal.innerText = this.formatMoney(resOpt.balance);
 
+        let pLabels = ['0']; let pData = [deposit];
+        let curr = deposit;
+        for (let m = 1; m <= months; m++) {
+            curr = curr * (1 + this.rates.avg);
+            if (m < months) curr += topup;
+            pLabels.push(m.toString());
+            pData.push(curr);
+        }
+
+        if (this.projChart) {
+            this.projChart.data.labels = pLabels;
+            this.projChart.data.datasets[0].data = pData;
+            this.projChart.update();
+        }
+
         [1, 3, 6, 12].forEach(m => {
             let avgM = this.simulateProj(deposit, topup, m, this.rates.avg).balance;
             const elAvg = document.getElementById(`ms${m}-avg`);
@@ -245,62 +303,19 @@ class DualEngineApp {
         });
     }
 
-    // --- BACKTEST ENGINE LOGIK ---
-    initBacktestChart() {
-        const canvas = document.getElementById('backtestChart');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        
-        let gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, 'rgba(52, 211, 153, 0.2)'); 
-        gradient.addColorStop(1, 'rgba(52, 211, 153, 0.0)');
-
-        Chart.defaults.font.family = "'JetBrains Mono', monospace";
-        Chart.defaults.color = '#64748B';
-
-        this.chartInstance = new Chart(ctx, {
-            type: 'line',
-            data: { labels: [], datasets: [{ 
-                data: [], borderColor: '#34D399', backgroundColor: gradient, 
-                borderWidth: 2, pointRadius: 0, pointHoverRadius: 6,
-                pointBackgroundColor: '#040914', pointBorderColor: '#34D399', pointBorderWidth: 2,
-                fill: true, tension: 0.1 
-            }]},
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { 
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#0A101C', titleColor: '#94A3B8', bodyColor: '#FFFFFF',
-                        borderColor: '#1A2436', borderWidth: 1, padding: 12, displayColors: false,
-                        callbacks: { label: (ctx) => '$' + ctx.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }
-                    }
-                },
-                scales: {
-                    x: { grid: { color: 'rgba(255, 255, 255, 0.02)', drawBorder: false }, ticks: { maxTicksLimit: 6 } },
-                    y: { position: 'right', grid: { color: 'rgba(255, 255, 255, 0.04)', drawBorder: false }, border: { dash: [4, 4] },
-                         ticks: { maxTicksLimit: 6, callback: (val) => val >= 1000 ? '$' + (val/1000).toFixed(1) + 'k' : '$' + val }
-                    }
-                },
-                interaction: { mode: 'index', intersect: false }
-            }
-        });
-    }
-
+    // --- BACKTEST LOGIK ---
     async loadTrades() {
         let data = [];
         try {
-            // Extrem robustes Laden (prüft lokales Repo oder Server)
-            const res = await fetch('../data/trades.json').catch(() => fetch('./data/trades.json')).catch(() => fetch('/data/trades.json'));
+            const res = await fetch('../data/trades.json').catch(() => fetch('/data/trades.json')).catch(() => fetch('./data/trades.json'));
             if (!res || !res.ok) throw new Error("JSON Fetch failed");
             data = await res.json();
         } catch (error) {
-            console.error("Fehler beim Laden der trades.json:", error);
-            if (this.dom.tradesBody) this.dom.tradesBody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-rose-400 font-mono">Verbindungsfehler zur Historie. Bitte prüfen Sie den /data Ordner.</td></tr>`;
+            console.error("Fehler beim Laden:", error);
+            if (this.dom.tradesBody) this.dom.tradesBody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-rose-400 font-mono">Keine Trades in der Datenbank gefunden.</td></tr>`;
             return;
         }
 
-        // Filtern nach Buy/Sell, Date Formatieren
         this.rawTrades = data.filter(t => {
             const action = (t.Action || t.action || "").toLowerCase();
             return action === 'buy' || action === 'sell';
@@ -309,14 +324,10 @@ class DualEngineApp {
             let parsedDate = new Date(dateStr);
             if(isNaN(parsedDate.getTime())) parsedDate = new Date(); 
             
-            // Formatieren des Datums für die UI (nur Tag, Monat, Jahr)
-            const displayDate = parsedDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
             return {
                 ...t,
                 parsedDate,
-                displayDate: displayDate,
-                Gain: parseFloat(t.Gain || t.gain || 0), // Profit in % aus der JSON ("Gain")
+                Gain: parseFloat(t.Gain || t.gain || 0),
                 Action: (t.Action || t.action || "Buy").toUpperCase()
             };
         }).sort((a, b) => a.parsedDate - b.parsedDate);
@@ -325,11 +336,9 @@ class DualEngineApp {
             const firstDate = this.rawTrades[0].parsedDate;
             const lastDate = this.rawTrades[this.rawTrades.length - 1].parsedDate;
             
-            // Backtest Bereich (Kompletter Zeitraum)
             this.dom.btStart.value = firstDate.toISOString().split('T')[0];
             this.dom.btEnd.value = lastDate.toISOString().split('T')[0];
 
-            // Statistik Bereich (Letzter Monat als Standard)
             if(this.dom.statStart && this.dom.statEnd) {
                 const oneMonthAgo = new Date(lastDate);
                 oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
@@ -357,14 +366,15 @@ class DualEngineApp {
         let winRate = total > 0 ? ((wins / total) * 100).toFixed(2) : 0;
 
         if(this.dom.statTotal) this.dom.statTotal.innerText = total;
+        if(this.dom.kpiTrades) this.dom.kpiTrades.innerText = this.rawTrades.length; 
         if(this.dom.statWins) this.dom.statWins.innerText = wins;
         if(this.dom.statLosses) this.dom.statLosses.innerText = losses;
         if(this.dom.statWinrate) this.dom.statWinrate.innerText = winRate + "%";
 
-        // Tabelen Render - nur die gefilterten Trades
         if (!this.dom.tradesBody) return;
         let html = '';
         
+        // Zeigt immer ALLE gefilterten Trades an
         const reversedForTable = [...statsTrades].reverse(); 
 
         if (reversedForTable.length === 0) {
@@ -381,9 +391,9 @@ class DualEngineApp {
             
             html += `
                 <tr class="hover:bg-cardBorder/30 transition-colors">
-                    <td class="px-6 py-4 text-zinc-400">${t.displayDate}</td>
                     <td class="px-6 py-4 font-bold text-white">${t.Symbol || 'XAUUSD'}</td>
                     <td class="px-6 py-4 font-semibold">${actionBadge}</td>
+                    <td class="px-6 py-4 text-zinc-400">${parseFloat(t["Units/Lots"] || 1).toFixed(2)} Lots</td>
                     <td class="px-6 py-4 text-right font-bold ${profitClass}">${isProfit ? '+' : ''}${t.Gain.toFixed(2)}%</td>
                 </tr>
             `;
@@ -410,7 +420,7 @@ class DualEngineApp {
         let dataPoints = [capital];
 
         validTrades.forEach(t => {
-            let percentFactor = t.Gain / 100; // Aus 0.04 (in der CSV) wird 0.0004
+            let percentFactor = t.Gain / 100; 
             let tradeProfit = currentBalance * percentFactor;
 
             if (mode === 'reinvest') {
@@ -418,7 +428,6 @@ class DualEngineApp {
                 dataPoints.push(currentBalance);
             } else {
                 totalPayouts += tradeProfit;
-                // Bei Payout: Zeigt das gesammelte Geld auf dem Konto an
                 dataPoints.push(capital + totalPayouts);
             }
             labels.push(t.parsedDate.toISOString().split('T')[0]);
@@ -432,10 +441,10 @@ class DualEngineApp {
         this.dom.btResProf.innerText = (netProfit >= 0 ? '+' : '') + '$' + netProfit.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         this.dom.btResGrowth.innerText = (growth >= 0 ? '+' : '') + growth.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
 
-        if (this.chartInstance) {
-            this.chartInstance.data.labels = labels;
-            this.chartInstance.data.datasets[0].data = dataPoints;
-            this.chartInstance.update();
+        if (this.btChart) {
+            this.btChart.data.labels = labels;
+            this.btChart.data.datasets[0].data = dataPoints;
+            this.btChart.update();
         }
     }
 }
