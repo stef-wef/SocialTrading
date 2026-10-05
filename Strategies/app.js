@@ -1,4 +1,3 @@
-// --- i18n Dictionary ---
 const translations = {
     de: {
         back: "Zurück",
@@ -7,7 +6,6 @@ const translations = {
         maxDrawdown: "Max Drawdown",
         liveTradesKpi: "Live Trades",
         avgMonth: "Ø Monat",
-        
         growthProj: "Wachstums-Projektion",
         projTitle: "Projektions-Engine",
         projSub: "Basierend auf dem verifizierten Durchschnitt von 1.14%, multipliziert mit 24x Hebelwirkung, abzüglich 30% Performance-Fee.",
@@ -21,10 +19,9 @@ const translations = {
         projCons: "Konservativ",
         projOpt: "Optimistisch",
         projMilestones: "Meilensteine",
-
         btBadge: "Echte Historische Daten",
         btTitle: "Backtest-Engine",
-        btSub: "Simuliert Gewinne basierend auf allen vergangenen Trades. Gib dein Startkapital ein und wähle den Gewinn-Modus.",
+        btSub: "Simuliert den exakten Gewinnverlauf über alle vergangenen Trades. Gib dein Startkapital ein und wähle den Modus.",
         btCapital: "Startkapital",
         btMode: "Gewinn-Modus",
         modeReinvest: "Täglich Reinvestieren (Zinseszins)",
@@ -32,13 +29,11 @@ const translations = {
         btSimBal: "Simuliertes Endguthaben",
         btProfit: "Gewinn",
         btGrowth: "Wachstum",
-
         tradeStats: "Trade Statistiken",
         totalTrades: "Total Trades",
         winningTrades: "Gewonnen",
         losingTrades: "Verloren",
         winRate: "Win Rate",
-        
         ledgerTitle1: "Die komplette Trade-Historie,",
         ledgerTitle2: "Zeile für Zeile.",
         colDate: "Datum",
@@ -52,7 +47,6 @@ const translations = {
         maxDrawdown: "Max Drawdown",
         liveTradesKpi: "Live Trades",
         avgMonth: "Avg / Month",
-        
         growthProj: "Growth Projection",
         projTitle: "Projection Engine",
         projSub: "Modeled from the verified MyFXBook average monthly return of 1.14%, amplified 24x by broker leverage, minus a 30% performance fee.",
@@ -66,10 +60,9 @@ const translations = {
         projCons: "Conservative",
         projOpt: "Optimistic",
         projMilestones: "Milestones",
-
         btBadge: "Real Historical Data",
         btTitle: "Backtest Engine",
-        btSub: "Simulates returns based on all exact historical trades. Input your capital and select the profit mode.",
+        btSub: "Simulates exact performance across all past trades. Input your capital and select the mode.",
         btCapital: "Starting Capital",
         btMode: "Profit Mode",
         modeReinvest: "Daily Reinvest (Compound)",
@@ -77,13 +70,11 @@ const translations = {
         btSimBal: "Simulated Balance",
         btProfit: "Profit",
         btGrowth: "Growth",
-
         tradeStats: "Trade Statistics",
         totalTrades: "Total Trades",
         winningTrades: "Wins",
         losingTrades: "Losses",
         winRate: "Win Rate",
-        
         ledgerTitle1: "A live trade ledger,",
         ledgerTitle2: "line by line.",
         colDate: "Date",
@@ -94,15 +85,13 @@ const translations = {
 
 class DualEngineApp {
     constructor() {
-        this.rawTrades = []; 
-        this.projChart = null;
+        this.rawTrades = window.TRADES_DATA || [];
         this.btChart = null;
         this.currentLang = 'de';
-        
         this.rates = { cons: 0.0588, avg: 0.19152, opt: 0.3528 };
-        
+
         this.dom = {
-            // Projection UI
+            // Rechner 1 (Projektion)
             projDepInput: document.getElementById('proj-deposit'),
             projDepSlider: document.getElementById('proj-deposit-slider'),
             projTopInput: document.getElementById('proj-topup'),
@@ -116,7 +105,7 @@ class DualEngineApp {
             projConsBal: document.getElementById('proj-cons-balance'),
             projOptBal: document.getElementById('proj-opt-balance'),
 
-            // Backtest UI
+            // Rechner 2 (Backtest)
             btDepInput: document.getElementById('bt-capital'),
             btDepSlider: document.getElementById('bt-capital-slider'),
             btMode: document.getElementById('bt-mode-select'),
@@ -124,7 +113,7 @@ class DualEngineApp {
             btResProf: document.getElementById('bt-res-profit'),
             btResGrowth: document.getElementById('bt-res-growth'),
 
-            // Stats & Table UI
+            // Statistiken & Tabelle
             statTotal: document.getElementById('stat-total'),
             statWins: document.getElementById('stat-wins'),
             statLosses: document.getElementById('stat-losses'),
@@ -138,7 +127,7 @@ class DualEngineApp {
     }
 
     init() {
-        if(this.dom.langToggle) {
+        if (this.dom.langToggle) {
             this.dom.langToggle.addEventListener('click', () => {
                 this.currentLang = this.currentLang === 'de' ? 'en' : 'de';
                 this.dom.langToggle.innerText = this.currentLang === 'de' ? 'EN' : 'DE';
@@ -147,18 +136,21 @@ class DualEngineApp {
         }
         this.applyTranslations();
 
-        if (!this.dom.projDepInput) return; // Nur wenn Rechner geladen ist
+        if (!this.dom.projDepInput) return;
 
         this.setupListeners();
-        this.initCharts();
+        this.initBacktestChart();
         this.calcProjection();
-        this.loadTrades(); 
+        
+        // Trades sofort aus window.TRADES_DATA laden
+        this.renderStatsAndTable();
+        this.calcBacktest();
     }
 
     applyTranslations() {
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
-            if(translations[this.currentLang] && translations[this.currentLang][key]) {
+            if (translations[this.currentLang] && translations[this.currentLang][key]) {
                 el.innerText = translations[this.currentLang][key];
             }
         });
@@ -171,68 +163,24 @@ class DualEngineApp {
     setupListeners() {
         const syncSliderInput = (slider, input, callback) => {
             slider.addEventListener('input', () => { input.value = slider.value; callback(); });
-            input.addEventListener('input', () => { 
-                let val = parseInt(input.value) || 0; 
-                slider.value = val; 
-                callback(); 
+            input.addEventListener('input', () => {
+                let val = parseInt(input.value) || 0;
+                slider.value = val;
+                callback();
             });
         };
 
-        // Projection 
+        // Rechner 1 Listeners
         syncSliderInput(this.dom.projDepSlider, this.dom.projDepInput, () => this.calcProjection());
         syncSliderInput(this.dom.projTopSlider, this.dom.projTopInput, () => this.calcProjection());
         syncSliderInput(this.dom.projMoSlider, this.dom.projMoInput, () => this.calcProjection());
 
-        // Backtest (Kein Datum mehr!)
+        // Rechner 2 Listeners
         syncSliderInput(this.dom.btDepSlider, this.dom.btDepInput, () => this.calcBacktest());
         this.dom.btMode.addEventListener('change', () => this.calcBacktest());
     }
 
-    initCharts() {
-        Chart.defaults.font.family = "'JetBrains Mono', monospace";
-        Chart.defaults.color = '#64748B';
-
-        const createChart = (canvasId, color, gStart, gEnd) => {
-            const canvas = document.getElementById(canvasId);
-            if (!canvas) return null;
-            const ctx = canvas.getContext('2d');
-            let gradient = ctx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, gStart); gradient.addColorStop(1, gEnd);
-
-            return new Chart(ctx, {
-                type: 'line',
-                data: { labels: [], datasets: [{ 
-                    data: [], borderColor: color, backgroundColor: gradient, 
-                    borderWidth: 2, pointRadius: 0, pointHoverRadius: 6,
-                    pointBackgroundColor: '#040914', pointBorderColor: color, pointBorderWidth: 2,
-                    fill: true, tension: 0.1 
-                }]},
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#0A101C', titleColor: '#94A3B8', bodyColor: '#FFFFFF',
-                            borderColor: '#1A2436', borderWidth: 1, padding: 12, displayColors: false,
-                            callbacks: { label: (ctx) => '$' + ctx.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }
-                        }
-                    },
-                    scales: {
-                        x: { grid: { color: 'rgba(255, 255, 255, 0.02)', drawBorder: false }, ticks: { maxTicksLimit: 6 } },
-                        y: { position: 'right', grid: { color: 'rgba(255, 255, 255, 0.04)', drawBorder: false }, border: { dash: [4, 4] },
-                             ticks: { maxTicksLimit: 6, callback: (val) => val >= 1000 ? '$' + (val/1000).toFixed(1) + 'k' : '$' + val }
-                        }
-                    },
-                    interaction: { mode: 'index', intersect: false }
-                }
-            });
-        };
-
-        this.projChart = createChart('projectionChart', '#00E5FF', 'rgba(0, 229, 255, 0.2)', 'rgba(0, 229, 255, 0.0)');
-        this.btChart = createChart('backtestChart', '#34D399', 'rgba(52, 211, 153, 0.2)', 'rgba(52, 211, 153, 0.0)');
-    }
-
-    // --- PROJECTION LOGIC ---
+    // --- RECHNER 1: PROJEKTION ---
     simulateProj(deposit, topup, months, rate) {
         let balance = deposit;
         let invested = deposit;
@@ -256,154 +204,178 @@ class DualEngineApp {
 
         let multiplier = resAvg.invested > 0 ? (resAvg.balance / resAvg.invested).toFixed(1) : 0;
 
-        this.dom.projResAvgBal.innerText = this.formatMoney(resAvg.balance);
+        this.dom.projResBal.innerText = this.formatMoney(resAvg.balance);
         this.dom.projResInv.innerText = this.formatMoney(resAvg.invested);
         this.dom.projResMult.innerText = multiplier + 'x';
-        this.dom.projResMult.className = multiplier >= 1 ? "text-emerald-400 font-bold" : "text-rose-400 font-bold";
 
         this.dom.projConsBal.innerText = this.formatMoney(resCons.balance);
         this.dom.projOptBal.innerText = this.formatMoney(resOpt.balance);
 
-        let pLabels = ['0']; let pData = [deposit];
-        let curr = deposit;
-        for (let m = 1; m <= months; m++) {
-            curr = curr * (1 + this.rates.avg);
-            if (m < months) curr += topup;
-            pLabels.push(m.toString());
-            pData.push(curr);
-        }
-
-        if (this.projChart) {
-            this.projChart.data.labels = pLabels;
-            this.projChart.data.datasets[0].data = pData;
-            this.projChart.update();
-        }
-
         [1, 3, 6, 12].forEach(m => {
             let avgM = this.simulateProj(deposit, topup, m, this.rates.avg).balance;
             const elAvg = document.getElementById(`ms${m}-avg`);
-            if(elAvg) elAvg.innerText = this.formatMoney(avgM);
+            if (elAvg) elAvg.innerText = this.formatMoney(avgM);
         });
     }
 
-    // --- DATA LOADING LOGIC ---
-    async loadTrades() {
-        let data = [];
-        try {
-            // Robustes Fetching
-            const res = await fetch('../data/trades.json').catch(() => fetch('/data/trades.json')).catch(() => fetch('./data/trades.json'));
-            if (!res || !res.ok) throw new Error("JSON Fetch failed");
-            data = await res.json();
-        } catch (error) {
-            console.error("Fehler beim Laden:", error);
-            if (this.dom.tradesBody) this.dom.tradesBody.innerHTML = `<tr><td colspan="3" class="py-8 text-center text-rose-400 font-mono">Lade-Fehler. Keine Daten.</td></tr>`;
-            return;
-        }
+    // --- RECHNER 2: BACKTEST (ECHTE TRADES) ---
+    initBacktestChart() {
+        const canvas = document.getElementById('backtestChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
 
-        // Alle gültigen Buy/Sell Trades extrahieren
-        this.rawTrades = data.filter(t => {
-            const action = (t.Action || t.action || "").toLowerCase();
-            return action === 'buy' || action === 'sell';
-        }).map(t => {
-            const dateStr = t["Close Date"] || t["Open Date"] || t.date || "";
-            // Robustes Fallback für das Datum
-            let parsedDate = new Date(dateStr);
-            if(isNaN(parsedDate.getTime())) parsedDate = new Date(); 
-            
-            return {
-                ...t,
-                parsedDate,
-                displayDate: dateStr, // String Anzeige so wie er reinkommt
-                Gain: parseFloat(t.Gain || t.gain || 0), // Profit in Prozent
-                Action: (t.Action || t.action || "Buy").toUpperCase()
-            };
-        }).sort((a, b) => a.parsedDate - b.parsedDate); // Alt nach Neu sortiert
+        let gradient = ctx.createLinearGradient(0, 0, 0, 260);
+        gradient.addColorStop(0, 'rgba(52, 211, 153, 0.25)');
+        gradient.addColorStop(1, 'rgba(52, 211, 153, 0.0)');
 
-        this.updateStatsAndTable();
-        this.calcBacktest();
-    }
+        Chart.defaults.font.family = "'JetBrains Mono', monospace";
+        Chart.defaults.color = '#64748B';
 
-    // --- STATS & TABLE LOGIC (ALLE TRADES) ---
-    updateStatsAndTable() {
-        if (this.rawTrades.length === 0) return;
-
-        let wins = 0; let losses = 0;
-        this.rawTrades.forEach(t => { if (t.Gain >= 0) wins++; else losses++; });
-        let total = wins + losses;
-        let winRate = total > 0 ? ((wins / total) * 100).toFixed(2) : 0;
-
-        if(this.dom.statTotal) this.dom.statTotal.innerText = total;
-        if(this.dom.kpiTrades) this.dom.kpiTrades.innerText = total;
-        if(this.dom.statWins) this.dom.statWins.innerText = wins;
-        if(this.dom.statLosses) this.dom.statLosses.innerText = losses;
-        if(this.dom.statWinrate) this.dom.statWinrate.innerText = winRate + "%";
-
-        if (!this.dom.tradesBody) return;
-        let html = '';
-        
-        // Alle Trades: Neuste ganz oben
-        const reversedForTable = [...this.rawTrades].reverse(); 
-
-        reversedForTable.forEach(t => {
-            const isProfit = t.Gain >= 0;
-            const profitClass = isProfit ? 'text-emerald-400' : 'text-rose-400';
-            const actionBadge = t.Action === 'BUY' 
-                ? `<span class="px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">BUY</span>` 
-                : `<span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">SELL</span>`;
-            
-            html += `
-                <tr class="hover:bg-cardBorder/30 transition-colors">
-                    <td class="px-6 py-4 text-zinc-400">${t.displayDate}</td>
-                    <td class="px-6 py-4 font-semibold">${actionBadge}</td>
-                    <td class="px-6 py-4 text-right font-bold ${profitClass}">${isProfit ? '+' : ''}${t.Gain.toFixed(2)}%</td>
-                </tr>
-            `;
+        this.btChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    borderColor: '#34D399',
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
+                    pointBackgroundColor: '#040914',
+                    pointBorderColor: '#34D399',
+                    pointBorderWidth: 2,
+                    fill: true,
+                    tension: 0.15
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0A101C',
+                        titleColor: '#94A3B8',
+                        bodyColor: '#FFFFFF',
+                        borderColor: '#1A2436',
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: false,
+                        callbacks: {
+                            label: (ctx) => '$' + ctx.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { color: 'rgba(255, 255, 255, 0.02)' }, ticks: { maxTicksLimit: 6 } },
+                    y: {
+                        position: 'right',
+                        grid: { color: 'rgba(255, 255, 255, 0.04)' },
+                        border: { dash: [4, 4] },
+                        ticks: {
+                            maxTicksLimit: 6,
+                            callback: (val) => val >= 1000 ? '$' + (val / 1000).toFixed(1) + 'k' : '$' + val
+                        }
+                    }
+                },
+                interaction: { mode: 'index', intersect: false }
+            }
         });
-        this.dom.tradesBody.innerHTML = html;
     }
 
-    // --- BACKTEST LOGIC (ALLE TRADES) ---
     calcBacktest() {
-        if (this.rawTrades.length === 0) return;
+        if (!this.rawTrades || this.rawTrades.length === 0) return;
 
         let capital = parseFloat(this.dom.btDepInput.value) || 10000;
-        let mode = this.dom.btMode.value; 
+        let mode = this.dom.btMode.value;
 
         let currentBalance = capital;
         let totalPayouts = 0;
-        
+
         let labels = ['Start'];
         let dataPoints = [capital];
 
-        // Berechnet über ALLE historischen Trades
-        this.rawTrades.forEach(t => {
-            let percentFactor = t.Gain / 100; // Aus Gain 0.04 wird hier 0.0004
-            let tradeProfit = currentBalance * percentFactor;
+        // Schleife über alle 625 verifizierten Trades
+        this.rawTrades.forEach((t, i) => {
+            let gainPercent = parseFloat(t.g || 0); // Gain % aus den echten Daten
+            let tradeProfit = currentBalance * (gainPercent / 100);
 
             if (mode === 'reinvest') {
                 currentBalance += tradeProfit;
                 dataPoints.push(currentBalance);
             } else {
                 totalPayouts += tradeProfit;
-                dataPoints.push(capital + totalPayouts); // Wachsende Linie trotz Auszahlung
+                dataPoints.push(capital + totalPayouts);
             }
-            labels.push(t.displayDate.split(' ')[0]); // Nur das Datum für den Chart anzeigen
+
+            // Jeden 15. Punkt beschriften, damit der Chart sauber bleibt
+            if (i % 15 === 0 || i === this.rawTrades.length - 1) {
+                labels.push(t.d.split(' ')[0]);
+            } else {
+                labels.push('');
+            }
         });
 
         let finalBalance = mode === 'reinvest' ? dataPoints[dataPoints.length - 1] : capital;
         let netProfit = mode === 'reinvest' ? (finalBalance - capital) : totalPayouts;
         let growth = capital > 0 ? (netProfit / capital) * 100 : 0;
 
-        // UI Updates
-        this.dom.btResBal.innerText = '$' + finalBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        this.dom.btResProf.innerText = (netProfit >= 0 ? '+' : '') + '$' + netProfit.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        this.dom.btResGrowth.innerText = (growth >= 0 ? '+' : '') + growth.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
+        this.dom.btResBal.innerText = '$' + finalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        this.dom.btResProf.innerText = (netProfit >= 0 ? '+' : '') + '$' + netProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        this.dom.btResGrowth.innerText = (growth >= 0 ? '+' : '') + growth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
 
         if (this.btChart) {
             this.btChart.data.labels = labels;
             this.btChart.data.datasets[0].data = dataPoints;
             this.btChart.update();
         }
+    }
+
+    // --- STATISTIKEN & HISTORIE TABELLE ---
+    renderStatsAndTable() {
+        if (!this.rawTrades || this.rawTrades.length === 0) return;
+
+        let wins = 0;
+        let losses = 0;
+        this.rawTrades.forEach(t => {
+            if (parseFloat(t.g || 0) >= 0) wins++;
+            else losses++;
+        });
+
+        let total = wins + losses;
+        let winRate = total > 0 ? ((wins / total) * 100).toFixed(2) : '0.00';
+
+        if (this.dom.statTotal) this.dom.statTotal.innerText = total;
+        if (this.dom.kpiTrades) this.dom.kpiTrades.innerText = total;
+        if (this.dom.statWins) this.dom.statWins.innerText = wins;
+        if (this.dom.statLosses) this.dom.statLosses.innerText = losses;
+        if (this.dom.statWinrate) this.dom.statWinrate.innerText = winRate + '%';
+
+        if (!this.dom.tradesBody) return;
+
+        // Tabelle: Alle Trades chronologisch absteigend (neueste oben)
+        let html = '';
+        const reversedTrades = [...this.rawTrades].reverse();
+
+        reversedTrades.forEach(t => {
+            const gainVal = parseFloat(t.g || 0);
+            const isProfit = gainVal >= 0;
+            const profitClass = isProfit ? 'text-emerald-400' : 'text-rose-400';
+            const actionBadge = t.a === 'BUY'
+                ? `<span class="px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-bold">BUY</span>`
+                : `<span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 font-bold">SELL</span>`;
+
+            html += `
+                <tr class="hover:bg-cardBorder/30 transition-colors">
+                    <td class="px-6 py-3.5 text-zinc-400">${t.d}</td>
+                    <td class="px-6 py-3.5 font-semibold">${actionBadge}</td>
+                    <td class="px-6 py-3.5 text-right font-bold ${profitClass}">${isProfit ? '+' : ''}${gainVal.toFixed(2)}%</td>
+                </tr>
+            `;
+        });
+
+        this.dom.tradesBody.innerHTML = html;
     }
 }
 
