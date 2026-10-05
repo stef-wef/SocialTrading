@@ -26,6 +26,11 @@ async function loginMyfxbook() {
     }
 }
 
+// Startseite, damit die Render-URL direkt einen Status anzeigt
+app.get('/', (req, res) => {
+    res.send('TAG Markets Backend läuft erfolgreich! API erreichbar unter /api/live-trades');
+});
+
 app.get('/api/live-trades', async (req, res) => {
     try {
         if (!sessionToken) await loginMyfxbook();
@@ -33,16 +38,20 @@ app.get('/api/live-trades', async (req, res) => {
         const response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=12076857`);
         const data = await response.json();
 
+        // Rohdaten für das Debugging in den Render-Logs ausgeben
+        console.log("Myfxbook Daten erhalten:", JSON.stringify(data));
+
         if (data.error === true) {
             // Session abgelaufen? Erneut versuchen
             await loginMyfxbook();
             const retryRes = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=12076857`);
             const retryData = await retryRes.json();
-            return res.json(retryData.history || []);
+            return res.json(retryData.history || retryData.trades || []);
         }
 
-        res.json(data.history || []);
+        res.json(data.history || data.trades || []);
     } catch (error) {
+        console.error("API Fehler:", error);
         res.status(500).json({ error: error.message });
     }
 });
