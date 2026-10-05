@@ -3,7 +3,7 @@ class StrategyCalculator {
         this.appContainer = document.getElementById('strategy-app');
         this.config = {
             defaultCapital: 139836.51,
-            defaultRate: 0.04, // Historischer Tagesdurchschnitt
+            defaultRate: 0.04, // Historischer Tagesdurchschnitt in %
             defaultDays: 90
         };
 
@@ -14,6 +14,7 @@ class StrategyCalculator {
             capSlider: document.getElementById('calc-capital-slider'),
             rateSlider: document.getElementById('calc-rate-slider'),
             daysSlider: document.getElementById('calc-days-slider'),
+            modeSelect: document.getElementById('calc-mode-select'), // Reinvestieren vs. Auszahlen
             dispRate: document.getElementById('display-rate'),
             dispDays: document.getElementById('display-days'),
             resBalance: document.getElementById('res-balance'),
@@ -56,6 +57,10 @@ class StrategyCalculator {
 
         this.dom.rateSlider.addEventListener('input', () => this.calculate());
         this.dom.daysSlider.addEventListener('input', () => this.calculate());
+        
+        if (this.dom.modeSelect) {
+            this.dom.modeSelect.addEventListener('change', () => this.calculate());
+        }
 
         this.dom.presetBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -142,27 +147,36 @@ class StrategyCalculator {
         let principal = parseFloat(this.dom.capInput.value) || 0;
         let rate = parseFloat(this.dom.rateSlider.value) || 0;
         let days = parseInt(this.dom.daysSlider.value) || 0;
+        let mode = this.dom.modeSelect ? this.dom.modeSelect.value : 'reinvest'; // 'reinvest' oder 'payout'
 
-        this.dom.dispRate.innerText = rate.toFixed(2) + '%';
-        this.dom.dispDays.innerText = days + ' Tage';
+        if (this.dom.dispRate) this.dom.dispRate.innerText = rate.toFixed(2) + '%';
+        if (this.dom.dispDays) this.dom.dispDays.innerText = days + ' Tage';
 
         let currentBalance = principal;
         let labels = ['0'];
         let dataPoints = [principal];
+        let totalPayouts = 0;
 
         for (let i = 1; i <= days; i++) {
-            currentBalance *= (1 + (rate / 100));
+            let dailyProfit = currentBalance * (rate / 100);
+            
+            if (mode === 'reinvest') {
+                currentBalance += dailyProfit; // Tägliches Reinvestieren (Zinseszins)
+            } else {
+                totalPayouts += dailyProfit; // Gewinne werden täglich ausgezahlt, Kapital bleibt gleich
+            }
+
             labels.push(i.toString());
-            dataPoints.push(currentBalance);
+            dataPoints.push(mode === 'reinvest' ? currentBalance : principal);
         }
 
-        let finalBalance = dataPoints[dataPoints.length - 1];
-        let netProfit = finalBalance - principal;
+        let finalBalance = mode === 'reinvest' ? dataPoints[dataPoints.length - 1] : principal;
+        let netProfit = mode === 'reinvest' ? (finalBalance - principal) : totalPayouts;
         let growth = (principal > 0) ? (netProfit / principal) * 100 : 0;
 
-        this.dom.resBalance.innerText = '$' + finalBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        this.dom.resProfit.innerText = '+$' + netProfit.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        this.dom.resGrowth.innerText = '+' + growth.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
+        if (this.dom.resBalance) this.dom.resBalance.innerText = '$' + finalBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        if (this.dom.resProfit) this.dom.resProfit.innerText = '+$' + netProfit.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        if (this.dom.resGrowth) this.dom.resGrowth.innerText = '+' + growth.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
 
         if (this.chartInstance) {
             this.chartInstance.data.labels = labels;
@@ -173,14 +187,23 @@ class StrategyCalculator {
 
     async loadTrades() {
         try {
-            // Lädt die verifizierten Trades direkt aus der exportierten JSON-Datei
-            const response = await fetch('../trades.json'); // oder direkt './trades.json' je nach Pfad
+            // Absoluter oder korrekter relativer Pfad zur trades.json im Hauptverzeichnis
+            const response = await fetch('/trades.json');
+            if (!response.ok) throw new Error("trades.json nicht gefunden");
             const trades = await response.json();
             this.renderTradesTable(trades);
         } catch (error) {
-            console.warn("Trades konnten nicht geladen werden:", error);
-            if (this.dom.tradesBody) {
-                this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-400 font-mono">Fehler beim Laden der Historie.</td></tr>`;
+            console.warn("Versuche alternativen Pfad für trades.json...", error);
+            try {
+                // Fallback für Unterordner
+                const response = await fetch('trades.json');
+                const trades = await response.json();
+                this.renderTradesTable(trades);
+            } catch (err) {
+                console.error("Fehler beim Laden der trades.json:", err);
+                if (this.dom.tradesBody) {
+                    this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-400 font-mono">Fehler beim Laden der Trade-Historie.</td></tr>`;
+                }
             }
         }
     }
@@ -194,7 +217,6 @@ class StrategyCalculator {
         }
 
         let html = '';
-        // Zeigt die historisch echten Trades an
         trades.slice(0, 20).forEach(t => {
             const profitVal = parseFloat(t.profit || 0);
             const isProfit = profitVal >= 0;
