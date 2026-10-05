@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonic AI | Performance & Rechner</title>
+    <title>Sonic AI | Performance & Projection</title>
     
-    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script>
@@ -22,16 +19,11 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        brand: {
-                            bg: '#09090b',
-                            card: '#121214',
-                            cardHover: '#18181b',
-                            border: '#27272a',
-                            accent: '#CBFD5F',
-                            accentDark: '#a3d83b',
-                            textMain: '#fafafa',
-                            textMuted: '#a1a1aa'
-                        }
+                        bgMain: '#050505',
+                        boxBg: '#0f0f11',
+                        boxBorder: '#1f1f22',
+                        accent: '#CBFD5F',
+                        textMuted: '#8b8b93'
                     }
                 }
             }
@@ -39,192 +31,184 @@
     </script>
 
     <style>
-        body {
-            background-color: #09090b;
-            color: #fafafa;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        body { background-color: #050505; color: #ffffff; }
         ::-webkit-scrollbar { display: none; }
-        * { -ms-overflow-style: none; scrollbar-width: none; }
-
-        .glass-header {
-            background: rgba(9, 9, 11, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        /* Custom Range Slider Styling (Wie im Screenshot) */
-        input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-            height: 24px;
-        }
-        input[type=range]:focus {
-            outline: none;
-        }
+        .glass-nav { background: rgba(5, 5, 5, 0.7); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        
+        /* Premium Range Slider */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; height: 24px; }
+        input[type=range]:focus { outline: none; }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 22px;
-            width: 22px;
-            border-radius: 50%;
-            background: #CBFD5F;
-            cursor: pointer;
-            margin-top: -8px;
-            box-shadow: 0 0 15px rgba(203, 253, 95, 0.4);
-            transition: transform 0.1s;
+            -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%;
+            background: #CBFD5F; cursor: pointer; margin-top: -7px;
+            box-shadow: 0 0 12px rgba(203, 253, 95, 0.4); transition: transform 0.1s;
         }
-        input[type=range]::-webkit-slider-thumb:active {
-            transform: scale(1.15);
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 6px;
-            cursor: pointer;
-            background: #27272a;
-            border-radius: 999px;
-        }
-
-        /* Zahleneingabe ohne Pfeile */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
+        input[type=range]::-webkit-slider-thumb:active { transform: scale(1.15); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #27272a; border-radius: 999px; }
+        
+        /* Hide number arrows */
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col pb-12">
+<body class="min-h-screen flex flex-col pb-20">
 
-    <!-- Top Navigation (WICHTIG: '../index.html' wegen neuem Ordner) -->
-    <header class="fixed top-0 left-0 right-0 z-50 glass-header px-4 py-3 flex justify-between items-center md:px-8">
+    <!-- Navigation -->
+    <header class="fixed top-0 w-full z-50 glass-nav px-6 py-4 flex justify-between items-center">
         <div class="flex items-center gap-4">
-            <a href="../index.html" class="p-2 rounded-xl bg-brand-card hover:bg-brand-cardHover border border-brand-border text-brand-textMuted hover:text-white transition-colors flex items-center justify-center text-sm">
-                <i class="fa-solid fa-chevron-left mr-1.5 text-xs"></i> Alle Strategien
+            <a href="../index.html" class="w-10 h-10 rounded-xl bg-boxBg border border-boxBorder flex items-center justify-center text-textMuted hover:text-white hover:border-textMuted transition-all">
+                <i class="fa-solid fa-arrow-left"></i>
             </a>
-            <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#CBFD5F] to-[#8eb833] flex items-center justify-center shadow-[0_0_12px_rgba(203,253,95,0.25)]">
-                    <i class="fa-solid fa-bolt text-brand-bg text-sm"></i>
-                </div>
-                <h1 class="text-base font-bold tracking-tight hidden sm:block">SONIC <span class="text-brand-accent">AI</span></h1>
+            <div>
+                <h1 class="text-lg font-bold tracking-tight text-white">SONIC <span class="text-accent">AI</span></h1>
             </div>
         </div>
-        <a href="https://www.myfxbook.com/members/SonicExperts/sonic-ai/12076857" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 bg-brand-border hover:bg-brand-cardHover rounded-full text-xs font-semibold transition-colors flex items-center gap-2 border border-gray-700">
-            <i class="fa-solid fa-shield-check text-brand-accent"></i> Verified on Myfxbook
+        <a href="https://www.myfxbook.com/members/SonicExperts/sonic-ai/12076857" target="_blank" class="px-4 py-2 bg-boxBorder hover:bg-[#2a2a2e] rounded-full text-xs font-semibold transition-colors flex items-center gap-2">
+            <i class="fa-solid fa-shield-check text-accent"></i> MyFXBook Verified
         </a>
     </header>
 
-    <main class="flex-1 w-full max-w-md mx-auto md:max-w-4xl px-4 mt-24 space-y-6">
+    <main class="w-full max-w-6xl mx-auto px-6 mt-32 space-y-6">
 
-        <!-- Myfxbook Live Data -->
-        <div class="bg-brand-card border border-brand-border rounded-2xl p-5 shadow-lg">
-            <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-brand-accent"></i>
-                    <h2 class="text-base font-bold text-white">Sonic AI Myfxbook Stats</h2>
+        <!-- Bento Grid: Hero & Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            
+            <!-- Intro Box (Spans 2 cols) -->
+            <div class="md:col-span-2 bg-boxBg border border-boxBorder rounded-[2rem] p-8 flex flex-col justify-center relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-40 h-40 bg-accent/5 rounded-full blur-3xl"></div>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Fakten, keine Versprechen.</h2>
+                <p class="text-textMuted leading-relaxed">
+                    Jeder Trade, jeden Monat – öffentlich verifizierbar auf MyFXBook. 
+                    Sonic AI ist nicht darauf ausgelegt, über Nacht reich zu machen, sondern mit kontrolliertem Risiko konstant zu wachsen.
+                </p>
+            </div>
+
+            <!-- Stat Boxes -->
+            <div class="bg-boxBg border border-boxBorder rounded-[2rem] p-6 flex flex-col justify-between">
+                <div class="flex items-center gap-2 text-textMuted mb-4">
+                    <i class="fa-solid fa-arrow-trend-up"></i> <span class="text-xs uppercase font-semibold tracking-wider">Gesamtrendite</span>
                 </div>
-                <button onclick="refreshWidget()" class="text-xs text-brand-textMuted hover:text-brand-accent transition-colors flex items-center gap-1.5 px-3 py-1 rounded-lg bg-brand-bg border border-brand-border">
-                    <i class="fa-solid fa-arrows-rotate" id="refresh-icon"></i> <span>Aktualisieren</span>
-                </button>
+                <div>
+                    <p class="text-4xl font-extrabold text-white">+28.77%</p>
+                    <p class="text-xs text-textMuted mt-1">Seit Auflage</p>
+                </div>
+            </div>
+
+            <div class="bg-boxBg border border-boxBorder rounded-[2rem] p-6 flex flex-col justify-between">
+                <div class="flex items-center gap-2 text-textMuted mb-4">
+                    <i class="fa-solid fa-shield-halved"></i> <span class="text-xs uppercase font-semibold tracking-wider">Strategie Drawdown</span>
+                </div>
+                <div>
+                    <p class="text-4xl font-extrabold text-white">0.86%</p>
+                    <p class="text-xs text-textMuted mt-1">Max. Risiko (1x)</p>
+                </div>
+            </div>
+
+            <div class="bg-boxBg border border-boxBorder rounded-[2rem] p-6 flex flex-col justify-between">
+                <div class="flex items-center gap-2 text-textMuted mb-4">
+                    <i class="fa-solid fa-list-check"></i> <span class="text-xs uppercase font-semibold tracking-wider">Live Trades</span>
+                </div>
+                <div>
+                    <p class="text-4xl font-extrabold text-white">595</p>
+                    <p class="text-xs text-textMuted mt-1">Öffentlich sichtbar</p>
+                </div>
+            </div>
+
+            <div class="bg-boxBg border border-boxBorder rounded-[2rem] p-6 flex flex-col justify-between">
+                <div class="flex items-center gap-2 text-textMuted mb-4">
+                    <i class="fa-solid fa-calendar-check"></i> <span class="text-xs uppercase font-semibold tracking-wider">Ø Monatlich</span>
+                </div>
+                <div>
+                    <p class="text-4xl font-extrabold text-accent">+1.14%</p>
+                    <p class="text-xs text-textMuted mt-1">Verifizierter Schnitt</p>
+                </div>
             </div>
             
-            <p class="text-xs text-brand-textMuted mb-4 leading-relaxed">
-                Diese Grafik wird direkt von Myfxbook synchronisiert.
-            </p>
-            
-            <div class="w-full overflow-hidden rounded-xl bg-brand-bg border border-brand-border flex justify-center p-3 relative">
-                <a href="https://www.myfxbook.com/members/SonicExperts/sonic-ai/12076857" target="_blank" rel="noopener noreferrer" class="w-full flex justify-center">
-                    <img id="myfxbook-img" 
-                         src="https://widgets.myfxbook.com/widgets/12076857/large.jpg" 
-                         alt="Sonic AI Stats" 
-                         class="max-w-full h-auto rounded-lg shadow-md transition-opacity duration-300"
-                         style="min-height: 190px;">
-                </a>
+            <!-- MyFXBook Widget Box (Spans 2 cols) -->
+            <div class="md:col-span-2 bg-boxBg border border-boxBorder rounded-[2rem] p-6 flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-semibold text-white">Live Tracking</span>
+                    <button onclick="refreshWidget()" class="text-xs text-textMuted hover:text-white transition-colors bg-[#1a1a1d] px-3 py-1.5 rounded-lg border border-boxBorder">
+                        <i class="fa-solid fa-arrows-rotate mr-1" id="refresh-icon"></i> Refresh
+                    </button>
+                </div>
+                <div class="w-full h-full min-h-[160px] overflow-hidden rounded-xl border border-boxBorder bg-black flex items-center justify-center p-2">
+                    <a href="https://www.myfxbook.com/members/SonicExperts/sonic-ai/12076857" target="_blank" class="w-full flex justify-center">
+                        <img id="myfxbook-img" src="https://widgets.myfxbook.com/widgets/12076857/large.jpg" alt="Sonic AI Stats" class="max-w-full rounded-lg">
+                    </a>
+                </div>
             </div>
         </div>
 
-        <!-- Investitions- & Zinseszinsrechner -->
-        <div class="bg-brand-card border border-brand-border rounded-2xl p-5 shadow-lg md:col-span-2">
-            
-            <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-calculator text-brand-accent"></i> Investitions- & Zinseszinsrechner
-                    </h2>
-                    <p class="text-sm text-brand-textMuted mt-1">Berechne das Potenzial bei täglicher Reinvestition (Daily Compounding).</p>
-                </div>
-                <div class="self-start sm:self-auto">
-                    <span class="text-xs bg-[#162013] text-brand-accent border border-brand-accent/30 px-3 py-1 rounded-full font-bold">
-                        Skala bis $100'000
-                    </span>
-                </div>
+        <!-- Profit Projection Engine (Der neue Rechner) -->
+        <div class="mt-12 bg-boxBg border border-boxBorder rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden">
+            <!-- Background Glow -->
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-64 bg-accent/5 blur-[100px] pointer-events-none"></div>
+
+            <div class="mb-10 text-center max-w-2xl mx-auto">
+                <h2 class="text-3xl font-extrabold text-white mb-3">Profit Projection Engine</h2>
+                <p class="text-textMuted text-sm">Mathematische Hochrechnung basierend auf dem Zinseszinseffekt (Compounding). Die historische Performance ist keine Garantie für zukünftige Ergebnisse.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Inputs Area -->
-                <div class="space-y-6 bg-brand-bg p-5 rounded-2xl border border-brand-border">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
+                
+                <!-- Links: Eingaben -->
+                <div class="lg:col-span-5 space-y-10 relative z-10">
                     
-                    <!-- Investitionsbetrag -->
+                    <!-- Kapital -->
                     <div>
-                        <div class="flex justify-between items-center mb-3">
-                            <label for="num-start" class="text-sm font-semibold text-brand-textMuted">Investitionsbetrag</label>
-                            <div class="flex items-center bg-brand-card border border-brand-border rounded-lg px-2.5 py-1 focus-within:border-brand-accent">
-                                <span class="text-sm text-brand-textMuted mr-1">$</span>
-                                <input type="number" id="num-start" min="100" max="100000" step="100" value="100000"
-                                       class="w-24 bg-transparent text-white font-bold text-right outline-none text-base">
+                        <div class="flex justify-between items-center mb-4">
+                            <label class="text-sm font-semibold text-textMuted uppercase tracking-wider">Initiales Kapital</label>
+                            <div class="flex items-center bg-[#1a1a1d] border border-boxBorder rounded-xl px-3 py-1.5 focus-within:border-accent transition-colors">
+                                <span class="text-textMuted mr-1">$</span>
+                                <input type="number" id="num-start" min="100" max="100000" step="100" value="10000" class="w-24 bg-transparent text-white font-bold text-right outline-none text-lg">
                             </div>
                         </div>
-
-                        <input type="range" id="input-start" min="100" max="100000" step="500" value="100000">
-
-                        <div class="grid grid-cols-6 gap-1.5 mt-3">
-                            <button type="button" onclick="setInvestment(1000)" class="text-[11px] py-1 rounded-md bg-brand-card hover:bg-brand-cardHover border border-brand-border text-brand-textMuted hover:text-white transition-colors">$1k</button>
-                            <button type="button" onclick="setInvestment(5000)" class="text-[11px] py-1 rounded-md bg-brand-card hover:bg-brand-cardHover border border-brand-border text-brand-textMuted hover:text-white transition-colors">$5k</button>
-                            <button type="button" onclick="setInvestment(10000)" class="text-[11px] py-1 rounded-md bg-brand-card hover:bg-brand-cardHover border border-brand-border text-brand-textMuted hover:text-white transition-colors">$10k</button>
-                            <button type="button" onclick="setInvestment(25000)" class="text-[11px] py-1 rounded-md bg-brand-card hover:bg-brand-cardHover border border-brand-border text-brand-textMuted hover:text-white transition-colors">$25k</button>
-                            <button type="button" onclick="setInvestment(50000)" class="text-[11px] py-1 rounded-md bg-brand-card hover:bg-brand-cardHover border border-brand-border text-brand-textMuted hover:text-white transition-colors">$50k</button>
-                            <button type="button" onclick="setInvestment(100000)" class="text-[11px] py-1 rounded-md bg-brand-card hover:bg-brand-cardHover border border-brand-border text-brand-accent font-bold transition-colors">$100k</button>
+                        <input type="range" id="input-start" min="100" max="100000" step="500" value="10000">
+                        <div class="flex gap-2 mt-4">
+                            <button onclick="setInvestment(5000)" class="flex-1 py-1.5 rounded-lg bg-[#1a1a1d] hover:bg-[#252529] border border-boxBorder text-xs text-textMuted transition-colors">$5k</button>
+                            <button onclick="setInvestment(10000)" class="flex-1 py-1.5 rounded-lg bg-[#1a1a1d] hover:bg-[#252529] border border-boxBorder text-xs text-textMuted transition-colors">$10k</button>
+                            <button onclick="setInvestment(50000)" class="flex-1 py-1.5 rounded-lg bg-[#1a1a1d] hover:bg-[#252529] border border-boxBorder text-xs text-textMuted transition-colors">$50k</button>
                         </div>
                     </div>
 
                     <!-- Täglicher Profit -->
                     <div>
-                        <div class="flex justify-between items-end mb-3">
-                            <label class="text-sm font-semibold text-brand-textMuted">Täglicher Ziel-Profit (Schnitt)</label>
-                            <span class="text-lg font-bold text-brand-accent bg-brand-card border border-brand-border px-3 py-1 rounded-lg" id="display-rate">1.00%</span>
+                        <div class="flex justify-between items-end mb-4">
+                            <label class="text-sm font-semibold text-textMuted uppercase tracking-wider">Ø Tagesrendite</label>
+                            <span class="text-xl font-bold text-accent" id="display-rate">0.50%</span>
                         </div>
-                        <input type="range" id="input-rate" min="0.1" max="2.0" step="0.05" value="1.00">
+                        <input type="range" id="input-rate" min="0.1" max="2.0" step="0.05" value="0.5">
                     </div>
 
-                    <!-- Tage -->
+                    <!-- Laufzeit -->
                     <div>
-                        <div class="flex justify-between items-end mb-3">
-                            <label class="text-sm font-semibold text-brand-textMuted">Laufzeit (Handelstage)</label>
-                            <span class="text-lg font-bold text-white bg-brand-card border border-brand-border px-3 py-1 rounded-lg" id="display-days">90 Tage</span>
+                        <div class="flex justify-between items-end mb-4">
+                            <label class="text-sm font-semibold text-textMuted uppercase tracking-wider">Handelstage</label>
+                            <span class="text-xl font-bold text-white" id="display-days">90 Tage</span>
                         </div>
                         <input type="range" id="input-days" min="10" max="365" step="5" value="90">
                     </div>
                 </div>
 
-                <!-- Outputs & Chart Area -->
-                <div class="flex flex-col">
-                    <div class="grid grid-cols-2 gap-3 mb-6">
-                        <div class="bg-[#141e12] border border-brand-accent/30 rounded-xl p-4">
-                            <p class="text-xs text-brand-textMuted font-medium mb-1">Endguthaben</p>
-                            <p class="text-2xl md:text-3xl font-extrabold text-brand-accent tracking-tight" id="calc-final">$244,863.81</p>
+                <!-- Rechts: Auswertung & Chart -->
+                <div class="lg:col-span-7 flex flex-col relative z-10">
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="bg-accent/10 border border-accent/20 rounded-2xl p-6">
+                            <p class="text-xs text-accent uppercase font-bold tracking-wider mb-2">Projiziertes Endguthaben</p>
+                            <p class="text-4xl md:text-5xl font-extrabold text-white tracking-tight" id="calc-final">$15,668.50</p>
                         </div>
-                        <div class="bg-brand-bg border border-brand-border rounded-xl p-4">
-                            <p class="text-xs text-brand-textMuted font-medium mb-1">Reingewinn</p>
-                            <p class="text-xl md:text-2xl font-bold text-white" id="calc-profit">+$144,863.81</p>
-                            <p class="text-xs text-brand-accent font-semibold mt-1" id="calc-percent">+144.86%</p>
+                        <div class="bg-[#1a1a1d] border border-boxBorder rounded-2xl p-6 flex flex-col justify-center">
+                            <p class="text-xs text-textMuted uppercase font-bold tracking-wider mb-2">Reingewinn</p>
+                            <div class="flex items-baseline gap-3">
+                                <p class="text-2xl md:text-3xl font-bold text-white" id="calc-profit">+$5,668.50</p>
+                                <p class="text-sm font-bold text-accent" id="calc-percent">+56.68%</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="flex-1 w-full relative min-h-[220px]">
+                    <div class="flex-1 w-full min-h-[250px] relative bg-[#1a1a1d]/50 rounded-2xl border border-boxBorder p-4">
                         <canvas id="dailyChart"></canvas>
                     </div>
                 </div>
@@ -239,12 +223,8 @@
             const img = document.getElementById('myfxbook-img');
             const icon = document.getElementById('refresh-icon');
             if (icon) icon.classList.add('fa-spin');
-            
             img.src = "https://widgets.myfxbook.com/widgets/12076857/large.jpg?t=" + new Date().getTime();
-            
-            setTimeout(() => {
-                if (icon) icon.classList.remove('fa-spin');
-            }, 800);
+            setTimeout(() => { if (icon) icon.classList.remove('fa-spin'); }, 800);
         }
 
         // Chart.js Setup
@@ -252,68 +232,22 @@
 
         function initChart() {
             const ctx = document.getElementById('dailyChart').getContext('2d');
-            let gradient = ctx.createLinearGradient(0, 0, 0, 220);
-            gradient.addColorStop(0, 'rgba(203, 253, 95, 0.35)');
+            let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(203, 253, 95, 0.4)');
             gradient.addColorStop(1, 'rgba(203, 253, 95, 0.0)');
 
             dailyChartInstance = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Portfolio Wert ($)',
-                        data: [],
-                        borderColor: '#CBFD5F',
-                        backgroundColor: gradient,
-                        borderWidth: 3,
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                        pointBackgroundColor: '#CBFD5F',
-                        fill: true,
-                        tension: 0.35
-                    }]
-                },
+                data: { labels: [], datasets: [{ data: [], borderColor: '#CBFD5F', backgroundColor: gradient, borderWidth: 3, pointRadius: 0, pointHoverRadius: 6, pointBackgroundColor: '#CBFD5F', fill: true, tension: 0.4 }] },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { 
                         legend: { display: false },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            backgroundColor: '#121214',
-                            titleColor: '#a1a1aa',
-                            bodyColor: '#fafafa',
-                            bodyFont: { weight: 'bold', size: 14 },
-                            borderColor: '#27272a',
-                            borderWidth: 1,
-                            padding: 10,
-                            displayColors: false,
-                            callbacks: {
-                                title: function(context) { return 'Tag ' + context[0].label; },
-                                label: function(context) { 
-                                    return '$' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); 
-                                }
-                            }
-                        }
+                        tooltip: { backgroundColor: '#0f0f11', titleColor: '#8b8b93', bodyColor: '#ffffff', bodyFont: { size: 16, weight: 'bold' }, borderColor: '#1f1f22', borderWidth: 1, padding: 12, displayColors: false, callbacks: { title: (ctx) => 'Tag ' + ctx[0].label, label: (ctx) => '$' + ctx.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}) } }
                     },
                     scales: {
                         x: { display: false },
-                        y: {
-                            display: true,
-                            position: 'right',
-                            grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
-                            ticks: {
-                                color: '#a1a1aa',
-                                font: { size: 10 },
-                                maxTicksLimit: 5,
-                                callback: function(value) {
-                                    if (value >= 1000000) return '$' + (value/1000000).toFixed(1) + 'M';
-                                    if (value >= 1000) return '$' + (value/1000).toFixed(0) + 'k';
-                                    return '$' + value;
-                                }
-                            }
-                        }
+                        y: { position: 'right', grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false }, ticks: { color: '#8b8b93', font: { size: 11 }, maxTicksLimit: 5, callback: (val) => val >= 1000 ? '$' + (val/1000).toFixed(0) + 'k' : '$' + val } }
                     },
                     interaction: { mode: 'nearest', axis: 'x', intersect: false }
                 }
@@ -321,73 +255,40 @@
         }
 
         // Berechnung & UI Update
-        const sliderStart = document.getElementById('input-start');
-        const numStart = document.getElementById('num-start');
-        const sliderRate = document.getElementById('input-rate');
-        const sliderDays = document.getElementById('input-days');
+        const sliderStart = document.getElementById('input-start'), numStart = document.getElementById('num-start');
+        const sliderRate = document.getElementById('input-rate'), sliderDays = document.getElementById('input-days');
 
-        function setInvestment(amount) {
-            sliderStart.value = amount;
-            numStart.value = amount;
-            calculateDailyCompound();
-        }
+        function setInvestment(amount) { sliderStart.value = amount; numStart.value = amount; calculateDailyCompound(); }
 
         function calculateDailyCompound() {
             let principal = parseFloat(sliderStart.value);
             if (isNaN(principal) || principal < 100) principal = 100;
             if (principal > 100000) principal = 100000;
 
-            const dailyRate = parseFloat(sliderRate.value);
-            const days = parseInt(sliderDays.value);
-
+            const dailyRate = parseFloat(sliderRate.value), days = parseInt(sliderDays.value);
             document.getElementById('display-rate').innerText = dailyRate.toFixed(2) + '%';
             document.getElementById('display-days').innerText = days + ' Tage';
 
-            let currentBalance = principal;
-            let labels = ['0'];
-            let dataPoints = [principal];
-
+            let currentBalance = principal, labels = ['0'], dataPoints = [principal];
             for (let i = 1; i <= days; i++) {
-                currentBalance = currentBalance * (1 + (dailyRate / 100));
-                labels.push(i.toString());
-                dataPoints.push(currentBalance);
+                currentBalance *= (1 + (dailyRate / 100));
+                labels.push(i.toString()); dataPoints.push(currentBalance);
             }
 
-            const finalBalance = dataPoints[dataPoints.length - 1];
-            const netProfit = finalBalance - principal;
-            const growthPercentage = (netProfit / principal) * 100;
+            const finalBalance = dataPoints[dataPoints.length - 1], netProfit = finalBalance - principal, growthPercentage = (netProfit / principal) * 100;
 
             document.getElementById('calc-final').innerText = '$' + finalBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById('calc-profit').innerText = '+$' + netProfit.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById('calc-percent').innerText = '+' + growthPercentage.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
 
-            if (dailyChartInstance) {
-                dailyChartInstance.data.labels = labels;
-                dailyChartInstance.data.datasets[0].data = dataPoints;
-                dailyChartInstance.update();
-            }
+            if (dailyChartInstance) { dailyChartInstance.data.labels = labels; dailyChartInstance.data.datasets[0].data = dataPoints; dailyChartInstance.update(); }
         }
 
         window.onload = () => {
-            initChart();
-            refreshWidget();
-            calculateDailyCompound();
-
-            sliderStart.addEventListener('input', () => {
-                numStart.value = sliderStart.value;
-                calculateDailyCompound();
-            });
-            numStart.addEventListener('input', () => {
-                let val = parseFloat(numStart.value);
-                if (!isNaN(val)) {
-                    if (val > 100000) val = 100000;
-                    sliderStart.value = val;
-                    calculateDailyCompound();
-                }
-            });
-
-            sliderRate.addEventListener('input', calculateDailyCompound);
-            sliderDays.addEventListener('input', calculateDailyCompound);
+            initChart(); refreshWidget(); calculateDailyCompound();
+            sliderStart.addEventListener('input', () => { numStart.value = sliderStart.value; calculateDailyCompound(); });
+            numStart.addEventListener('input', () => { let v = parseFloat(numStart.value); if(!isNaN(v)){ if(v>100000)v=100000; sliderStart.value = v; calculateDailyCompound(); }});
+            sliderRate.addEventListener('input', calculateDailyCompound); sliderDays.addEventListener('input', calculateDailyCompound);
         };
     </script>
 </body>

@@ -3,203 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAG Markets | Strategie Übersicht</title>
+    <title>TAG Markets | Strategien</title>
     
-    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        brand: {
-                            bg: '#09090b',
-                            card: '#121214',
-                            cardHover: '#18181b',
-                            border: '#27272a',
-                            accent: '#CBFD5F',
-                            accentDark: '#a3d83b',
-                            textMain: '#fafafa',
-                            textMuted: '#a1a1aa'
-                        }
+                        bgMain: '#050505',
+                        boxBg: '#0f0f11',
+                        boxBorder: '#1f1f22',
+                        accent: '#CBFD5F',
+                        textMuted: '#8b8b93'
                     }
                 }
             }
         }
     </script>
-
     <style>
-        body {
-            background-color: #09090b;
-            color: #fafafa;
-            -webkit-tap-highlight-color: transparent;
-        }
+        body { background-color: #050505; color: #ffffff; }
         ::-webkit-scrollbar { display: none; }
-        * { -ms-overflow-style: none; scrollbar-width: none; }
-        .glass-header {
-            background: rgba(9, 9, 11, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+        .glass-nav {
+            background: rgba(5, 5, 5, 0.7);
+            backdrop-filter: blur(16px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between">
+<body class="min-h-screen flex flex-col">
 
-    <!-- Top Navigation -->
-    <header class="fixed top-0 left-0 right-0 z-50 glass-header px-4 py-3 flex justify-between items-center md:px-8">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#CBFD5F] to-[#8eb833] flex items-center justify-center shadow-[0_0_15px_rgba(203,253,95,0.2)]">
-                <i class="fa-solid fa-chart-pie text-brand-bg text-xl"></i>
+    <header class="fixed top-0 w-full z-50 glass-nav px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-accent text-bgMain flex items-center justify-center font-bold shadow-[0_0_20px_rgba(203,253,95,0.3)]">
+                <i class="fa-solid fa-layer-group"></i>
             </div>
-            <div class="flex flex-col">
-                <h1 class="text-base font-bold tracking-tight leading-tight">TAG <span class="text-brand-accent">MARKETS</span></h1>
-                <span class="text-[10px] text-brand-textMuted uppercase tracking-widest font-semibold">AI Strategien Portal</span>
+            <div>
+                <h1 class="text-lg font-bold tracking-tight">TAG MARKETS</h1>
+                <p class="text-[10px] text-textMuted uppercase tracking-widest font-semibold">AI Trading Portal</p>
             </div>
         </div>
-        <div class="flex items-center gap-2">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-border text-brand-textMuted border border-gray-700">
-                <span class="h-2 w-2 rounded-full bg-brand-accent animate-pulse"></span> Broker: TAG Markets
-            </span>
+        <div class="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-full bg-boxBg border border-boxBorder text-xs text-textMuted">
+            <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span> Systems Online
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-1 w-full max-w-5xl mx-auto px-4 mt-28 mb-12 space-y-8">
+    <main class="flex-1 w-full max-w-6xl mx-auto px-6 mt-32 mb-20">
         
-        <!-- Hero Header -->
-        <div class="text-center max-w-2xl mx-auto space-y-3">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-accent/10 border border-brand-accent/20 text-brand-accent text-xs font-bold tracking-wide">
-                <i class="fa-solid fa-robot"></i> ALGORITHMISCHES TRADING
+        <div class="mb-16 max-w-2xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-boxBg border border-boxBorder text-accent text-xs font-bold tracking-wide mb-6">
+                <i class="fa-solid fa-robot"></i> VERIFIZIERTE STRATEGIEN
             </div>
-            <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Verfügbare Strategien</h2>
-            <p class="text-sm md:text-base text-brand-textMuted leading-relaxed">
-                Wähle eine Handelsstrategie aus, um Echtzeit-Leistungsdaten von Myfxbook einzusehen und das Ertragspotenzial mit dem Zinseszins-Rechner zu kalkulieren.
+            <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Investiere in messbare Performance.</h2>
+            <p class="text-lg text-textMuted leading-relaxed">
+                Keine Versprechen. Nur verifizierte Live-Daten, echtes Risikomanagement und transparente Trade-Historien direkt via MyFXBook.
             </p>
         </div>
 
-        <!-- Dynamisches Strategy Cards Grid -->
-        <div id="strategy-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Loading Spinner (wird durch JS ersetzt) -->
-            <div class="col-span-full flex justify-center py-12">
-                <i class="fa-solid fa-circle-notch fa-spin text-3xl text-brand-accent"></i>
+        <!-- Dynamisches Grid -->
+        <div id="strategy-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="col-span-full flex justify-center py-20">
+                <i class="fa-solid fa-circle-notch fa-spin text-3xl text-accent"></i>
             </div>
         </div>
 
     </main>
 
-    <footer class="text-center py-6 border-t border-brand-border px-4">
-        <p class="text-[11px] text-brand-textMuted leading-relaxed max-w-xl mx-auto">
-            <strong>Risikohinweis:</strong> Der Handel mit Devisen und CFDs auf Margin birgt erhebliche Risiken und ist möglicherweise nicht für alle Anleger geeignet.
-        </p>
-    </footer>
-
-    <!-- API & Render Logik -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            
-            // 1. Deine API URL (Wenn du eine echte API hast, trage sie hier ein)
-            // const API_URL = 'https://api.deinedomain.com/strategies';
-
-            // 2. Simulierte API Datenstruktur (Wird als JSON von deiner API kommen)
+            // Mock API Data
             const apiDataMock = [
                 {
                     "id": "sonic-ai",
                     "name": "Sonic AI",
-                    "description": "Vollautomatisierter Hochfrequenz- & Swing-Algorithmus für Gold (XAU/USD).",
-                    "asset": "XAU/USD (Gold)",
-                    "broker": "TAG Markets",
-                    "leverage": "1:500",
-                    "isLive": true,
-                    "folderPath": "Strategies/Sonic.html", // Angepasste Ordnerstruktur
+                    "badge": "Live & Verifiziert",
+                    "description": "Slow, boring, consistent. Sonic AI ist darauf ausgelegt, stetig zu wachsen – Monat für Monat verifiziert.",
+                    "stats": { "gain": "+28.77%", "drawdown": "0.86%", "trades": "595" },
+                    "folderPath": "Strategies/Sonic.html",
                     "icon": "fa-bolt"
                 }
-                // Wenn du hier ein zweites Objekt hinzufügst, erscheint sofort eine zweite Karte!
             ];
 
-            // 3. Funktion zum Abrufen der Daten
             async function fetchStrategies() {
-                try {
-                    // Echter Fetch Aufruf wäre:
-                    // const response = await fetch(API_URL);
-                    // return await response.json();
-                    
-                    // Für jetzt nutzen wir die simulierten Daten mit 500ms Ladeverzögerung für den Effekt:
-                    return new Promise(resolve => setTimeout(() => resolve(apiDataMock), 500));
-                } catch (error) {
-                    console.error("Fehler beim Laden der Strategien:", error);
-                    return [];
-                }
+                return new Promise(resolve => setTimeout(() => resolve(apiDataMock), 400));
             }
 
-            // 4. Render Funktion für das Grid
             async function renderGrid() {
                 const grid = document.getElementById('strategy-grid');
                 const strategies = await fetchStrategies();
-
-                if(strategies.length === 0) {
-                    grid.innerHTML = '<p class="text-center text-brand-textMuted col-span-full">Aktuell sind keine Strategien verfügbar.</p>';
-                    return;
-                }
-
-                // Grid leeren (Lade-Spinner entfernen)
                 grid.innerHTML = '';
 
-                // Durch die API-Daten iterieren und HTML generieren
                 strategies.forEach(strat => {
                     const cardHTML = `
-                        <div class="bg-brand-card border-2 border-brand-accent/40 hover:border-brand-accent rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group">
-                            <div class="absolute -right-6 -top-6 w-32 h-32 bg-brand-accent/10 blur-3xl rounded-full"></div>
+                        <div class="group bg-boxBg border border-boxBorder hover:border-accent/50 rounded-[2rem] p-8 relative overflow-hidden transition-all duration-500 flex flex-col">
+                            <div class="absolute -right-20 -top-20 w-64 h-64 bg-accent/5 rounded-full blur-3xl group-hover:bg-accent/10 transition-colors"></div>
                             
-                            <div>
-                                <div class="flex justify-between items-start mb-4">
-                                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#CBFD5F] to-[#8eb833] flex items-center justify-center shadow-[0_0_15px_rgba(203,253,95,0.25)]">
-                                        <i class="fa-solid ${strat.icon} text-brand-bg text-2xl"></i>
-                                    </div>
-                                    ${strat.isLive ? `
-                                    <span class="px-2.5 py-1 bg-brand-accent/15 text-brand-accent text-xs font-bold rounded-full border border-brand-accent/30 flex items-center gap-1.5">
-                                        <i class="fa-solid fa-circle-check text-[10px]"></i> Live & Verifiziert
-                                    </span>` : ''}
+                            <div class="flex justify-between items-start mb-8 relative z-10">
+                                <div class="w-14 h-14 rounded-2xl bg-[#1a1a1d] border border-boxBorder flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                                    <i class="fa-solid ${strat.icon} text-accent text-2xl"></i>
                                 </div>
+                                <span class="px-3 py-1 bg-accent/10 text-accent text-xs font-bold rounded-full border border-accent/20">
+                                    ${strat.badge}
+                                </span>
+                            </div>
 
-                                <h3 class="text-2xl font-bold text-white group-hover:text-brand-accent transition-colors">${strat.name}</h3>
-                                <p class="text-xs text-brand-textMuted mt-1 mb-5">${strat.description}</p>
+                            <h3 class="text-3xl font-bold mb-3 relative z-10">${strat.name}</h3>
+                            <p class="text-sm text-textMuted leading-relaxed mb-8 relative z-10">${strat.description}</p>
 
-                                <div class="space-y-2 mb-6">
-                                    <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
-                                        <span class="text-brand-textMuted">Handelspaar</span>
-                                        <span class="font-semibold text-white">${strat.asset}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
-                                        <span class="text-brand-textMuted">Broker / Hebel</span>
-                                        <span class="font-semibold text-white">${strat.broker} (${strat.leverage})</span>
-                                    </div>
-                                    <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
-                                        <span class="text-brand-textMuted">Track Record</span>
-                                        <span class="font-semibold text-brand-accent flex items-center gap-1">
-                                            <i class="fa-solid fa-shield-check"></i> Myfxbook Verified
-                                        </span>
-                                    </div>
+                            <div class="grid grid-cols-3 gap-4 mb-8 relative z-10">
+                                <div>
+                                    <p class="text-[10px] text-textMuted uppercase font-semibold mb-1">Rendite</p>
+                                    <p class="text-sm font-bold text-white">${strat.stats.gain}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-textMuted uppercase font-semibold mb-1">Drawdown</p>
+                                    <p class="text-sm font-bold text-white">${strat.stats.drawdown}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-textMuted uppercase font-semibold mb-1">Trades</p>
+                                    <p class="text-sm font-bold text-white">${strat.stats.trades}</p>
                                 </div>
                             </div>
 
-                            <a href="${strat.folderPath}" class="w-full py-3 px-4 bg-brand-accent hover:bg-brand-accentDark text-brand-bg font-bold rounded-xl text-center text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#cbfd5f]/15">
-                                Strategie öffnen <i class="fa-solid fa-arrow-right text-xs"></i>
+                            <a href="${strat.folderPath}" class="mt-auto w-full py-4 bg-white text-black hover:bg-accent font-bold rounded-xl text-center text-sm transition-colors flex items-center justify-center gap-2 relative z-10">
+                                Performance prüfen <i class="fa-solid fa-arrow-right"></i>
                             </a>
                         </div>
                     `;
                     grid.insertAdjacentHTML('beforeend', cardHTML);
                 });
             }
-
             renderGrid();
         });
     </script>
