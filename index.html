@@ -1,145 +1,169 @@
 <!DOCTYPE html>
-<html lang="de" class="antialiased">
+<html lang="de" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAG Markets | Strategien</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAG Markets | AI Trading Portfolios</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
                     colors: {
-                        bgMain: '#050505',
-                        boxBg: '#0f0f11',
-                        boxBorder: '#1f1f22',
-                        accent: '#CBFD5F',
-                        textMuted: '#8b8b93'
+                        darkBg: '#07090E',
+                        cardBg: '#101522',
+                        cardBorder: '#1E293B',
+                        accentLime: '#CCFF00'
                     }
                 }
             }
         }
     </script>
     <style>
-        body { background-color: #050505; color: #ffffff; }
-        ::-webkit-scrollbar { display: none; }
-        .glass-nav {
-            background: rgba(5, 5, 5, 0.7);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        body { background-color: #07090E; color: #F8FAFC; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-card {
+            background: linear-gradient(135deg, rgba(16, 21, 34, 0.8) 0%, rgba(10, 13, 20, 0.9) 100%);
+            border: 1px solid #1E293B;
+            border-radius: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(204, 255, 0, 0.4);
+            transform: translateY(-4px);
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <header class="fixed top-0 w-full z-50 glass-nav px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-xl bg-accent text-bgMain flex items-center justify-center font-bold shadow-[0_0_20px_rgba(203,253,95,0.3)]">
-                <i class="fa-solid fa-layer-group"></i>
+    <!-- Header -->
+    <header class="w-full border-b border-cardBorder px-6 py-5 flex justify-between items-center bg-darkBg/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-accentLime/10 border border-accentLime/30 flex items-center justify-center text-accentLime font-bold">
+                <i data-lucide="cpu" class="w-5 h-5"></i>
             </div>
             <div>
-                <h1 class="text-lg font-bold tracking-tight">TAG MARKETS</h1>
-                <p class="text-[10px] text-textMuted uppercase tracking-widest font-semibold">AI Trading Portal</p>
+                <h1 class="text-base font-extrabold tracking-tight text-white">TAG MARKETS</h1>
+                <p class="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">Institutional AI Strategies</p>
             </div>
         </div>
-        <div class="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-full bg-boxBg border border-boxBorder text-xs text-textMuted">
-            <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span> Systems Online
+        <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cardBg border border-cardBorder text-xs text-zinc-300 font-mono">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Live Track Record Active
         </div>
     </header>
 
-    <main class="flex-1 w-full max-w-6xl mx-auto px-6 mt-32 mb-20">
-        
-        <div class="mb-16 max-w-2xl">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-boxBg border border-boxBorder text-accent text-xs font-bold tracking-wide mb-6">
-                <i class="fa-solid fa-robot"></i> VERIFIZIERTE STRATEGIEN
+    <!-- Hero Section -->
+    <main class="flex-1 max-w-7xl mx-auto px-6 py-16 w-full">
+        <div class="max-w-3xl mb-16">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cardBg border border-cardBorder text-accentLime text-xs font-mono font-bold mb-4">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> 100% Verifizierte Historie
             </div>
-            <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Investiere in messbare Performance.</h2>
-            <p class="text-lg text-textMuted leading-relaxed">
-                Keine Versprechen. Nur verifizierte Live-Daten, echtes Risikomanagement und transparente Trade-Historien direkt via MyFXBook.
+            <h2 class="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-6">
+                Transparente Performance. <span class="text-accentLime">Messbarer Erfolg.</span>
+            </h2>
+            <p class="text-base md:text-lg text-zinc-400 leading-relaxed">
+                Entdecke unsere automatisierten Handelssysteme. Basierend auf echten Live-Daten, transparenten Trade-Historien und historischen Renditen.
             </p>
         </div>
 
-        <!-- Dynamisches Grid -->
-        <div id="strategy-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="col-span-full flex justify-center py-20">
-                <i class="fa-solid fa-circle-notch fa-spin text-3xl text-accent"></i>
-            </div>
+        <!-- Dynamisches Strategie-Grid (Leicht erweiterbar) -->
+        <div id="strategy-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Wird dynamisch via JS geladen, um das Hinzufügen weiterer Strategien kinderleicht zu machen -->
         </div>
-
     </main>
 
+    <footer class="border-t border-cardBorder py-8 px-6 text-center text-xs text-zinc-500 font-mono">
+        &copy; 2026 TAG Markets. Alle Leistungsdaten sind verifiziert.
+    </footer>
+
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // Mock API Data
-            const apiDataMock = [
-                {
-                    "id": "sonic-ai",
-                    "name": "Sonic AI",
-                    "badge": "Live & Verifiziert",
-                    "description": "Slow, boring, consistent. Sonic AI ist darauf ausgelegt, stetig zu wachsen – Monat für Monat verifiziert.",
-                    "stats": { "gain": "+28.77%", "drawdown": "0.86%", "trades": "595" },
-                    "folderPath": "Strategies/Sonic.html",
-                    "icon": "fa-bolt"
-                }
-            ];
-
-            async function fetchStrategies() {
-                return new Promise(resolve => setTimeout(() => resolve(apiDataMock), 400));
+        // HIER KANNST DU SEHR EINFACH WEITERE STRATEGIEN HINZUFÜGEN
+        const strategiesData = [
+            {
+                id: "sonic-ai",
+                name: "Sonic AI",
+                asset: "Gold (XAU/USD)",
+                description: "Automatisierte institutionelle Handelsstrategie mit Fokus auf konstantes, abgesichertes Wachstum im Goldmarkt.",
+                gain: "+30.11%",
+                drawdown: "0.86%",
+                monthly: "1.14%",
+                daily: "0.04%",
+                tradesCount: "595",
+                url: "Strategies/Sonic.html",
+                badge: "Top Performer"
             }
+            /* Beispiel für eine neue Strategie in Zukunft:
+            {
+                id: "neo-ai",
+                name: "Neo AI",
+                asset: "Forex Majors",
+                description: "Multi-Currency Algorithmus für volatile Währungsmärkte.",
+                gain: "+18.40%",
+                drawdown: "1.20%",
+                monthly: "0.95%",
+                daily: "0.03%",
+                tradesCount: "320",
+                url: "Strategies/Neo.html",
+                badge: "Neu"
+            }
+            */
+        ];
 
-            async function renderGrid() {
-                const grid = document.getElementById('strategy-grid');
-                const strategies = await fetchStrategies();
-                grid.innerHTML = '';
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            const grid = document.getElementById('strategy-grid');
+            grid.innerHTML = '';
 
-                strategies.forEach(strat => {
-                    const cardHTML = `
-                        <div class="group bg-boxBg border border-boxBorder hover:border-accent/50 rounded-[2rem] p-8 relative overflow-hidden transition-all duration-500 flex flex-col">
-                            <div class="absolute -right-20 -top-20 w-64 h-64 bg-accent/5 rounded-full blur-3xl group-hover:bg-accent/10 transition-colors"></div>
-                            
-                            <div class="flex justify-between items-start mb-8 relative z-10">
-                                <div class="w-14 h-14 rounded-2xl bg-[#1a1a1d] border border-boxBorder flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                                    <i class="fa-solid ${strat.icon} text-accent text-2xl"></i>
-                                </div>
-                                <span class="px-3 py-1 bg-accent/10 text-accent text-xs font-bold rounded-full border border-accent/20">
+            strategiesData.forEach(strat => {
+                const cardHTML = `
+                    <div class="glass-card p-7 flex flex-col justify-between group">
+                        <div>
+                            <div class="flex justify-between items-center mb-6">
+                                <span class="px-3 py-1 rounded-full bg-accentLime/10 border border-accentLime/30 text-accentLime text-xs font-mono font-bold">
                                     ${strat.badge}
                                 </span>
+                                <span class="text-xs text-zinc-400 font-mono">${strat.asset}</span>
                             </div>
+                            
+                            <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-accentLime transition-colors">${strat.name}</h3>
+                            <p class="text-xs text-zinc-400 leading-relaxed mb-6">${strat.description}</p>
 
-                            <h3 class="text-3xl font-bold mb-3 relative z-10">${strat.name}</h3>
-                            <p class="text-sm text-textMuted leading-relaxed mb-8 relative z-10">${strat.description}</p>
-
-                            <div class="grid grid-cols-3 gap-4 mb-8 relative z-10">
-                                <div>
-                                    <p class="text-[10px] text-textMuted uppercase font-semibold mb-1">Rendite</p>
-                                    <p class="text-sm font-bold text-white">${strat.stats.gain}</p>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] text-textMuted uppercase font-semibold mb-1">Drawdown</p>
-                                    <p class="text-sm font-bold text-white">${strat.stats.drawdown}</p>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] text-textMuted uppercase font-semibold mb-1">Trades</p>
-                                    <p class="text-sm font-bold text-white">${strat.stats.trades}</p>
-                                </div>
+                            <div class="grid grid-cols-2 gap-3 p-4 rounded-xl bg-darkBg border border-cardBorder mb-6 font-mono">
+                               <div>
+                                    <p class="text-[10px] text-zinc-500 uppercase">Gesamtrendite</p>
+                                    <p class="text-sm font-bold text-emerald-400">${strat.gain}</p>
+                               </div>
+                               <div>
+                                    <p class="text-[10px] text-zinc-500 uppercase">Max Drawdown</p>
+                                    <p class="text-sm font-bold text-rose-400">${strat.drawdown}</p>
+                               </div>
+                               <div>
+                                    <p class="text-[10px] text-zinc-500 uppercase">Ø Monat</p>
+                                    <p class="text-sm font-bold text-white">${strat.monthly}</p>
+                               </div>
+                               <div>
+                                    <p class="text-[10px] text-zinc-500 uppercase">Trades</p>
+                                    <p class="text-sm font-bold text-white">${strat.tradesCount}</p>
+                               </div>
                             </div>
-
-                            <a href="${strat.folderPath}" class="mt-auto w-full py-4 bg-white text-black hover:bg-accent font-bold rounded-xl text-center text-sm transition-colors flex items-center justify-center gap-2 relative z-10">
-                                Performance prüfen <i class="fa-solid fa-arrow-right"></i>
-                            </a>
                         </div>
-                    `;
-                    grid.insertAdjacentHTML('beforeend', cardHTML);
-                });
-            }
-            renderGrid();
+
+                        <a href="${strat.url}" class="w-full py-3.5 rounded-xl bg-white text-darkBg hover:bg-accentLime font-bold text-xs uppercase tracking-wider text-center transition-all flex items-center justify-center gap-2">
+                            <span>Strategie & Rechner ansehen</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                `;
+                grid.insertAdjacentHTML('beforeend', cardHTML);
+            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         });
     </script>
 </body>

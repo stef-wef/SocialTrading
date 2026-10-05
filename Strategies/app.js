@@ -1,14 +1,10 @@
-class StrategyApp {
+class StrategyCalculator {
     constructor() {
-        this.appContainer = document.getElementById('strategy-app');
-        if (!this.appContainer) return;
-
-        // Config aus den Data-Attributen des Containers auslesen (Wichtig für Wiederverwendbarkeit)
+        this.appContainer = document.getElementById('strategy-app'); // falls vorhanden
         this.config = {
-            apiUrl: this.appContainer.dataset.apiUrl,
-            defaultCapital: parseFloat(this.appContainer.dataset.defaultCapital) || 10000,
-            defaultRate: parseFloat(this.appContainer.dataset.defaultRate) || 1.35,
-            defaultDays: parseInt(this.appContainer.dataset.defaultDays) || 90
+            defaultCapital: 139836.51,
+            defaultRate: 0.04, // Historischer Tagesdurchschnitt
+            defaultDays: 90
         };
 
         this.chartInstance = null;
@@ -23,25 +19,17 @@ class StrategyApp {
             resBalance: document.getElementById('res-balance'),
             resProfit: document.getElementById('res-profit'),
             resGrowth: document.getElementById('res-growth'),
-            presetBtns: document.querySelectorAll('.preset-btn'),
-            
-            tradesBody: document.getElementById('trades-table-body'),
-            apiDot: document.getElementById('api-status-dot'),
-            apiText: document.getElementById('api-status-text')
+            presetBtns: document.querySelectorAll('.preset-btn')
         };
 
         this.init();
     }
 
-    async init() {
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-
+    init() {
+        if (!this.dom.capInput) return;
         this.setupCalculator();
         this.initChart();
         this.calculate();
-        
-        // Echten API Call ausführen
-        await this.loadLiveTrades();
     }
 
     setupCalculator() {
@@ -58,7 +46,7 @@ class StrategyApp {
         this.dom.capInput.addEventListener('input', (e) => {
             let val = parseFloat(e.target.value);
             if (!isNaN(val)) {
-                if (val > 100000) val = 100000;
+                if (val > 1000000) val = 1000000;
                 this.dom.capSlider.value = val;
                 this.calculate();
             }
@@ -69,7 +57,7 @@ class StrategyApp {
 
         this.dom.presetBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const val = e.target.dataset.preset;
+                const val = parseFloat(e.target.dataset.preset);
                 this.dom.capInput.value = val;
                 this.dom.capSlider.value = val;
                 this.calculate();
@@ -78,26 +66,28 @@ class StrategyApp {
     }
 
     initChart() {
-        const ctx = document.getElementById('projectionChart').getContext('2d');
+        const canvas = document.getElementById('projectionChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
         
-        let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(208, 246, 92, 0.25)'); 
-        gradient.addColorStop(1, 'rgba(208, 246, 92, 0.0)');
+        let gradient = ctx.createLinearGradient(0, 0, 0, 350);
+        gradient.addColorStop(0, 'rgba(204, 255, 0, 0.25)'); 
+        gradient.addColorStop(1, 'rgba(204, 255, 0, 0.0)');
 
         this.chartInstance = new Chart(ctx, {
             type: 'line',
             data: { labels: [], datasets: [{ 
                 data: [], 
-                borderColor: '#D0F65C', 
+                borderColor: '#CCFF00', 
                 backgroundColor: gradient, 
-                borderWidth: 2, 
+                borderWidth: 2.5, 
                 pointRadius: 0,
                 pointHoverRadius: 6,
-                pointBackgroundColor: '#121214',
-                pointBorderColor: '#D0F65C',
+                pointBackgroundColor: '#07090E',
+                pointBorderColor: '#CCFF00',
                 pointBorderWidth: 2,
                 fill: true, 
-                tension: 0.4 
+                tension: 0.35 
             }]},
             options: {
                 responsive: true, 
@@ -105,26 +95,26 @@ class StrategyApp {
                 plugins: { 
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#18181B',
-                        titleColor: '#94959A',
-                        bodyColor: '#FAFAFA',
-                        bodyFont: { family: "'JetBrains Mono', monospace", size: 14, weight: 'bold' },
-                        borderColor: '#27272A',
+                        backgroundColor: '#101522',
+                        titleColor: '#94A3B8',
+                        bodyColor: '#FFFFFF',
+                        bodyFont: { family: "'JetBrains Mono', monospace", size: 12, weight: 'bold' },
+                        borderColor: '#1E293B',
                         borderWidth: 1,
-                        padding: 12,
+                        padding: 10,
                         displayColors: false,
                         callbacks: {
                             title: (ctx) => 'Tag ' + ctx[0].label,
-                            label: (ctx) => '$' + ctx.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})
+                            label: (ctx) => '$' + ctx.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})
                         }
                     }
                 },
                 scales: {
                     x: { 
-                        display: true, // X-Achse mit Zeitraum aktiv
+                        display: true,
                         grid: { color: 'rgba(255, 255, 255, 0.02)', drawBorder: false },
                         ticks: {
-                            color: '#94959A',
+                            color: '#64748B',
                             font: { family: "'JetBrains Mono', monospace", size: 10 },
                             maxTicksLimit: 8,
                             callback: function(value) { return 'T ' + this.getLabelForValue(value); }
@@ -134,8 +124,8 @@ class StrategyApp {
                         position: 'right',
                         grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
                         ticks: { 
-                            color: '#94959A', 
-                            font: { family: "'JetBrains Mono', monospace", size: 11 },
+                            color: '#64748B', 
+                            font: { family: "'JetBrains Mono', monospace", size: 10 },
                             maxTicksLimit: 6,
                             callback: (val) => val >= 1000 ? '$' + (val/1000).toFixed(0) + 'k' : '$' + val
                         }
@@ -158,6 +148,7 @@ class StrategyApp {
         let labels = ['0'];
         let dataPoints = [principal];
 
+        // Tägliche Reinvestition (Zinseszinsformel)
         for (let i = 1; i <= days; i++) {
             currentBalance *= (1 + (rate / 100));
             labels.push(i.toString());
@@ -178,74 +169,8 @@ class StrategyApp {
             this.chartInstance.update();
         }
     }
-
-    async loadLiveTrades() {
-        try {
-            // Echter API Call an die im HTML angegebene URL
-            const response = await fetch(this.config.apiUrl, {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' }
-            });
-            
-            if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-            
-            const trades = await response.json();
-            this.renderTradesTable(trades);
-            this.setApiStatus('connected');
-
-        } catch (error) {
-            console.warn("Live API Call fehlgeschlagen:", error.message);
-            this.setApiStatus('error');
-            
-            this.dom.tradesBody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="py-10 text-center">
-                        <p class="text-sm text-zinc-300 font-medium mb-1">Verbindung zur Live-Trading API fehlgeschlagen.</p>
-                        <p class="text-xs text-zinc-600">(Bitte hinterlege eine gültige API im data-api-url Attribut)</p>
-                    </td>
-                </tr>
-            `;
-        }
-    }
-
-    renderTradesTable(trades) {
-        if (!trades || trades.length === 0) {
-            this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-zinc-500">Aktuell keine Trades verfügbar.</td></tr>`;
-            return;
-        }
-
-        let html = '';
-        trades.forEach(t => {
-            const isProfit = t.profit >= 0;
-            const profitClass = isProfit ? 'text-emerald-400' : 'text-rose-500';
-            const actionClass = t.action.toUpperCase() === 'BUY' ? 'text-blue-500' : 'text-purple-400';
-            
-            html += `
-                <tr class="border-b border-surface-600 hover:bg-surface-700/50 transition-colors">
-                    <td class="p-4 text-zinc-400">${t.date}</td>
-                    <td class="p-4 font-bold text-white">${t.asset}</td>
-                    <td class="p-4 ${actionClass} font-semibold">${t.action.toUpperCase()}</td>
-                    <td class="p-4 text-zinc-400">${parseFloat(t.volume).toFixed(2)} Lots</td>
-                    <td class="p-4 text-right font-bold ${profitClass}">${isProfit ? '+' : ''}$${parseFloat(t.profit).toFixed(2)}</td>
-                </tr>
-            `;
-        });
-        this.dom.tradesBody.innerHTML = html;
-    }
-
-    setApiStatus(status) {
-        if (status === 'connected') {
-            this.dom.apiDot.className = "w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]";
-            this.dom.apiText.innerText = "Live API";
-            this.dom.apiText.className = "text-[10px] text-emerald-500 uppercase tracking-widest";
-        } else {
-            this.dom.apiDot.className = "w-2 h-2 rounded-full bg-zinc-600";
-            this.dom.apiText.innerText = "Offline";
-            this.dom.apiText.className = "text-[10px] text-zinc-500 uppercase tracking-widest";
-        }
-    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    new StrategyApp();
+    new StrategyCalculator();
 });
