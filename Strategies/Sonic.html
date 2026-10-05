@@ -257,7 +257,7 @@
                 </div>
             </div>
 
-            <!-- Ledger: Datum, Typ (Daily Trade), Profit % -->
+            <!-- Ledger: Datum, Asset, Typ, Einstieg ➔ Ausstieg, Dauer, Pips, Profit % -->
             <div class="glass-panel overflow-hidden">
                 <div class="px-6 py-5 border-b border-cardBorder flex justify-between items-center bg-cardBg/50">
                     <div>
@@ -267,12 +267,16 @@
                         <h2 class="text-xl font-extrabold text-white tracking-tight"><span data-i18n="ledgerTitle1">Die komplette Trade-Historie,</span> <span class="text-accentCyan" data-i18n="ledgerTitle2">Zeile für Zeile.</span></h2>
                     </div>
                 </div>
-                <div class="overflow-x-auto max-h-[500px] table-scroll">
+                <div class="overflow-x-auto max-h-[550px] table-scroll">
                     <table class="w-full text-left border-collapse text-xs font-mono whitespace-nowrap">
                         <thead class="sticky top-0 bg-darkBg z-10 shadow-md">
                             <tr class="text-zinc-500 uppercase tracking-widest border-b border-cardBorder">
-                                <th class="px-6 py-4 font-semibold" data-i18n="colDate">Datum</th>
-                                <th class="px-6 py-4 font-semibold" data-i18n="colType">Art / Dauer</th>
+                                <th class="px-6 py-4 font-semibold" data-i18n="colDate">Datum / Zeit</th>
+                                <th class="px-6 py-4 font-semibold" data-i18n="colAsset">Asset</th>
+                                <th class="px-6 py-4 font-semibold" data-i18n="colType">Richtung</th>
+                                <th class="px-6 py-4 font-semibold" data-i18n="colPrices">Einstieg ➔ Ausstieg</th>
+                                <th class="px-6 py-4 font-semibold" data-i18n="colDuration">Dauer</th>
+                                <th class="px-6 py-4 font-semibold" data-i18n="colPips">Pips</th>
                                 <th class="px-6 py-4 font-semibold text-right" data-i18n="colProfit">Profit %</th>
                             </tr>
                         </thead>
@@ -285,7 +289,6 @@
 
     </div>
 
-    <!-- Rechner-Skript -->
     <script src="app.js"></script>
     <script>if (typeof lucide !== 'undefined') lucide.createIcons();</script>
 </body>
