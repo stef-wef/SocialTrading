@@ -3,7 +3,7 @@ class StrategyCalculator {
         this.appContainer = document.getElementById('strategy-app');
         this.config = {
             defaultCapital: 139836.51,
-            defaultRate: 0.04, // Historischer Tagesdurchschnitt in %
+            defaultRate: 0.04, 
             defaultDays: 90
         };
 
@@ -77,9 +77,13 @@ class StrategyCalculator {
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         
-        let gradient = ctx.createLinearGradient(0, 0, 0, 350);
-        gradient.addColorStop(0, 'rgba(204, 255, 0, 0.25)'); 
+        // Etwas softerer Gradient für das Copy-X Feeling
+        let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(204, 255, 0, 0.15)'); 
         gradient.addColorStop(1, 'rgba(204, 255, 0, 0.0)');
+
+        Chart.defaults.font.family = "'JetBrains Mono', monospace";
+        Chart.defaults.color = '#64748B';
 
         this.chartInstance = new Chart(ctx, {
             type: 'line',
@@ -87,14 +91,14 @@ class StrategyCalculator {
                 data: [], 
                 borderColor: '#CCFF00', 
                 backgroundColor: gradient, 
-                borderWidth: 2.5, 
+                borderWidth: 2, 
                 pointRadius: 0,
                 pointHoverRadius: 6,
-                pointBackgroundColor: '#07090E',
+                pointBackgroundColor: '#05070A',
                 pointBorderColor: '#CCFF00',
                 pointBorderWidth: 2,
                 fill: true, 
-                tension: 0.35 
+                tension: 0.4 // Smoothe Kurve
             }]},
             options: {
                 responsive: true, 
@@ -102,13 +106,13 @@ class StrategyCalculator {
                 plugins: { 
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#101522',
+                        backgroundColor: '#0F131C',
                         titleColor: '#94A3B8',
                         bodyColor: '#FFFFFF',
-                        bodyFont: { family: "'JetBrains Mono', monospace", size: 12, weight: 'bold' },
-                        borderColor: '#1E293B',
+                        bodyFont: { size: 13, weight: 'bold' },
+                        borderColor: '#1A2333',
                         borderWidth: 1,
-                        padding: 10,
+                        padding: 12,
                         displayColors: false,
                         callbacks: {
                             title: (ctx) => 'Tag ' + ctx[0].label,
@@ -119,20 +123,17 @@ class StrategyCalculator {
                 scales: {
                     x: { 
                         display: true,
-                        grid: { color: 'rgba(255, 255, 255, 0.02)', drawBorder: false },
+                        grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
                         ticks: {
-                            color: '#64748B',
-                            font: { family: "'JetBrains Mono', monospace", size: 10 },
                             maxTicksLimit: 8,
                             callback: function(value) { return 'T ' + this.getLabelForValue(value); }
                         }
                     },
                     y: {
                         position: 'right',
-                        grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
+                        grid: { color: 'rgba(255, 255, 255, 0.04)', drawBorder: false },
+                        border: { dash: [4, 4] },
                         ticks: { 
-                            color: '#64748B', 
-                            font: { family: "'JetBrains Mono', monospace", size: 10 },
                             maxTicksLimit: 6,
                             callback: (val) => val >= 1000 ? '$' + (val/1000).toFixed(0) + 'k' : '$' + val
                         }
@@ -174,6 +175,12 @@ class StrategyCalculator {
         let netProfit = mode === 'reinvest' ? (finalBalance - principal) : totalPayouts;
         let growth = (principal > 0) ? (netProfit / principal) * 100 : 0;
 
+        // UI Updates
+        const resTitle = document.getElementById('res-title');
+        if (resTitle) {
+            resTitle.innerText = mode === 'reinvest' ? "Projiziertes Endguthaben" : "Kapital (Konstant wg. Auszahlung)";
+        }
+
         if (this.dom.resBalance) this.dom.resBalance.innerText = '$' + finalBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         if (this.dom.resProfit) this.dom.resProfit.innerText = '+$' + netProfit.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         if (this.dom.resGrowth) this.dom.resGrowth.innerText = '+' + growth.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
@@ -187,14 +194,20 @@ class StrategyCalculator {
 
     async loadTrades() {
         try {
+            // Lädt aus dem data Ordner (eine Ebene höher)
             const response = await fetch('../data/trades.json');
             if (!response.ok) throw new Error("trades.json nicht gefunden");
             const trades = await response.json();
-            this.renderTradesTable(trades);
+            
+            // Künstliche Ladezeit für einen "App-Look"
+            setTimeout(() => {
+                this.renderTradesTable(trades);
+            }, 400);
+
         } catch (error) {
             console.error("Fehler beim Laden der trades.json:", error);
             if (this.dom.tradesBody) {
-                this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-400 font-mono">Fehler beim Laden der Trade-Historie.</td></tr>`;
+                this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-rose-400">Verifizierte Daten konnten nicht geladen werden. Bitte später erneut versuchen.</td></tr>`;
             }
         }
     }
@@ -203,12 +216,11 @@ class StrategyCalculator {
         if (!this.dom.tradesBody) return;
         
         if (!trades || trades.length === 0) {
-            this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-zinc-500 font-mono">Keine Trades verfügbar.</td></tr>`;
+            this.dom.tradesBody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-zinc-500">Keine Trades in der Historie.</td></tr>`;
             return;
         }
 
         let html = '';
-        // Filtere nur echte Buy/Sell Trades heraus (ignoriere evtl. Einzahlungen)
         const validTrades = trades.filter(t => t.Action === 'Buy' || t.Action === 'Sell');
 
         validTrades.slice(0, 20).forEach(t => {
@@ -216,15 +228,19 @@ class StrategyCalculator {
             const isProfit = profitVal >= 0;
             const profitClass = isProfit ? 'text-emerald-400' : 'text-rose-400';
             const action = (t.Action || 'Buy').toUpperCase();
-            const actionClass = action === 'BUY' ? 'text-sky-400' : 'text-purple-400';
+            
+            // Farblich angepasste Badges für Buy/Sell wie bei Copy-X
+            const actionBadge = action === 'BUY' 
+                ? `<span class="px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">${action}</span>` 
+                : `<span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">${action}</span>`;
             
             html += `
-                <tr class="hover:bg-cardBg/40 transition-colors">
-                    <td class="p-4 text-zinc-400">${t["Close Date"] || t["Open Date"] || 'Verifiziert'}</td>
-                    <td class="p-4 font-bold text-white">${t.Symbol || 'XAUUSD'}</td>
-                    <td class="p-4 ${actionClass} font-semibold">${action}</td>
-                    <td class="p-4 text-zinc-400">${parseFloat(t["Units/Lots"] || 1).toFixed(2)} Lots</td>
-                    <td class="p-4 text-right font-bold ${profitClass}">${isProfit ? '+' : ''}$${profitVal.toFixed(2)}</td>
+                <tr class="hover:bg-cardBorder/30 transition-colors cursor-default">
+                    <td class="px-5 md:px-7 py-3 text-zinc-400">${t["Close Date"] || t["Open Date"] || 'Verifiziert'}</td>
+                    <td class="px-5 md:px-7 py-3 font-bold text-white">${t.Symbol || 'XAUUSD'}</td>
+                    <td class="px-5 md:px-7 py-3 font-semibold">${actionBadge}</td>
+                    <td class="px-5 md:px-7 py-3 text-zinc-400">${parseFloat(t["Units/Lots"] || 1).toFixed(2)} Lots</td>
+                    <td class="px-5 md:px-7 py-3 text-right font-bold ${profitClass}">${isProfit ? '+' : ''}$${profitVal.toFixed(2)}</td>
                 </tr>
             `;
         });

@@ -2,12 +2,12 @@
 <html lang="de" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TAG Markets | AI Trading Portfolios</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -18,9 +18,9 @@
                 extend: {
                     fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
                     colors: {
-                        darkBg: '#07090E',
-                        cardBg: '#101522',
-                        cardBorder: '#1E293B',
+                        darkBg: '#05070A',
+                        cardBg: '#0F131C',
+                        cardBorder: '#1A2333',
                         accentLime: '#CCFF00'
                     }
                 }
@@ -28,142 +28,134 @@
         }
     </script>
     <style>
-        body { background-color: #07090E; color: #F8FAFC; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: #05070A; color: #F8FAFC; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+        ::-webkit-scrollbar { display: none; }
         .glass-card {
-            background: linear-gradient(135deg, rgba(16, 21, 34, 0.8) 0%, rgba(10, 13, 20, 0.9) 100%);
-            border: 1px solid #1E293B;
+            background: linear-gradient(135deg, rgba(15, 19, 28, 0.8) 0%, rgba(10, 13, 20, 0.95) 100%);
+            border: 1px solid #1A2333;
             border-radius: 1.5rem;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .glass-card:hover {
-            border-color: rgba(204, 255, 0, 0.4);
+            border-color: rgba(204, 255, 0, 0.3);
             transform: translateY(-4px);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
     <!-- Header -->
-    <header class="w-full border-b border-cardBorder px-6 py-5 flex justify-between items-center bg-darkBg/80 backdrop-blur-md sticky top-0 z-50">
+    <header class="w-full border-b border-cardBorder px-5 py-4 flex justify-between items-center bg-darkBg/90 backdrop-blur-md sticky top-0 z-50">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-accentLime/10 border border-accentLime/30 flex items-center justify-center text-accentLime font-bold">
-                <i data-lucide="cpu" class="w-5 h-5"></i>
+            <div class="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-accentLime/10 border border-accentLime/30 flex items-center justify-center text-accentLime font-bold shadow-[0_0_15px_rgba(204,255,0,0.15)]">
+                <i data-lucide="cpu" class="w-4 h-4 md:w-5 md:h-5"></i>
             </div>
             <div>
-                <h1 class="text-base font-extrabold tracking-tight text-white">TAG MARKETS</h1>
-                <p class="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">Institutional AI Strategies</p>
+                <h1 class="text-sm md:text-base font-extrabold tracking-tight text-white">TAG MARKETS</h1>
+                <p class="text-[9px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-mono">Institutional AI Portfolios</p>
             </div>
         </div>
-        <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cardBg border border-cardBorder text-xs text-zinc-300 font-mono">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Live Track Record Active
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cardBg border border-cardBorder text-[10px] md:text-xs text-zinc-300 font-mono">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> <span class="hidden md:inline">Daten monatlich aktualisiert</span><span class="md:hidden">Updated</span>
         </div>
     </header>
 
     <!-- Hero Section -->
-    <main class="flex-1 max-w-7xl mx-auto px-6 py-16 w-full">
-        <div class="max-w-3xl mb-16">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cardBg border border-cardBorder text-accentLime text-xs font-mono font-bold mb-4">
+    <main class="flex-1 w-full max-w-7xl mx-auto px-5 py-12 md:py-20">
+        <div class="max-w-3xl mb-12 md:mb-16">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cardBg border border-cardBorder text-accentLime text-[10px] md:text-xs font-mono font-bold tracking-wider mb-5">
                 <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> 100% Verifizierte Historie
             </div>
-            <h2 class="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-6">
-                Transparente Performance. <span class="text-accentLime">Messbarer Erfolg.</span>
+            <h2 class="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-5 leading-tight">
+                Transparente Performance.<br> <span class="text-accentLime">Messbarer Erfolg.</span>
             </h2>
-            <p class="text-base md:text-lg text-zinc-400 leading-relaxed">
-                Entdecke unsere automatisierten Handelssysteme. Basierend auf echten Live-Daten, transparenten Trade-Historien und historischen Renditen.
+            <p class="text-sm md:text-base lg:text-lg text-zinc-400 leading-relaxed max-w-2xl">
+                Investiere datenbasiert. Wir zeigen dir die unverfälschte Historie unserer Handelssysteme – jeden Monat frisch aus unseren Live-Accounts exportiert.
             </p>
         </div>
 
-        <!-- Dynamisches Strategie-Grid (Leicht erweiterbar) -->
+        <!-- Dynamisches Strategie-Grid -->
         <div id="strategy-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Wird dynamisch via JS geladen, um das Hinzufügen weiterer Strategien kinderleicht zu machen -->
+            <!-- Loader (wird von JS überschrieben) -->
+            <div class="col-span-full flex justify-center py-20">
+                <i data-lucide="loader-2" class="w-8 h-8 text-accentLime animate-spin"></i>
+            </div>
         </div>
     </main>
 
-    <footer class="border-t border-cardBorder py-8 px-6 text-center text-xs text-zinc-500 font-mono">
-        &copy; 2026 TAG Markets. Alle Leistungsdaten sind verifiziert.
+    <footer class="border-t border-cardBorder py-6 px-5 text-center text-[10px] md:text-xs text-zinc-500 font-mono">
+        &copy; 2026 TAG Markets. Alle angezeigten Leistungsdaten sind historisch belegt.
     </footer>
 
     <script>
-        // HIER KANNST DU SEHR EINFACH WEITERE STRATEGIEN HINZUFÜGEN
         const strategiesData = [
             {
                 id: "sonic-ai",
                 name: "Sonic AI",
                 asset: "Gold (XAU/USD)",
-                description: "Automatisierte institutionelle Handelsstrategie mit Fokus auf konstantes, abgesichertes Wachstum im Goldmarkt.",
+                description: "Automatisierte institutionelle Handelsstrategie mit Fokus auf konstantes, strikt risikominimiertes Wachstum.",
                 gain: "+30.11%",
                 drawdown: "0.86%",
                 monthly: "1.14%",
                 daily: "0.04%",
-                tradesCount: "595",
+                tradesCount: "640",
                 url: "Strategies/Sonic.html",
                 badge: "Top Performer"
             }
-            /* Beispiel für eine neue Strategie in Zukunft:
-            {
-                id: "neo-ai",
-                name: "Neo AI",
-                asset: "Forex Majors",
-                description: "Multi-Currency Algorithmus für volatile Währungsmärkte.",
-                gain: "+18.40%",
-                drawdown: "1.20%",
-                monthly: "0.95%",
-                daily: "0.03%",
-                tradesCount: "320",
-                url: "Strategies/Neo.html",
-                badge: "Neu"
-            }
-            */
         ];
 
         document.addEventListener("DOMContentLoaded", () => {
             if (typeof lucide !== 'undefined') lucide.createIcons();
             const grid = document.getElementById('strategy-grid');
-            grid.innerHTML = '';
+            
+            // Simulierter Ladevorgang für den "App"-Look
+            setTimeout(() => {
+                grid.innerHTML = '';
+                strategiesData.forEach(strat => {
+                    const cardHTML = `
+                        <div class="glass-card p-6 md:p-8 flex flex-col justify-between group">
+                            <div>
+                                <div class="flex justify-between items-center mb-6">
+                                    <span class="px-2.5 py-1 rounded-full bg-accentLime/10 border border-accentLime/30 text-accentLime text-[10px] font-mono font-bold uppercase tracking-wider">
+                                        ${strat.badge}
+                                    </span>
+                                    <span class="text-[10px] md:text-xs text-zinc-400 font-mono">${strat.asset}</span>
+                                </div>
+                                
+                                <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-accentLime transition-colors">${strat.name}</h3>
+                                <p class="text-xs md:text-sm text-zinc-400 leading-relaxed mb-6 md:mb-8">${strat.description}</p>
 
-            strategiesData.forEach(strat => {
-                const cardHTML = `
-                    <div class="glass-card p-7 flex flex-col justify-between group">
-                        <div>
-                            <div class="flex justify-between items-center mb-6">
-                                <span class="px-3 py-1 rounded-full bg-accentLime/10 border border-accentLime/30 text-accentLime text-xs font-mono font-bold">
-                                    ${strat.badge}
-                                </span>
-                                <span class="text-xs text-zinc-400 font-mono">${strat.asset}</span>
+                                <div class="grid grid-cols-2 gap-2 md:gap-3 p-4 rounded-xl bg-darkBg border border-cardBorder mb-8 font-mono">
+                                   <div>
+                                        <p class="text-[9px] text-zinc-500 uppercase tracking-widest mb-0.5">Gesamtrendite</p>
+                                        <p class="text-sm md:text-base font-bold text-emerald-400">${strat.gain}</p>
+                                   </div>
+                                   <div>
+                                        <p class="text-[9px] text-zinc-500 uppercase tracking-widest mb-0.5">Max Drawdown</p>
+                                        <p class="text-sm md:text-base font-bold text-rose-400">${strat.drawdown}</p>
+                                   </div>
+                                   <div class="mt-2 pt-2 border-t border-cardBorder/50">
+                                        <p class="text-[9px] text-zinc-500 uppercase tracking-widest mb-0.5">Ø Monat</p>
+                                        <p class="text-xs md:text-sm font-bold text-white">${strat.monthly}</p>
+                                   </div>
+                                   <div class="mt-2 pt-2 border-t border-cardBorder/50">
+                                        <p class="text-[9px] text-zinc-500 uppercase tracking-widest mb-0.5">Trades</p>
+                                        <p class="text-xs md:text-sm font-bold text-white">${strat.tradesCount}</p>
+                                   </div>
+                                </div>
                             </div>
-                            
-                            <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-accentLime transition-colors">${strat.name}</h3>
-                            <p class="text-xs text-zinc-400 leading-relaxed mb-6">${strat.description}</p>
 
-                            <div class="grid grid-cols-2 gap-3 p-4 rounded-xl bg-darkBg border border-cardBorder mb-6 font-mono">
-                               <div>
-                                    <p class="text-[10px] text-zinc-500 uppercase">Gesamtrendite</p>
-                                    <p class="text-sm font-bold text-emerald-400">${strat.gain}</p>
-                               </div>
-                               <div>
-                                    <p class="text-[10px] text-zinc-500 uppercase">Max Drawdown</p>
-                                    <p class="text-sm font-bold text-rose-400">${strat.drawdown}</p>
-                               </div>
-                               <div>
-                                    <p class="text-[10px] text-zinc-500 uppercase">Ø Monat</p>
-                                    <p class="text-sm font-bold text-white">${strat.monthly}</p>
-                               </div>
-                               <div>
-                                    <p class="text-[10px] text-zinc-500 uppercase">Trades</p>
-                                    <p class="text-sm font-bold text-white">${strat.tradesCount}</p>
-                               </div>
-                            </div>
+                            <a href="${strat.url}" class="w-full py-3.5 md:py-4 rounded-xl bg-white text-darkBg hover:bg-accentLime font-extrabold text-xs uppercase tracking-widest text-center transition-all flex items-center justify-center gap-2">
+                                Performance prüfen
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
                         </div>
-
-                        <a href="${strat.url}" class="w-full py-3.5 rounded-xl bg-white text-darkBg hover:bg-accentLime font-bold text-xs uppercase tracking-wider text-center transition-all flex items-center justify-center gap-2">
-                            <span>Strategie & Rechner ansehen</span>
-                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </a>
-                    </div>
-                `;
-                grid.insertAdjacentHTML('beforeend', cardHTML);
-            });
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+                    `;
+                    grid.insertAdjacentHTML('beforeend', cardHTML);
+                });
+                lucide.createIcons();
+            }, 300); // 300ms Ladeverzögerung für einen smoothen Aufbau
         });
     </script>
 </body>
