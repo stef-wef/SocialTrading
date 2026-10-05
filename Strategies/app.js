@@ -24,10 +24,8 @@ const translations = {
 
         btBadge: "Echte Historische Daten",
         btTitle: "Backtest-Engine",
-        btSub: "Simuliert Gewinne basierend auf exakten vergangenen Trades. Wähle einen historischen Zeitraum und dein Startkapital.",
+        btSub: "Simuliert Gewinne basierend auf allen vergangenen Trades. Gib dein Startkapital ein und wähle den Gewinn-Modus.",
         btCapital: "Startkapital",
-        btStart: "Startdatum",
-        btEnd: "Enddatum",
         btMode: "Gewinn-Modus",
         modeReinvest: "Täglich Reinvestieren (Zinseszins)",
         modePayout: "Auszahlen (Konstantes Kapital)",
@@ -43,9 +41,8 @@ const translations = {
         
         ledgerTitle1: "Die komplette Trade-Historie,",
         ledgerTitle2: "Zeile für Zeile.",
-        colAsset: "Instrument",
+        colDate: "Datum",
         colType: "Typ",
-        colVol: "Volumen",
         colProfit: "Profit %"
     },
     en: {
@@ -72,10 +69,8 @@ const translations = {
 
         btBadge: "Real Historical Data",
         btTitle: "Backtest Engine",
-        btSub: "Simulates returns based on exact historical trades. Select a timeframe from the history and input your capital.",
+        btSub: "Simulates returns based on all exact historical trades. Input your capital and select the profit mode.",
         btCapital: "Starting Capital",
-        btStart: "Start Date",
-        btEnd: "End Date",
         btMode: "Profit Mode",
         modeReinvest: "Daily Reinvest (Compound)",
         modePayout: "Daily Payout (Constant Capital)",
@@ -91,9 +86,8 @@ const translations = {
         
         ledgerTitle1: "A live trade ledger,",
         ledgerTitle2: "line by line.",
-        colAsset: "Instrument",
+        colDate: "Date",
         colType: "Type",
-        colVol: "Volume",
         colProfit: "Profit %"
     }
 };
@@ -108,7 +102,7 @@ class DualEngineApp {
         this.rates = { cons: 0.0588, avg: 0.19152, opt: 0.3528 };
         
         this.dom = {
-            // Projection
+            // Projection UI
             projDepInput: document.getElementById('proj-deposit'),
             projDepSlider: document.getElementById('proj-deposit-slider'),
             projTopInput: document.getElementById('proj-topup'),
@@ -122,19 +116,15 @@ class DualEngineApp {
             projConsBal: document.getElementById('proj-cons-balance'),
             projOptBal: document.getElementById('proj-opt-balance'),
 
-            // Backtest
+            // Backtest UI
             btDepInput: document.getElementById('bt-capital'),
             btDepSlider: document.getElementById('bt-capital-slider'),
-            btStart: document.getElementById('bt-start-date'),
-            btEnd: document.getElementById('bt-end-date'),
             btMode: document.getElementById('bt-mode-select'),
             btResBal: document.getElementById('bt-res-balance'),
             btResProf: document.getElementById('bt-res-profit'),
             btResGrowth: document.getElementById('bt-res-growth'),
 
-            // Stats & Tables
-            statStart: document.getElementById('stats-start-date'),
-            statEnd: document.getElementById('stats-end-date'),
+            // Stats & Table UI
             statTotal: document.getElementById('stat-total'),
             statWins: document.getElementById('stat-wins'),
             statLosses: document.getElementById('stat-losses'),
@@ -157,7 +147,7 @@ class DualEngineApp {
         }
         this.applyTranslations();
 
-        if (!this.dom.projDepInput) return;
+        if (!this.dom.projDepInput) return; // Nur wenn Rechner geladen ist
 
         this.setupListeners();
         this.initCharts();
@@ -188,21 +178,14 @@ class DualEngineApp {
             });
         };
 
-        // Projection
+        // Projection 
         syncSliderInput(this.dom.projDepSlider, this.dom.projDepInput, () => this.calcProjection());
         syncSliderInput(this.dom.projTopSlider, this.dom.projTopInput, () => this.calcProjection());
         syncSliderInput(this.dom.projMoSlider, this.dom.projMoInput, () => this.calcProjection());
 
-        // Backtest
+        // Backtest (Kein Datum mehr!)
         syncSliderInput(this.dom.btDepSlider, this.dom.btDepInput, () => this.calcBacktest());
-        this.dom.btStart.addEventListener('change', () => this.calcBacktest());
-        this.dom.btEnd.addEventListener('change', () => this.calcBacktest());
         this.dom.btMode.addEventListener('change', () => this.calcBacktest());
-        
-        // Stats
-        const triggerStats = () => this.updateStatsAndTable();
-        if(this.dom.statStart) this.dom.statStart.addEventListener('change', triggerStats);
-        if(this.dom.statEnd) this.dom.statEnd.addEventListener('change', triggerStats);
     }
 
     initCharts() {
@@ -249,7 +232,7 @@ class DualEngineApp {
         this.btChart = createChart('backtestChart', '#34D399', 'rgba(52, 211, 153, 0.2)', 'rgba(52, 211, 153, 0.0)');
     }
 
-    // --- PROJECTION LOGIK ---
+    // --- PROJECTION LOGIC ---
     simulateProj(deposit, topup, months, rate) {
         let balance = deposit;
         let invested = deposit;
@@ -303,70 +286,54 @@ class DualEngineApp {
         });
     }
 
-    // --- BACKTEST LOGIK ---
+    // --- DATA LOADING LOGIC ---
     async loadTrades() {
         let data = [];
         try {
+            // Robustes Fetching
             const res = await fetch('../data/trades.json').catch(() => fetch('/data/trades.json')).catch(() => fetch('./data/trades.json'));
             if (!res || !res.ok) throw new Error("JSON Fetch failed");
             data = await res.json();
         } catch (error) {
             console.error("Fehler beim Laden:", error);
-            if (this.dom.tradesBody) this.dom.tradesBody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-rose-400 font-mono">Keine Trades in der Datenbank gefunden.</td></tr>`;
+            if (this.dom.tradesBody) this.dom.tradesBody.innerHTML = `<tr><td colspan="3" class="py-8 text-center text-rose-400 font-mono">Lade-Fehler. Keine Daten.</td></tr>`;
             return;
         }
 
+        // Alle gültigen Buy/Sell Trades extrahieren
         this.rawTrades = data.filter(t => {
             const action = (t.Action || t.action || "").toLowerCase();
             return action === 'buy' || action === 'sell';
         }).map(t => {
             const dateStr = t["Close Date"] || t["Open Date"] || t.date || "";
+            // Robustes Fallback für das Datum
             let parsedDate = new Date(dateStr);
             if(isNaN(parsedDate.getTime())) parsedDate = new Date(); 
             
             return {
                 ...t,
                 parsedDate,
-                Gain: parseFloat(t.Gain || t.gain || 0),
+                displayDate: dateStr, // String Anzeige so wie er reinkommt
+                Gain: parseFloat(t.Gain || t.gain || 0), // Profit in Prozent
                 Action: (t.Action || t.action || "Buy").toUpperCase()
             };
-        }).sort((a, b) => a.parsedDate - b.parsedDate);
-
-        if (this.rawTrades.length > 0) {
-            const firstDate = this.rawTrades[0].parsedDate;
-            const lastDate = this.rawTrades[this.rawTrades.length - 1].parsedDate;
-            
-            this.dom.btStart.value = firstDate.toISOString().split('T')[0];
-            this.dom.btEnd.value = lastDate.toISOString().split('T')[0];
-
-            if(this.dom.statStart && this.dom.statEnd) {
-                const oneMonthAgo = new Date(lastDate);
-                oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-                this.dom.statStart.value = oneMonthAgo.toISOString().split('T')[0];
-                this.dom.statEnd.value = lastDate.toISOString().split('T')[0];
-            }
-        }
+        }).sort((a, b) => a.parsedDate - b.parsedDate); // Alt nach Neu sortiert
 
         this.updateStatsAndTable();
         this.calcBacktest();
     }
 
+    // --- STATS & TABLE LOGIC (ALLE TRADES) ---
     updateStatsAndTable() {
-        if (!this.dom.statStart || !this.dom.statEnd) return;
-        
-        let startD = new Date(this.dom.statStart.value);
-        let endD = new Date(this.dom.statEnd.value);
-        endD.setHours(23,59,59);
-
-        const statsTrades = this.rawTrades.filter(t => t.parsedDate >= startD && t.parsedDate <= endD);
+        if (this.rawTrades.length === 0) return;
 
         let wins = 0; let losses = 0;
-        statsTrades.forEach(t => { if (t.Gain >= 0) wins++; else losses++; });
+        this.rawTrades.forEach(t => { if (t.Gain >= 0) wins++; else losses++; });
         let total = wins + losses;
         let winRate = total > 0 ? ((wins / total) * 100).toFixed(2) : 0;
 
         if(this.dom.statTotal) this.dom.statTotal.innerText = total;
-        if(this.dom.kpiTrades) this.dom.kpiTrades.innerText = this.rawTrades.length; 
+        if(this.dom.kpiTrades) this.dom.kpiTrades.innerText = total;
         if(this.dom.statWins) this.dom.statWins.innerText = wins;
         if(this.dom.statLosses) this.dom.statLosses.innerText = losses;
         if(this.dom.statWinrate) this.dom.statWinrate.innerText = winRate + "%";
@@ -374,13 +341,8 @@ class DualEngineApp {
         if (!this.dom.tradesBody) return;
         let html = '';
         
-        // Zeigt immer ALLE gefilterten Trades an
-        const reversedForTable = [...statsTrades].reverse(); 
-
-        if (reversedForTable.length === 0) {
-            this.dom.tradesBody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-zinc-500 font-mono">Keine Trades in diesem Zeitraum.</td></tr>`;
-            return;
-        }
+        // Alle Trades: Neuste ganz oben
+        const reversedForTable = [...this.rawTrades].reverse(); 
 
         reversedForTable.forEach(t => {
             const isProfit = t.Gain >= 0;
@@ -391,9 +353,8 @@ class DualEngineApp {
             
             html += `
                 <tr class="hover:bg-cardBorder/30 transition-colors">
-                    <td class="px-6 py-4 font-bold text-white">${t.Symbol || 'XAUUSD'}</td>
+                    <td class="px-6 py-4 text-zinc-400">${t.displayDate}</td>
                     <td class="px-6 py-4 font-semibold">${actionBadge}</td>
-                    <td class="px-6 py-4 text-zinc-400">${parseFloat(t["Units/Lots"] || 1).toFixed(2)} Lots</td>
                     <td class="px-6 py-4 text-right font-bold ${profitClass}">${isProfit ? '+' : ''}${t.Gain.toFixed(2)}%</td>
                 </tr>
             `;
@@ -401,26 +362,22 @@ class DualEngineApp {
         this.dom.tradesBody.innerHTML = html;
     }
 
+    // --- BACKTEST LOGIC (ALLE TRADES) ---
     calcBacktest() {
         if (this.rawTrades.length === 0) return;
 
         let capital = parseFloat(this.dom.btDepInput.value) || 10000;
         let mode = this.dom.btMode.value; 
 
-        let startD = new Date(this.dom.btStart.value);
-        let endD = new Date(this.dom.btEnd.value);
-        endD.setHours(23,59,59); 
-
-        let validTrades = this.rawTrades.filter(t => t.parsedDate >= startD && t.parsedDate <= endD);
-
         let currentBalance = capital;
         let totalPayouts = 0;
         
-        let labels = [startD.toISOString().split('T')[0]];
+        let labels = ['Start'];
         let dataPoints = [capital];
 
-        validTrades.forEach(t => {
-            let percentFactor = t.Gain / 100; 
+        // Berechnet über ALLE historischen Trades
+        this.rawTrades.forEach(t => {
+            let percentFactor = t.Gain / 100; // Aus Gain 0.04 wird hier 0.0004
             let tradeProfit = currentBalance * percentFactor;
 
             if (mode === 'reinvest') {
@@ -428,15 +385,16 @@ class DualEngineApp {
                 dataPoints.push(currentBalance);
             } else {
                 totalPayouts += tradeProfit;
-                dataPoints.push(capital + totalPayouts);
+                dataPoints.push(capital + totalPayouts); // Wachsende Linie trotz Auszahlung
             }
-            labels.push(t.parsedDate.toISOString().split('T')[0]);
+            labels.push(t.displayDate.split(' ')[0]); // Nur das Datum für den Chart anzeigen
         });
 
         let finalBalance = mode === 'reinvest' ? dataPoints[dataPoints.length - 1] : capital;
         let netProfit = mode === 'reinvest' ? (finalBalance - capital) : totalPayouts;
         let growth = capital > 0 ? (netProfit / capital) * 100 : 0;
 
+        // UI Updates
         this.dom.btResBal.innerText = '$' + finalBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         this.dom.btResProf.innerText = (netProfit >= 0 ? '+' : '') + '$' + netProfit.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         this.dom.btResGrowth.innerText = (growth >= 0 ? '+' : '') + growth.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
