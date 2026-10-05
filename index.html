@@ -4,18 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TAG Markets | AI Trading Portfolios</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
-                    colors: { darkBg: '#040914', cardBg: '#0A101C', cardBorder: '#1A2436', accentCyan: '#00E5FF' }
+                    colors: {
+                        darkBg: '#040914',
+                        cardBg: '#0A101C',
+                        cardBorder: '#1A2436',
+                        accentCyan: '#00E5FF'
+                    }
                 }
             }
         }
@@ -28,6 +35,7 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
+
     <!-- Header -->
     <header class="w-full border-b border-cardBorder px-6 py-4 flex justify-between items-center bg-darkBg/90 backdrop-blur-md sticky top-0 z-50">
         <div class="flex items-center gap-3">
@@ -76,10 +84,10 @@
                 heroTitle2: "keine Versprechen.",
                 heroSub: "Jeder Trade, jeden Monat — öffentlich verifizierbar. Analysiere die echte Historie direkt über die verbundene Broker-Schnittstelle.",
                 footerText: "© 2026 TAG Markets. Risikoaufklärung: Trading beinhaltet hohe Risiken. Die vergangene Performance ist keine Garantie für zukünftige Ergebnisse.",
-                totalGain: "Gesamtrendite",
-                maxDrawdown: "Max Drawdown",
-                winRate: "Win Rate",
-                totalTrades: "Total Trades",
+                tradesMade: "Trades Made",
+                tradesWon: "Trades Won",
+                tradesLost: "Trades Lost",
+                winRate: "Winrate",
                 checkPerformance: "Performance prüfen",
                 descSonic: "Vollautomatisiertes Handelssystem für Gold. Konstantes Wachstum, algorithmische Risikoabsicherung."
             },
@@ -90,10 +98,10 @@
                 heroTitle2: "not promises.",
                 heroSub: "Every trade, every month — publicly verifiable. Access our live accounts and analyze the real history directly via the connected broker API.",
                 footerText: "© 2026 TAG Markets. Risk Disclosure: Trading involves high risk. Past performance does not guarantee future results.",
-                totalGain: "Total Gain",
-                maxDrawdown: "Max Drawdown",
-                winRate: "Win Rate",
-                totalTrades: "Total Trades",
+                tradesMade: "Trades Made",
+                tradesWon: "Trades Won",
+                tradesLost: "Trades Lost",
+                winRate: "Winrate",
                 checkPerformance: "Check Performance",
                 descSonic: "Fully automated trading system for gold. Consistent growth with algorithmic risk hedging."
             }
@@ -121,10 +129,10 @@
                 name: "Sonic AI",
                 asset: "XAUUSD",
                 descKey: "descSonic",
-                gain: "+29.23%",
-                drawdown: "0.86%",
-                winRate: "82.4%",
-                tradesCount: "640",
+                tradesMade: "625",
+                tradesWon: "524",
+                tradesLost: "101",
+                winRate: "83.84%",
                 url: "Strategies/Sonic.html"
             }
         ];
@@ -142,22 +150,23 @@
                             </div>
                             <h3 class="text-3xl font-extrabold text-white mb-3 group-hover:text-accentCyan transition-colors">${strat.name}</h3>
                             <p class="text-sm text-zinc-400 leading-relaxed mb-8">${i18n[currentLang][strat.descKey]}</p>
+                            
                             <div class="space-y-4 font-mono">
                                 <div class="flex justify-between items-end border-b border-cardBorder pb-2">
-                                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest">${i18n[currentLang].totalGain}</span>
-                                    <span class="text-sm font-bold text-emerald-400">${strat.gain}</span>
+                                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest">${i18n[currentLang].tradesMade}</span>
+                                    <span class="text-sm font-bold text-white">${strat.tradesMade}</span>
                                 </div>
                                 <div class="flex justify-between items-end border-b border-cardBorder pb-2">
-                                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest">${i18n[currentLang].maxDrawdown}</span>
-                                    <span class="text-sm font-bold text-rose-400">${strat.drawdown}</span>
+                                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest">${i18n[currentLang].tradesWon}</span>
+                                    <span class="text-sm font-bold text-emerald-400">${strat.tradesWon}</span>
+                                </div>
+                                <div class="flex justify-between items-end border-b border-cardBorder pb-2">
+                                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest">${i18n[currentLang].tradesLost}</span>
+                                    <span class="text-sm font-bold text-rose-400">${strat.tradesLost}</span>
                                 </div>
                                 <div class="flex justify-between items-end border-b border-cardBorder pb-2">
                                     <span class="text-[10px] text-zinc-500 uppercase tracking-widest">${i18n[currentLang].winRate}</span>
-                                    <span class="text-sm font-bold text-sky-400">${strat.winRate}</span>
-                                </div>
-                                <div class="flex justify-between items-end border-b border-cardBorder pb-2">
-                                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest">${i18n[currentLang].totalTrades}</span>
-                                    <span class="text-sm font-bold text-white">${strat.tradesCount}</span>
+                                    <span class="text-sm font-bold text-accentCyan">${strat.winRate}</span>
                                 </div>
                             </div>
                         </div>
