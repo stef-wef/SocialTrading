@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="de" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TAG Markets | Strategie Übersicht</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            bg: '#09090b',
+                            card: '#121214',
+                            cardHover: '#18181b',
+                            border: '#27272a',
+                            accent: '#CBFD5F',
+                            accentDark: '#a3d83b',
+                            textMain: '#fafafa',
+                            textMuted: '#a1a1aa'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #09090b;
+            color: #fafafa;
+            -webkit-tap-highlight-color: transparent;
+        }
+        ::-webkit-scrollbar { display: none; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-header {
+            background: rgba(9, 9, 11, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Top Navigation -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass-header px-4 py-3 flex justify-between items-center md:px-8">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#CBFD5F] to-[#8eb833] flex items-center justify-center shadow-[0_0_15px_rgba(203,253,95,0.2)]">
+                <i class="fa-solid fa-chart-pie text-brand-bg text-xl"></i>
+            </div>
+            <div class="flex flex-col">
+                <h1 class="text-base font-bold tracking-tight leading-tight">TAG <span class="text-brand-accent">MARKETS</span></h1>
+                <span class="text-[10px] text-brand-textMuted uppercase tracking-widest font-semibold">AI Strategien Portal</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-border text-brand-textMuted border border-gray-700">
+                <span class="h-2 w-2 rounded-full bg-brand-accent animate-pulse"></span> Broker: TAG Markets
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 w-full max-w-5xl mx-auto px-4 mt-28 mb-12 space-y-8">
+        
+        <!-- Hero Header -->
+        <div class="text-center max-w-2xl mx-auto space-y-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-accent/10 border border-brand-accent/20 text-brand-accent text-xs font-bold tracking-wide">
+                <i class="fa-solid fa-robot"></i> ALGORITHMISCHES TRADING
+            </div>
+            <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Verfügbare Strategien</h2>
+            <p class="text-sm md:text-base text-brand-textMuted leading-relaxed">
+                Wähle eine Handelsstrategie aus, um Echtzeit-Leistungsdaten von Myfxbook einzusehen und das Ertragspotenzial mit dem Zinseszins-Rechner zu kalkulieren.
+            </p>
+        </div>
+
+        <!-- Strategy Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Card 1: Sonic AI (Aktiv & Verlinkt) -->
+            <div class="bg-brand-card border-2 border-brand-accent/40 hover:border-brand-accent rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group">
+                <div class="absolute -right-6 -top-6 w-32 h-32 bg-brand-accent/10 blur-3xl rounded-full"></div>
+                
+                <div>
+                    <!-- Badge Header -->
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#CBFD5F] to-[#8eb833] flex items-center justify-center shadow-[0_0_15px_rgba(203,253,95,0.25)]">
+                            <i class="fa-solid fa-bolt text-brand-bg text-2xl"></i>
+                        </div>
+                        <span class="px-2.5 py-1 bg-brand-accent/15 text-brand-accent text-xs font-bold rounded-full border border-brand-accent/30 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check text-[10px]"></i> Live & Verifiziert
+                        </span>
+                    </div>
+
+                    <!-- Titel & Beschreibung -->
+                    <h3 class="text-2xl font-bold text-white group-hover:text-brand-accent transition-colors">Sonic AI</h3>
+                    <p class="text-xs text-brand-textMuted mt-1 mb-5">
+                        Vollautomatisierter Hochfrequenz- & Swing-Algorithmus für Gold (XAU/USD).
+                    </p>
+
+                    <!-- Key Data -->
+                    <div class="space-y-2 mb-6">
+                        <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
+                            <span class="text-brand-textMuted">Handelspaar</span>
+                            <span class="font-semibold text-white">XAU/USD (Gold)</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
+                            <span class="text-brand-textMuted">Broker / Hebel</span>
+                            <span class="font-semibold text-white">TAG Markets (1:500)</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
+                            <span class="text-brand-textMuted">Track Record</span>
+                            <span class="font-semibold text-brand-accent flex items-center gap-1">
+                                <i class="fa-solid fa-shield-check"></i> Myfxbook Verified
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs py-1.5">
+                            <span class="text-brand-textMuted">Rechner</span>
+                            <span class="font-semibold text-white">Bis 100'000 $</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Call to action button zu sonic.html -->
+                <a href="sonic.html" class="w-full py-3 px-4 bg-brand-accent hover:bg-brand-accentDark text-brand-bg font-bold rounded-xl text-center text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#cbfd5f]/15">
+                    Strategie & Rechner öffnen <i class="fa-solid fa-arrow-right text-xs"></i>
+                </a>
+            </div>
+
+            <!-- Card 2: Placeholder für weitere Strategie (z.B. Quantum FX) -->
+            <div class="bg-brand-card border border-brand-border rounded-2xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between opacity-75 hover:opacity-100 transition-all">
+                <div>
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-brand-bg border border-brand-border flex items-center justify-center text-brand-textMuted">
+                            <i class="fa-solid fa-chart-line text-xl"></i>
+                        </div>
+                        <span class="px-2.5 py-1 bg-brand-bg text-brand-textMuted text-xs font-semibold rounded-full border border-brand-border">
+                            In Vorbereitung
+                        </span>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-white">Quantum FX</h3>
+                    <p class="text-xs text-brand-textMuted mt-1 mb-5">
+                        Diversifiziertes Multi-Währungspaar Portfolio mit konservativem Drawdown-Management.
+                    </p>
+
+                    <div class="space-y-2 mb-6">
+                        <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
+                            <span class="text-brand-textMuted">Handelspaar</span>
+                            <span class="font-semibold text-white">EUR/USD, GBP/USD</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
+                            <span class="text-brand-textMuted">Broker</span>
+                            <span class="font-semibold text-white">TAG Markets</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs py-1.5">
+                            <span class="text-brand-textMuted">Status</span>
+                            <span class="font-semibold text-brand-textMuted">Auditing</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button disabled class="w-full py-3 px-4 bg-brand-border text-brand-textMuted font-semibold rounded-xl text-center text-sm cursor-not-allowed">
+                    Demnächst verfügbar
+                </button>
+            </div>
+
+            <!-- Card 3: Placeholder für Index Strategy -->
+            <div class="bg-brand-card border border-brand-border rounded-2xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between opacity-75 hover:opacity-100 transition-all">
+                <div>
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-brand-bg border border-brand-border flex items-center justify-center text-brand-textMuted">
+                            <i class="fa-solid fa-network-wired text-xl"></i>
+                        </div>
+                        <span class="px-2.5 py-1 bg-brand-bg text-brand-textMuted text-xs font-semibold rounded-full border border-brand-border">
+                            In Vorbereitung
+                        </span>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-white">Apex Indices</h3>
+                    <p class="text-xs text-brand-textMuted mt-1 mb-5">
+                        Trendfolgestrategie auf globalen Aktienindizes mit intelligenter Volatilitätsanpassung.
+                    </p>
+
+                    <div class="space-y-2 mb-6">
+                        <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
+                            <span class="text-brand-textMuted">Märkte</span>
+                            <span class="font-semibold text-white">US30, NAS100</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs py-1.5 border-b border-brand-border">
+                            <span class="text-brand-textMuted">Broker</span>
+                            <span class="font-semibold text-white">TAG Markets</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs py-1.5">
+                            <span class="text-brand-textMuted">Status</span>
+                            <span class="font-semibold text-brand-textMuted">Backtesting</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button disabled class="w-full py-3 px-4 bg-brand-border text-brand-textMuted font-semibold rounded-xl text-center text-sm cursor-not-allowed">
+                    Demnächst verfügbar
+                </button>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 border-t border-brand-border px-4">
+        <p class="text-[11px] text-brand-textMuted leading-relaxed max-w-xl mx-auto">
+            <strong>Risikohinweis:</strong> Der Handel mit Devisen und CFDs auf Margin birgt erhebliche Risiken und ist möglicherweise nicht für alle Anleger geeignet. Vergangene Ergebnisse garantieren keine zukünftigen Renditen.
+        </p>
+    </footer>
+
+</body>
+</html>
