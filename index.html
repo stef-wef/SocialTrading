@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Quantum Trading | AI Portfolios</title>
     
+    <!-- Externes CDN Favicon -->
+    <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/lucide:zap.svg?color=%2300E5FF">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/lucide:zap.svg?color=%2300E5FF">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -37,7 +39,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Header mit neuem Namen -->
+    <!-- Header -->
     <header class="w-full border-b border-cardBorder px-6 py-4 flex justify-between items-center bg-darkBg/90 backdrop-blur-md sticky top-0 z-50">
         <div class="flex items-center gap-3">
             <h1 class="text-xl font-extrabold tracking-tight text-white">QUANTUM<span class="text-accentCyan">TRADING</span></h1>
@@ -120,16 +122,17 @@
             updateLang();
         });
 
+        // Exakte Daten aus trades_data.json
         const strategiesData = [
             {
                 id: "sonic-ai",
                 name: "Sonic AI",
                 asset: "XAUUSD",
                 descKey: "descSonic",
-                tradesMade: "235",
-                tradesWon: "196",
-                tradesLost: "39",
-                winRate: "83.40%",
+                tradesMade: "625",
+                tradesWon: "524",
+                tradesLost: "101",
+                winRate: "83.84%",
                 url: "Strategies/Sonic.html",
                 active: true
             },
@@ -158,6 +161,36 @@
                 active: false
             }
         ];
+
+        async function syncWithDataSheet() {
+            try {
+                let res = await fetch('data/trades_data.json');
+                if (!res.ok) res = await fetch('trades_data.json');
+                if (res.ok) {
+                    const data = await res.json();
+                    let wins = 0;
+                    let losses = 0;
+                    data.forEach(t => {
+                        const act = (t["Action"] || "").toUpperCase();
+                        if (act === 'BUY' || act === 'SELL') {
+                            const gain = parseFloat(t["Gain"] || 0);
+                            if (gain >= 0) wins++;
+                            else losses++;
+                        }
+                    });
+                    const total = wins + losses;
+                    if (total > 0) {
+                        strategiesData[0].tradesMade = total.toString();
+                        strategiesData[0].tradesWon = wins.toString();
+                        strategiesData[0].tradesLost = losses.toString();
+                        strategiesData[0].winRate = ((wins / total) * 100).toFixed(2) + "%";
+                        renderGrid();
+                    }
+                }
+            } catch (e) {
+                // Bei lokalem Zugriff ohne Webserver bleiben die exakten 625-Fallback-Werte aktiv
+            }
+        }
 
         function renderGrid() {
             const grid = document.getElementById('strategy-grid');
@@ -220,7 +253,8 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            setTimeout(updateLang, 300);
+            updateLang();
+            syncWithDataSheet();
         });
     </script>
 </body>
