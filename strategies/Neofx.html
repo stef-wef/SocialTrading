@@ -143,7 +143,7 @@
         <!-- 4 Haupt-KPIs -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="glass-panel p-6 text-center">
-                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="totalGain">Gesamtrendite (ROI)</p>
+                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2">Gesamtrendite (ROI)</p>
                 <p class="text-3xl font-extrabold text-emerald-400 font-mono" id="kpi-total-gain">---</p>
                 <p class="text-[10px] text-zinc-500 mt-1 font-mono">Since Inception</p>
             </div>
@@ -302,7 +302,7 @@
                 </p>
             </div>
 
-            <!-- Ergebnisse Dashboard (Volle Breite oben) -->
+            <!-- Dashboard Style Layout für Projektion Ergebnisse (Über die volle Breite) -->
             <div class="glass-panel p-6 mb-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 items-center">
                 <div class="text-left">
                     <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Szenario nach <span id="proj-res-month">12</span> Monaten</p>
@@ -425,43 +425,41 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <!-- Rechner Einstellungen -->
-                <div class="lg:col-span-5 glass-panel p-8 flex flex-col justify-between space-y-6">
-                    <div class="space-y-6">
-                        <div>
-                            <div class="flex justify-between items-end mb-2">
-                                <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="btCapital">Startkapital</label>
-                                <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 transition-colors">
-                                    <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
-                                    <input type="number" id="bt-capital" value="10000" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
-                                </div>
+                <div class="lg:col-span-5 glass-panel p-8 space-y-6">
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="btCapital">Startkapital</label>
+                            <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 transition-colors">
+                                <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
+                                <input type="number" id="bt-capital" value="10000" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
                             </div>
-                            <input type="range" id="bt-capital-slider" min="100" max="100000" step="100" value="10000">
                         </div>
+                        <input type="range" id="bt-capital-slider" min="100" max="100000" step="100" value="10000">
+                    </div>
 
-                        <div>
-                            <div class="flex justify-between items-end mb-2">
-                                <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Monatliches Top-Up</label>
-                                <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 transition-colors">
-                                    <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
-                                    <input type="number" id="bt-topup" value="0" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
-                                </div>
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Monatliches Top-Up</label>
+                            <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 transition-colors">
+                                <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
+                                <input type="number" id="bt-topup" value="0" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
                             </div>
-                            <input type="range" id="bt-topup-slider" min="0" max="10000" step="50" value="0">
                         </div>
+                        <input type="range" id="bt-topup-slider" min="0" max="10000" step="50" value="0">
+                    </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btStart">Startdatum</label>
-                                <input type="date" id="bt-start-date" class="w-full bg-darkBg border border-cardBorder rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-emerald-400">
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btEnd">Enddatum</label>
-                                <input type="date" id="bt-end-date" class="w-full bg-darkBg border border-cardBorder rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-emerald-400">
-                            </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btStart">Startdatum</label>
+                            <input type="date" id="bt-start-date" class="w-full bg-darkBg border border-cardBorder rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-emerald-400">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btEnd">Enddatum</label>
+                            <input type="date" id="bt-end-date" class="w-full bg-darkBg border border-cardBorder rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-emerald-400">
                         </div>
                     </div>
 
-                    <div class="pt-6 border-t border-cardBorder mt-4">
+                    <div>
                         <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btMode">Gewinn-Modus</label>
                         <select id="bt-mode-select" class="w-full appearance-none bg-darkBg border border-cardBorder rounded px-3 py-2.5 text-xs text-white font-mono font-semibold outline-none focus:border-emerald-400 cursor-pointer">
                             <option value="reinvest" data-i18n="modeReinvest">Täglich Reinvestieren (Zinseszins)</option>
