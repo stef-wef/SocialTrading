@@ -131,7 +131,6 @@ class DualEngineApp {
 
         await this.loadTradesData();
 
-        // Absicherung: Datums-Felder nur belegen, wenn sie im DOM existieren
         if (this.rawTrades.length > 0 && this.dom.btStart && this.dom.btEnd) {
             this.dom.btStart.value = this.rawTrades[0].dt;
             this.dom.btEnd.value = this.rawTrades[this.rawTrades.length - 1].dt;
