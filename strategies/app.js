@@ -485,15 +485,18 @@ class DualEngineApp {
                     tooltip: {
                         backgroundColor: '#0A101C',
                         titleColor: '#00E5FF',
-                        bodyColor: '#FFFFFF',
+                        titleFont: { size: 13, family: "'JetBrains Mono', monospace", weight: 'bold' },
+                        bodyColor: '#E2E8F0',
+                        bodyFont: { size: 12, family: "'JetBrains Mono', monospace" },
+                        bodySpacing: 8,
                         borderColor: '#1A2436',
                         borderWidth: 1,
-                        padding: 12,
-                        displayColors: true,
+                        padding: 14,
+                        displayColors: false,
                         callbacks: {
                             title: (items) => `Datum: ${items[0].label}`,
                             label: (ctx) => {
-                                let label = ctx.dataset.label || '';
+                                let label = ctx.dataset.label === 'Portfolio Balance' ? 'Endguthaben' : 'Investiert';
                                 let val = '$' + ctx.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                                 return `${label}: ${val}`;
                             },
@@ -503,7 +506,7 @@ class DualEngineApp {
                                     let invested = items[1].parsed.y;
                                     let profit = balance - invested;
                                     let sign = profit >= 0 ? '+' : '';
-                                    return `\nNet Profit: ${sign}$${profit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                                    return `\nReingewinn: ${sign}$${profit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                                 }
                             }
                         }
