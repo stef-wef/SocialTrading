@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Quantum Trading | AI Portfolios</title>
     
-    <!-- Online Favicon -->
     <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/lucide:zap.svg?color=%2300E5FF">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -122,17 +121,16 @@
             updateLang();
         });
 
-        // Exakte Links abgestimmt auf Gross-/Kleinschreibung
         const strategiesData = [
             {
                 id: "sonic-ai",
                 name: "Sonic AI",
                 asset: "XAUUSD",
                 descKey: "descSonic",
-                tradesMade: "625",
-                tradesWon: "524",
-                tradesLost: "101",
-                winRate: "83.84%",
+                tradesMade: "—",
+                tradesWon: "—",
+                tradesLost: "—",
+                winRate: "—",
                 url: "strategies/Sonic.html",
                 active: true
             },
@@ -141,10 +139,10 @@
                 name: "NEO.FX",
                 asset: "EURUSD",
                 descKey: "descNeo",
-                tradesMade: "156",
-                tradesWon: "142",
-                tradesLost: "14",
-                winRate: "91.03%",
+                tradesMade: "—",
+                tradesWon: "—",
+                tradesLost: "—",
+                winRate: "—",
                 url: "strategies/Neofx.html",
                 active: true
             },
@@ -161,6 +159,44 @@
                 active: false
             }
         ];
+
+        async function fetchStats(url) {
+            try {
+                let res = await fetch(url);
+                if(!res.ok) return null;
+                let data = await res.json();
+                let trades = data.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+                let total = trades.length;
+                let won = trades.filter(t => parseFloat(t.Profit) > 0).length;
+                let lost = trades.filter(t => parseFloat(t.Profit) < 0).length;
+                let wr = total > 0 ? ((won/total)*100).toFixed(2) + '%' : '0%';
+                return { total, won, lost, wr };
+            } catch(e) {
+                return null;
+            }
+        }
+
+        async function initData() {
+            // Lade Sonic
+            let sonicRes = await fetchStats('data/Sonic_TradesData.json');
+            if(sonicRes) {
+                strategiesData[0].tradesMade = sonicRes.total;
+                strategiesData[0].tradesWon = sonicRes.won;
+                strategiesData[0].tradesLost = sonicRes.lost;
+                strategiesData[0].winRate = sonicRes.wr;
+            }
+            
+            // Lade Neo
+            let neoRes = await fetchStats('data/Neo_TradesData.json');
+            if(neoRes) {
+                strategiesData[1].tradesMade = neoRes.total;
+                strategiesData[1].tradesWon = neoRes.won;
+                strategiesData[1].tradesLost = neoRes.lost;
+                strategiesData[1].winRate = neoRes.wr;
+            }
+
+            renderGrid();
+        }
 
         function renderGrid() {
             const grid = document.getElementById('strategy-grid');
@@ -224,6 +260,7 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             updateLang();
+            initData();
         });
     </script>
 </body>

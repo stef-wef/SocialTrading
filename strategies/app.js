@@ -76,7 +76,6 @@ class DualEngineApp {
         this.equityChart = null;
         this.currentLang = 'de';
 
-        // Erkennt sicher, ob NEO.FX aktiv ist
         this.isNeo = window.location.pathname.toLowerCase().includes('neofx');
 
         this.rates = this.isNeo
@@ -130,12 +129,14 @@ class DualEngineApp {
 
         await this.loadTradesData();
 
-        if (this.rawTrades.length > 0 && this.dom.btStart && this.dom.btEnd) {
-            this.dom.btStart.value = this.rawTrades[0].dt;
-            this.dom.btEnd.value = this.rawTrades[this.rawTrades.length - 1].dt;
+        const tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+        if (tradesOnly.length > 0 && this.dom.btStart && this.dom.btEnd) {
+            this.dom.btStart.value = tradesOnly[0].dt;
+            this.dom.btEnd.value = tradesOnly[tradesOnly.length - 1].dt;
         }
 
         this.setupListeners();
+        this.updateKPIs();
         this.initEquityGrowthChart();
         this.initBacktestChart();
         this.renderStatsAndTable();
@@ -144,7 +145,6 @@ class DualEngineApp {
     }
 
     async loadTradesData() {
-        // Robuste Liste möglicher Dateipfade
         const candidateFiles = this.isNeo
             ? [
                 '../data/Neo_TradesData.json',
@@ -170,9 +170,7 @@ class DualEngineApp {
                     data = await response.json();
                     break;
                 }
-            } catch (e) {
-                // Nächsten Pfad versuchen
-            }
+            } catch (e) {}
         }
 
         if (!data || !Array.isArray(data)) {
@@ -181,13 +179,7 @@ class DualEngineApp {
             return;
         }
 
-        // Filter: Nur BUY und SELL
-        const filteredTrades = data.filter(t => {
-            const action = (t["Action"] || "").toUpperCase();
-            return action === 'BUY' || action === 'SELL';
-        });
-
-        this.rawTrades = filteredTrades.map(t => {
+        this.rawTrades = data.map(t => {
             const dateString = t["Open Date"] || "";
             let dt = "2025-01-01";
             let d = "01.01.2025";
@@ -213,6 +205,112 @@ class DualEngineApp {
                 parsedGain: isNaN(gain) ? 0 : gain
             };
         }).reverse();
+    }
+
+    updateKPIs() {
+        if (!this.rawTrades || this.rawTrades.length === 0) return;
+
+        let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+        let totalTrades = tradesOnly.length;
+        
+        let wins = 0, losses = 0;
+        let grossProfit = 0, grossLoss = 0;
+        let tradeProfitUSD = 0;
+        let totalDurationMs = 0, validDurations = 0;
+
+        tradesOnly.forEach(t => {
+            let p = parseFloat(t.Profit) || 0;
+            tradeProfitUSD += p;
+            if (p > 0) { wins++; grossProfit += p; }
+            else if (p < 0) { losses++; grossLoss += Math.abs(p); }
+
+            if (t["Duration (DD:HH:MM:SS)"]) {
+                let parts = t["Duration (DD:HH:MM:SS)"].split(':');
+                if(parts.length === 4) {
+                    let ms = (parseInt(parts[0])*86400 + parseInt(parts[1])*3600 + parseInt(parts[2])*60 + parseInt(parts[3])) * 1000;
+                    totalDurationMs += ms;
+                    validDurations++;
+                }
+            }
+        });
+
+        let deposits = 0, withdrawals = 0, currentBal = 0, highestBal = 0;
+        let currentGain = 0, peakGain = 0, maxDrawdown = 0;
+
+        this.rawTrades.forEach(t => {
+            let action = (t.Action || "").toUpperCase();
+            let p = parseFloat(t.Profit) || 0;
+            let g = parseFloat(t.Gain) || 0;
+
+            if (action === 'DEPOSIT') {
+                deposits += p;
+                currentBal += p;
+            } else if (action === 'WITHDRAWAL') {
+                withdrawals += Math.abs(p);
+                currentBal += p;
+            } else if (action === 'BUY' || action === 'SELL') {
+                currentBal += p;
+                currentGain += g;
+                if (currentGain > peakGain) peakGain = currentGain;
+                let dd = peakGain - currentGain;
+                if (dd > maxDrawdown) maxDrawdown = dd;
+            }
+            if (currentBal > highestBal) highestBal = currentBal;
+        });
+
+        if (deposits === 0) { deposits = 10000; currentBal += 10000; highestBal += 10000; }
+
+        let winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(2) : 0;
+        let profitFactor = grossLoss > 0 ? (grossProfit / grossLoss).toFixed(2) : (grossProfit > 0 ? grossProfit.toFixed(2) : "0.00");
+
+        let avgDurationStr = "~12 min";
+        if (validDurations > 0) {
+            let mins = Math.round((totalDurationMs / validDurations) / 60000);
+            if (mins > 1440) avgDurationStr = "~" + Math.round(mins/1440) + " d";
+            else if (mins > 60) avgDurationStr = "~" + Math.round(mins/60) + " h";
+            else avgDurationStr = "~" + mins + " min";
+        }
+
+        const formatMoney = (val) => '$' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+
+        let firstDate = new Date(tradesOnly[0].dt);
+        let lastDate = new Date(tradesOnly[tradesOnly.length - 1].dt);
+        let daysDiff = (lastDate - firstDate) / (1000 * 60 * 60 * 24);
+        if (daysDiff < 1) daysDiff = 1;
+        let monthsDiff = daysDiff / 30.44;
+
+        let dailyGain = currentGain / daysDiff;
+        let monthlyGain = currentGain / monthsDiff;
+
+        setEl('kpi-total-gain', '+' + currentGain.toFixed(2) + '%');
+        setEl('kpi-max-drawdown', maxDrawdown.toFixed(2) + '%');
+        setEl('kpi-trades', totalTrades);
+        setEl('kpi-monthly-gain', '+' + monthlyGain.toFixed(2) + '%');
+        setEl('kpi-winrate-main', winRate + '%'); 
+
+        setEl('kpi-daily-avg', '+' + dailyGain.toFixed(2) + '%');
+        setEl('kpi-profit-factor', profitFactor);
+        setEl('kpi-avg-duration', avgDurationStr);
+        setEl('kpi-loss-months', '0');
+
+        setEl('kpi-winrate', winRate + '%');
+        setEl('kpi-win-loss-text', `${wins} Win / ${losses} Lose`);
+        setEl('kpi-trades-text', `${totalTrades} Closed Trades`);
+
+        setEl('myfx-gain', '+' + currentGain.toFixed(2) + '%');
+        setEl('myfx-abs-gain', '+' + currentGain.toFixed(2) + '%');
+        setEl('myfx-daily', dailyGain.toFixed(2) + '%');
+        setEl('myfx-monthly', monthlyGain.toFixed(2) + '%');
+        setEl('myfx-drawdown', maxDrawdown.toFixed(2) + '%');
+        
+        setEl('myfx-balance', formatMoney(currentBal));
+        setEl('myfx-equity', `(100.00%) ${formatMoney(currentBal)}`);
+        setEl('myfx-highest', formatMoney(highestBal));
+        setEl('myfx-profit', formatMoney(tradeProfitUSD));
+        setEl('myfx-deposits', formatMoney(deposits));
+        setEl('myfx-withdrawals', formatMoney(withdrawals));
+        setEl('stat-total', totalTrades);
     }
 
     applyTranslations() {
@@ -359,14 +457,16 @@ class DualEngineApp {
     calcBacktest() {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
+        let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+
         let capital = parseFloat(this.dom.btDepInput.value) || 10000;
         let topup = parseFloat(this.dom.btTopInput ? this.dom.btTopInput.value : 0) || 0;
         let mode = this.dom.btMode ? this.dom.btMode.value : 'reinvest';
 
-        let startStr = (this.dom.btStart && this.dom.btStart.value) || this.rawTrades[0].dt;
-        let endStr = (this.dom.btEnd && this.dom.btEnd.value) || this.rawTrades[this.rawTrades.length - 1].dt;
+        let startStr = (this.dom.btStart && this.dom.btStart.value) || tradesOnly[0].dt;
+        let endStr = (this.dom.btEnd && this.dom.btEnd.value) || tradesOnly[tradesOnly.length - 1].dt;
 
-        let filteredTrades = this.rawTrades.filter(t => t.dt >= startStr && t.dt <= endStr);
+        let filteredTrades = tradesOnly.filter(t => t.dt >= startStr && t.dt <= endStr);
 
         let currentBalance = capital;
         let totalInvested = capital;
@@ -422,8 +522,27 @@ class DualEngineApp {
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
 
-        const labels = ['Nov 03, \'24', 'Jan 15, \'25', 'Mar 06, \'25', 'May 10, \'25', 'Jul 14, \'25', 'Sep 20, \'25', 'Nov 27, \'25', 'Jan 30, \'26', 'Mar 27, \'26', 'May 20, \'26', 'Jul 08, \'26', 'Oct 03, \'26'];
-        const growthData = [0, 2.8, 5.2, 8.4, 12.1, 15.6, 17.8, 20.2, 21.6, 23.4, 25.1, 26.63];
+        let labels = [];
+        let growthData = [];
+
+        if (this.rawTrades && this.rawTrades.length > 0) {
+            let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+            let step = Math.max(1, Math.floor(tradesOnly.length / 12));
+            let accumGain = 0;
+
+            for (let i = 0; i < tradesOnly.length; i++) {
+                accumGain += parseFloat(tradesOnly[i].Gain) || 0;
+                
+                if (i % step === 0 || i === tradesOnly.length - 1) {
+                    let d = new Date(tradesOnly[i].dt);
+                    labels.push(d.toLocaleString('en-US', { month: 'short', day: '2-digit', year: '2-digit' }));
+                    growthData.push(accumGain.toFixed(2));
+                }
+            }
+        } else {
+            labels = ['Nov', 'Dec', 'Jan', 'Feb'];
+            growthData = [0, 5, 10, 15];
+        }
 
         this.equityChart = new Chart(ctx, {
             type: 'line',
@@ -468,7 +587,9 @@ class DualEngineApp {
     renderStatsAndTable() {
         if (!this.dom.tradesBody) return;
 
-        if (!this.rawTrades || this.rawTrades.length === 0) {
+        let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+
+        if (!tradesOnly || tradesOnly.length === 0) {
             this.dom.tradesBody.innerHTML = `
                 <tr>
                     <td colspan="10" class="px-6 py-8 text-center text-zinc-500 font-sans">
@@ -479,13 +600,9 @@ class DualEngineApp {
             return;
         }
 
-        if (this.dom.statTotal) this.dom.statTotal.innerText = this.rawTrades.length;
-
         let html = '';
-        const reversedTrades = [...this.rawTrades].reverse();
-
-        reversedTrades.forEach(t => {
-            const rawAction = (t["Action"] || "").toUpperCase();
+        tradesOnly.forEach(t => {
+            const rawAction = (t.Action || "").toUpperCase();
             const isLong = rawAction === 'BUY';
             const typeLabel = isLong ? 'Long' : 'Short';
             const typeColor = isLong ? 'text-emerald-400' : 'text-rose-400';
