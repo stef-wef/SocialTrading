@@ -51,6 +51,7 @@
 
         input[type=range] { 
             -webkit-appearance: none; 
+            -moz-appearance: none;
             appearance: none;
             width: 100%; 
             background: transparent; 
@@ -80,6 +81,27 @@
             transition: transform 0.1s ease-in-out; 
         }
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        input[type=range]::-moz-range-track { 
+            width: 100%; 
+            height: 3px; 
+            cursor: pointer; 
+            background: #1A2436; 
+            border-radius: 9999px;
+            border: none;
+        }
+        input[type=range]::-moz-range-thumb { 
+            height: 16px; 
+            width: 16px; 
+            border-radius: 50%; 
+            background: #00E5FF; 
+            cursor: pointer; 
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); 
+            border: 2px solid #040914; 
+            transition: transform 0.1s ease-in-out; 
+        }
+        input[type=range]::-moz-range-thumb:hover { transform: scale(1.2); }
+        input[type=range]::-moz-range-progress { background-color: transparent; }
 
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
