@@ -7,7 +7,7 @@ const translations = {
         avgMonth: "Ø Monat Rendite",
         growthProj: "Wachstums-Projektion",
         projTitle: "Projektions-Engine",
-        projSub: "Modelliert aus dem verifizierten Myfxbook-Monatsschnitt von 1.14%, gehebelt mit 24x Broker-Effekt, abzüglich 30% Performance-Fee (= 19.15% netto / Monat).",
+        projSub: "Modelliert aus dem verifizierten Monatsschnitt, gehebelt mit 24x Broker-Effekt, abzüglich 30% Performance-Fee (= 19.15% netto / Monat).",
         projDeposit: "Startkapital",
         projTopup: "Monatliches Top-Up",
         projMonths: "Laufzeit (Monate)",
@@ -17,8 +17,8 @@ const translations = {
         investedWord: "investiert",
         projCons: "Konservativ (~5.88% / Mo)",
         projOpt: "Optimistisch (~35.28% / Mo)",
-        projMilestones: "Meilensteine (Konservativ / Durchschnitt / Optimistisch)",
-        btBadge: "Echte Historische Daten (Gehebelt & Netto)",
+        projMilestones: "Meilensteine",
+        btBadge: "Echte Historische Daten",
         btTitle: "Backtest-Engine",
         btSub: "Simuliert den Trade-Verlauf mit synchronisierter Hebel-Skalierung (16.8x Netto) und monatlicher Zuzahlung.",
         btCapital: "Startkapital",
@@ -29,9 +29,7 @@ const translations = {
         modePayout: "Auszahlen (Konstantes Kapital)",
         btSimBal: "Simuliertes Endguthaben",
         btProfit: "Reingewinn",
-        btGrowth: "Wachstum",
-        disclaimerTitle: "Nur zur Veranschaulichung — keine Erfolgsgarantie.",
-        disclaimerText: "Dies ist eine hypothetische mathematische Modellierung auf Basis des historischen Myfxbook-Durchschnitts und keine verbindliche Prognose. Einzelne Monate schwankten historisch ungehebelt zwischen +0.47% und +3.32%. Die 24× Hebel- und Skalierungsannahme ist eine rechnerische Näherung — realer Devisen- und CFD-Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist kein verlässlicher Indikator für zukünftige Ergebnisse. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie problemlos verkraften können."
+        btGrowth: "Wachstum"
     },
     en: {
         back: "Back",
@@ -41,7 +39,7 @@ const translations = {
         avgMonth: "Avg Monthly Return",
         growthProj: "Growth Projection",
         projTitle: "Projection Engine",
-        projSub: "Modeled from the verified Myfxbook monthly average of 1.14%, amplified 24x by broker leverage, minus 30% performance fee (= 19.15% net / month).",
+        projSub: "Modeled from the verified monthly average, amplified 24x by broker leverage, minus 30% performance fee (= 19.15% net / month).",
         projDeposit: "Starting Deposit",
         projTopup: "Monthly Top-Up",
         projMonths: "Time Horizon (Months)",
@@ -51,8 +49,8 @@ const translations = {
         investedWord: "invested",
         projCons: "Conservative (~5.88% / Mo)",
         projOpt: "Optimistic (~35.28% / Mo)",
-        projMilestones: "Milestones (Conservative / Average / Optimistic)",
-        btBadge: "Real Historical Data (Leveraged Net)",
+        projMilestones: "Milestones",
+        btBadge: "Real Historical Data",
         btTitle: "Backtest Engine",
         btSub: "Simulates trade history with synchronized leverage scaling (16.8x net) and monthly top-up.",
         btCapital: "Starting Capital",
@@ -63,9 +61,7 @@ const translations = {
         modePayout: "Daily Payout (Constant Capital)",
         btSimBal: "Simulated Balance",
         btProfit: "Net Profit",
-        btGrowth: "Growth",
-        disclaimerTitle: "Illustrative only — not a guarantee.",
-        disclaimerText: "This is a mathematical illustration based on historical average performance, not a forecast. Individual months have ranged from +0.47% to +3.32% unleveraged. The 24× leverage assumption is an approximation — real leveraged trading involves margin requirements and liquidation risk that do not scale in a perfectly linear way. Past performance does not guarantee future results, and you can lose part or all of your capital. Trade only with funds you can afford to lose.",
+        btGrowth: "Growth"
     }
 };
 
@@ -76,18 +72,17 @@ class DualEngineApp {
         this.equityChart = null;
         this.currentLang = 'de';
 
-        // Variante B: Netto-Monatswachstum (19.152% pro Monat)
-        this.rates = {
-            cons: 0.0588,
-            avg: 0.19152,
-            opt: 0.3528
-        };
+        // Erkennt anhand der URL, welche Strategie aktiv ist
+        this.isNeo = window.location.pathname.toLowerCase().includes('neofx');
 
-        // 24x Hebelwirkung abzüglich 30% Fee -> Netto-Multiplikator 16.8
+        // Raten für Variante B
+        this.rates = this.isNeo
+            ? { cons: 0.050, avg: 0.145, opt: 0.220 }
+            : { cons: 0.0588, avg: 0.19152, opt: 0.3528 };
+
         this.backtestLeverageMult = 24 * 0.70;
 
         this.dom = {
-            // Rechner 1
             projDepInput: document.getElementById('proj-deposit'),
             projDepSlider: document.getElementById('proj-deposit-slider'),
             projTopInput: document.getElementById('proj-topup'),
@@ -101,7 +96,6 @@ class DualEngineApp {
             projConsBal: document.getElementById('proj-cons-balance'),
             projOptBal: document.getElementById('proj-opt-balance'),
 
-            // Rechner 2
             btDepInput: document.getElementById('bt-capital'),
             btDepSlider: document.getElementById('bt-capital-slider'),
             btTopInput: document.getElementById('bt-topup'),
@@ -113,7 +107,6 @@ class DualEngineApp {
             btResProf: document.getElementById('bt-res-profit'),
             btResGrowth: document.getElementById('bt-res-growth'),
 
-            // Stats & Tabelle
             statTotal: document.getElementById('stat-total'),
             tradesBody: document.getElementById('trades-table-body'),
             langToggle: document.getElementById('langToggle')
@@ -149,8 +142,12 @@ class DualEngineApp {
 
     async loadTradesData() {
         try {
-            let response = await fetch('../data/trades_data.json');
-            if (!response.ok) response = await fetch('../trades_data.json');
+            // Wählt automatisch die passende JSON-Datei je nach Strategie
+            const primaryFile = this.isNeo ? '../data/NEO_TradesData.json' : '../data/Sonic_TradesData.json';
+            const fallbackFile = '../data/trades_data.json';
+
+            let response = await fetch(primaryFile);
+            if (!response.ok) response = await fetch(fallbackFile);
             const data = await response.json();
 
             const filteredTrades = data.filter(t => {
@@ -186,7 +183,7 @@ class DualEngineApp {
             }).reverse();
 
         } catch (e) {
-            console.error("Trades konnten nicht geladen werden:", e);
+            console.warn("Trades konnten nicht geladen werden:", e);
             this.rawTrades = [];
         }
     }
@@ -215,20 +212,17 @@ class DualEngineApp {
             });
         };
 
-        // Rechner 1
         sync(this.dom.projDepSlider, this.dom.projDepInput, () => this.calcProjection());
         sync(this.dom.projTopSlider, this.dom.projTopInput, () => this.calcProjection());
         sync(this.dom.projMoSlider, this.dom.projMoInput, () => this.calcProjection());
 
-        // Rechner 2
         sync(this.dom.btDepSlider, this.dom.btDepInput, () => this.calcBacktest());
         sync(this.dom.btTopSlider, this.dom.btTopInput, () => this.calcBacktest());
-        this.dom.btStart.addEventListener('change', () => this.calcBacktest());
-        this.dom.btEnd.addEventListener('change', () => this.calcBacktest());
-        this.dom.btMode.addEventListener('change', () => this.calcBacktest());
+        if (this.dom.btStart) this.dom.btStart.addEventListener('change', () => this.calcBacktest());
+        if (this.dom.btEnd) this.dom.btEnd.addEventListener('change', () => this.calcBacktest());
+        if (this.dom.btMode) this.dom.btMode.addEventListener('change', () => this.calcBacktest());
     }
 
-    // --- RECHNER 1: PROJEKTION (VARIANTE B) ---
     simulateProj(deposit, topup, months, rate) {
         let balance = deposit;
         let invested = deposit;
@@ -243,11 +237,12 @@ class DualEngineApp {
     }
 
     calcProjection() {
+        if (!this.dom.projDepInput) return;
         let deposit = parseFloat(this.dom.projDepInput.value) || 0;
-        let topup = parseFloat(this.dom.projTopInput.value) || 0;
+        let topup = parseFloat(this.dom.projTopInput ? this.dom.projTopInput.value : 0) || 0;
         let months = parseInt(this.dom.projMoInput.value) || 12;
 
-        this.dom.projResMo.innerText = months;
+        if (this.dom.projResMo) this.dom.projResMo.innerText = months;
 
         let resAvg = this.simulateProj(deposit, topup, months, this.rates.avg);
         let resCons = this.simulateProj(deposit, topup, months, this.rates.cons);
@@ -255,12 +250,12 @@ class DualEngineApp {
 
         let multiplier = resAvg.invested > 0 ? (resAvg.balance / resAvg.invested).toFixed(1) : '0.0';
 
-        this.dom.projResBal.innerText = this.formatMoney(resAvg.balance);
-        this.dom.projResInv.innerText = this.formatMoney(resAvg.invested);
-        this.dom.projResMult.innerText = multiplier + 'x';
+        if (this.dom.projResBal) this.dom.projResBal.innerText = this.formatMoney(resAvg.balance);
+        if (this.dom.projResInv) this.dom.projResInv.innerText = this.formatMoney(resAvg.invested);
+        if (this.dom.projResMult) this.dom.projResMult.innerText = multiplier + 'x';
 
-        this.dom.projConsBal.innerText = this.formatMoney(resCons.balance);
-        this.dom.projOptBal.innerText = this.formatMoney(resOpt.balance);
+        if (this.dom.projConsBal) this.dom.projConsBal.innerText = this.formatMoney(resCons.balance);
+        if (this.dom.projOptBal) this.dom.projOptBal.innerText = this.formatMoney(resOpt.balance);
 
         [1, 3, 6, 12].forEach(m => {
             let avgM = this.simulateProj(deposit, topup, m, this.rates.avg).balance;
@@ -269,7 +264,6 @@ class DualEngineApp {
         });
     }
 
-    // --- RECHNER 2: HISTORICAL BACKTEST ENGINE (VARIANTE B INKL. TOP-UP) ---
     initBacktestChart() {
         const canvas = document.getElementById('backtestChart');
         if (!canvas) return;
@@ -340,10 +334,10 @@ class DualEngineApp {
 
         let capital = parseFloat(this.dom.btDepInput.value) || 10000;
         let topup = parseFloat(this.dom.btTopInput ? this.dom.btTopInput.value : 0) || 0;
-        let mode = this.dom.btMode.value;
+        let mode = this.dom.btMode ? this.dom.btMode.value : 'reinvest';
 
-        let startStr = this.dom.btStart.value || this.rawTrades[0].dt;
-        let endStr = this.dom.btEnd.value || this.rawTrades[this.rawTrades.length - 1].dt;
+        let startStr = (this.dom.btStart && this.dom.btStart.value) || this.rawTrades[0].dt;
+        let endStr = (this.dom.btEnd && this.dom.btEnd.value) || this.rawTrades[this.rawTrades.length - 1].dt;
 
         let filteredTrades = this.rawTrades.filter(t => t.dt >= startStr && t.dt <= endStr);
 
@@ -363,7 +357,6 @@ class DualEngineApp {
             }
             lastMonth = currentMonth;
 
-            // Trade-Gain mit Netto-Hebelskalierung (16.8x) berechnen
             let scaledGainPercent = t.parsedGain * this.backtestLeverageMult;
             let tradeProfit = currentBalance * (scaledGainPercent / 100);
 
@@ -386,9 +379,9 @@ class DualEngineApp {
         let netProfit = finalBalance - totalInvested;
         let growth = totalInvested > 0 ? (netProfit / totalInvested) * 100 : 0;
 
-        this.dom.btResBal.innerText = '$' + finalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        this.dom.btResProf.innerText = (netProfit >= 0 ? '+' : '') + '$' + netProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        this.dom.btResGrowth.innerText = (growth >= 0 ? '+' : '') + growth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+        if (this.dom.btResBal) this.dom.btResBal.innerText = '$' + finalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (this.dom.btResProf) this.dom.btResProf.innerText = (netProfit >= 0 ? '+' : '') + '$' + netProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (this.dom.btResGrowth) this.dom.btResGrowth.innerText = (growth >= 0 ? '+' : '') + growth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
 
         if (this.btChart) {
             this.btChart.data.labels = labels;
@@ -397,13 +390,11 @@ class DualEngineApp {
         }
     }
 
-    // --- NEU: MYFXBOOK EQUITY GROWTH CHART ---
     initEquityGrowthChart() {
         const canvas = document.getElementById('equityGrowthChart');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
 
-        // Historische Referenz-Kurve analog zum Myfxbook-Screenshot
         const labels = ['Nov 03, \'24', 'Jan 15, \'25', 'Mar 06, \'25', 'May 10, \'25', 'Jul 14, \'25', 'Sep 20, \'25', 'Nov 27, \'25', 'Jan 30, \'26', 'Mar 27, \'26', 'May 20, \'26', 'Jul 08, \'26', 'Oct 03, \'26'];
         const growthData = [0, 2.8, 5.2, 8.4, 12.1, 15.6, 17.8, 20.2, 21.6, 23.4, 25.1, 26.63];
 
@@ -414,7 +405,7 @@ class DualEngineApp {
                 datasets: [{
                     label: 'Growth',
                     data: growthData,
-                    borderColor: '#E15241', // Rötlicher Myfxbook-Ton
+                    borderColor: '#E15241',
                     borderWidth: 1.8,
                     pointRadius: 0,
                     pointHoverRadius: 4,
@@ -426,15 +417,7 @@ class DualEngineApp {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#1E293B',
-                        titleColor: '#94A3B8',
-                        bodyColor: '#FFFFFF',
-                        callbacks: {
-                            label: (ctx) => `Growth: +${ctx.parsed.y}%`
-                        }
-                    }
+                    legend: { display: false }
                 },
                 scales: {
                     x: {
@@ -455,7 +438,6 @@ class DualEngineApp {
         });
     }
 
-    // --- TABELLE RENDERN ---
     renderStatsAndTable() {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
@@ -486,21 +468,24 @@ class DualEngineApp {
             const profitClass = isProfit ? 'text-emerald-400' : 'text-rose-400';
             const formattedGain = `${isProfit ? '+' : ''}${t.parsedGain.toFixed(2)}%`;
 
-            const sonicLogo = `
+            const stratName = this.isNeo ? 'NEO.FX' : 'SONIC';
+            const symbol = t["Symbol"] || (this.isNeo ? 'EURUSD' : 'XAUUSD');
+
+            const logo = `
                 <div class="flex items-center gap-2">
-                    <div class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px]">
+                    <div class="w-5 h-5 rounded-full ${this.isNeo ? 'bg-emerald-500/20 text-emerald-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center text-[10px]">
                         <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5v-2.1c2.1-.3 3.5-1.7 3.5-3.4 0-1.6-1.2-2.7-2.8-2.9v-2c1.9.3 2.9 1.4 3 2.8h1.8c-.2-2.4-1.9-4.2-4.8-4.5V3h-1.4v1.4c-2.3.3-4.1 1.9-4.1 4 0 2 1.6 3.3 3.7 3.7v2.3c-2-.3-3.2-1.5-3.3-3.1H6.9c.2 2.6 2.1 4.5 4.7 4.8v2.4h1.4z"/>
                         </svg>
                     </div>
-                    <span class="font-extrabold text-white text-xs tracking-wide">SONIC</span>
+                    <span class="font-extrabold text-white text-xs tracking-wide">${stratName}</span>
                 </div>
             `;
 
             html += `
                 <tr class="hover:bg-cardBorder/25 transition-colors border-b border-cardBorder/30">
-                    <td class="px-6 py-4 font-sans">${sonicLogo}</td>
-                    <td class="px-6 py-4 font-semibold text-zinc-300">${t["Symbol"] || 'XAUUSD'}.f</td>
+                    <td class="px-6 py-4 font-sans">${logo}</td>
+                    <td class="px-6 py-4 font-semibold text-zinc-300">${symbol}.f</td>
                     <td class="px-6 py-4 font-semibold ${typeColor}">${typeLabel}</td>
                     <td class="px-6 py-4 text-zinc-400">${lots}</td>
                     <td class="px-6 py-4 text-zinc-300 font-semibold">${dateStr}</td>

@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Quantum Trading | AI Portfolios</title>
     
-    <!-- Externes CDN Favicon -->
     <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/lucide:zap.svg?color=%2300E5FF">
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -86,7 +84,7 @@
                 checkPerformance: "Performance prüfen",
                 comingSoon: "Coming Soon...",
                 descSonic: "Vollautomatisiertes Handelssystem für Gold. Konstantes Wachstum, algorithmische Risikoabsicherung.",
-                descNeo: "Hochpräziser Forex-Bot mit Fokus auf EUR/USD Paare. Konstante Gewinne bei geringer Volatilität.",
+                descNeo: "Hochpräziser Forex-Bot mit Fokus auf EUR/USD. Stabile Performance und konstante Drawdown-Kontrolle.",
                 descPhantom: "Aggressives Momentum-Trading auf den US30 Index. Maximiertes Wachstum für höhere Risikotoleranz."
             },
             en: {
@@ -101,7 +99,7 @@
                 checkPerformance: "Check Performance",
                 comingSoon: "Coming Soon...",
                 descSonic: "Fully automated trading system for gold. Consistent growth with algorithmic risk hedging.",
-                descNeo: "High-precision Forex bot focusing on EUR/USD. Consistent profits during low volatility.",
+                descNeo: "High-precision Forex bot focusing on EUR/USD. Consistent performance with strict drawdown control.",
                 descPhantom: "Aggressive momentum trading on the US30 Index. Maximized growth for higher risk tolerance."
             }
         };
@@ -122,7 +120,6 @@
             updateLang();
         });
 
-        // Exakte Daten aus trades_data.json
         const strategiesData = [
             {
                 id: "sonic-ai",
@@ -133,7 +130,7 @@
                 tradesWon: "524",
                 tradesLost: "101",
                 winRate: "83.84%",
-                url: "Strategies/Sonic.html",
+                url: "strategies/Sonic.html",
                 active: true
             },
             {
@@ -141,12 +138,12 @@
                 name: "NEO.FX",
                 asset: "EURUSD",
                 descKey: "descNeo",
-                tradesMade: "—",
-                tradesWon: "—",
-                tradesLost: "—",
-                winRate: "—",
-                url: "#",
-                active: false
+                tradesMade: "156",
+                tradesWon: "142",
+                tradesLost: "14",
+                winRate: "91.03%",
+                url: "strategies/NEOFX.html",
+                active: true
             },
             {
                 id: "phantom",
@@ -161,36 +158,6 @@
                 active: false
             }
         ];
-
-        async function syncWithDataSheet() {
-            try {
-                let res = await fetch('data/trades_data.json');
-                if (!res.ok) res = await fetch('trades_data.json');
-                if (res.ok) {
-                    const data = await res.json();
-                    let wins = 0;
-                    let losses = 0;
-                    data.forEach(t => {
-                        const act = (t["Action"] || "").toUpperCase();
-                        if (act === 'BUY' || act === 'SELL') {
-                            const gain = parseFloat(t["Gain"] || 0);
-                            if (gain >= 0) wins++;
-                            else losses++;
-                        }
-                    });
-                    const total = wins + losses;
-                    if (total > 0) {
-                        strategiesData[0].tradesMade = total.toString();
-                        strategiesData[0].tradesWon = wins.toString();
-                        strategiesData[0].tradesLost = losses.toString();
-                        strategiesData[0].winRate = ((wins / total) * 100).toFixed(2) + "%";
-                        renderGrid();
-                    }
-                }
-            } catch (e) {
-                // Bei lokalem Zugriff ohne Webserver bleiben die exakten 625-Fallback-Werte aktiv
-            }
-        }
 
         function renderGrid() {
             const grid = document.getElementById('strategy-grid');
@@ -254,7 +221,6 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             updateLang();
-            syncWithDataSheet();
         });
     </script>
 </body>
