@@ -71,10 +71,6 @@ class DualEngineApp {
         this.btChart = null;
         this.currentLang = 'de';
 
-        // Exakte Monatsraten aus der Modellierung des Screenshots:
-        // avg: 1.14% * 24 * (1 - 0.30) = 19.152% netto pro Monat
-        // cons: ~5.88% netto pro Monat (ergibt 19'858$ bei 10k nach 12 Monaten)
-        // opt: ~35.28% netto pro Monat (ergibt 368'805$ bei 10k nach 12 Monaten)
         this.rates = {
             cons: 0.0588,
             avg: 0.19152,
@@ -82,7 +78,7 @@ class DualEngineApp {
         };
 
         this.dom = {
-            // Rechner 1
+            // Rechner 1 (Projektion)
             projDepInput: document.getElementById('proj-deposit'),
             projDepSlider: document.getElementById('proj-deposit-slider'),
             projTopInput: document.getElementById('proj-topup'),
@@ -96,7 +92,7 @@ class DualEngineApp {
             projConsBal: document.getElementById('proj-cons-balance'),
             projOptBal: document.getElementById('proj-opt-balance'),
 
-            // Rechner 2
+            // Rechner 2 (Backtest)
             btDepInput: document.getElementById('bt-capital'),
             btDepSlider: document.getElementById('bt-capital-slider'),
             btStart: document.getElementById('bt-start-date'),
@@ -127,6 +123,7 @@ class DualEngineApp {
 
         await this.loadTradesData();
 
+        // Datumsfilter automatisch auf die ECHTE Spanne der JSON setzen
         if (this.rawTrades.length > 0) {
             this.dom.btStart.value = this.rawTrades[0].dt;
             this.dom.btEnd.value = this.rawTrades[this.rawTrades.length - 1].dt;
@@ -145,25 +142,41 @@ class DualEngineApp {
             if (!response.ok) response = await fetch('../trades_data.json');
             const data = await response.json();
 
-            this.rawTrades = data.map(t => {
+            // Nur echte Trading-Aktionen (BUY und SELL) verarbeiten
+            const filteredTrades = data.filter(t => {
+                const action = (t["Action"] || "").toUpperCase();
+                return action === 'BUY' || action === 'SELL';
+            });
+
+            // JSON ist neueste zuerst -> wir konvertieren & drehen auf chronologisch (älteste zuerst)
+            this.rawTrades = filteredTrades.map(t => {
                 const dateString = t["Open Date"] || "";
                 let dt = "2025-01-01";
                 let d = "01.01.2025";
 
                 if (dateString) {
-                    const datePart = dateString.split(" ")[0];
+                    const datePart = dateString.split(" ")[0]; // "MM/DD/YYYY"
                     const parts = datePart.split("/");
                     if (parts.length === 3) {
                         const MM = parts[0].padStart(2, '0');
                         const DD = parts[1].padStart(2, '0');
                         const YYYY = parts[2];
-                        dt = `${YYYY}-${MM}-${DD}`;
+                        dt = `${YYYY}-${MM}-${DD}`; // YYYY-MM-DD für HTML-Date-Input & chronologischen Vergleich
                         d = `${DD}.${MM}.${YYYY} ${dateString.split(" ")[1] || ''}`;
                     }
                 }
 
-                return { ...t, dt, d };
-            }).reverse();
+                // Sauberen Gain-Wert parsen
+                const gain = parseFloat(t["Gain"] || 0);
+
+                return {
+                    ...t,
+                    dt,
+                    d,
+                    parsedGain: isNaN(gain) ? 0 : gain
+                };
+            }).reverse(); // Jetzt chronologisch: Mai 2025 -> Oktober 2026
+
         } catch (e) {
             console.error("Trades konnten nicht geladen werden:", e);
             this.rawTrades = [];
@@ -244,7 +257,7 @@ class DualEngineApp {
         });
     }
 
-    // --- RECHNER 2: BACKTEST ---
+    // --- RECHNER 2: HISTORICAL BACKTEST ENGINE ---
     initBacktestChart() {
         const canvas = document.getElementById('backtestChart');
         if (!canvas) return;
@@ -313,12 +326,14 @@ class DualEngineApp {
     calcBacktest() {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
-        let capital = parseFloat(this.dom.btDepInput.value) || 100000;
+        let capital = parseFloat(this.dom.btDepInput.value) || 60000;
         let mode = this.dom.btMode.value;
 
-        let startStr = this.dom.btStart.value || '2025-01-01';
-        let endStr = this.dom.btEnd.value || '2099-12-31';
+        // Fallback: Wenn leer, den vollen Datensatz nehmen
+        let startStr = this.dom.btStart.value || this.rawTrades[0].dt;
+        let endStr = this.dom.btEnd.value || this.rawTrades[this.rawTrades.length - 1].dt;
 
+        // Trades exakt im Zeitraum filtern
         let filteredTrades = this.rawTrades.filter(t => t.dt >= startStr && t.dt <= endStr);
 
         let currentBalance = capital;
@@ -328,7 +343,8 @@ class DualEngineApp {
         let dataPoints = [capital];
 
         filteredTrades.forEach((t, i) => {
-            let gainPercent = parseFloat(t["Gain"] || 0);
+            // Echter prozentualer Gain direkt aus den Daten (z. B. 0.04 = 0.04%)
+            let gainPercent = t.parsedGain;
             let tradeProfit = currentBalance * (gainPercent / 100);
 
             if (mode === 'reinvest') {
@@ -339,15 +355,16 @@ class DualEngineApp {
                 dataPoints.push(capital + totalPayouts);
             }
 
+            // Achsenbeschriftung sauber verteilen
             if (i % 15 === 0 || i === filteredTrades.length - 1) {
-                labels.push(t.d.split(" ")[0]);
+                labels.push(t.dt);
             } else {
                 labels.push('');
             }
         });
 
-        let finalBalance = mode === 'reinvest' ? dataPoints[dataPoints.length - 1] : capital;
-        let netProfit = mode === 'reinvest' ? (finalBalance - capital) : totalPayouts;
+        let finalBalance = mode === 'reinvest' ? dataPoints[dataPoints.length - 1] : (capital + totalPayouts);
+        let netProfit = finalBalance - capital;
         let growth = capital > 0 ? (netProfit / capital) * 100 : 0;
 
         this.dom.btResBal.innerText = '$' + finalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -361,26 +378,19 @@ class DualEngineApp {
         }
     }
 
-    // --- TABELLEN RENDERING ---
+    // --- TABELLE RENDERN ---
     renderStatsAndTable() {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
-        let activeTrades = 0;
-        this.rawTrades.forEach(t => {
-            const action = (t["Action"] || "").toLowerCase();
-            if (action === 'buy' || action === 'sell') activeTrades++;
-        });
-
-        if (this.dom.statTotal) this.dom.statTotal.innerText = activeTrades;
+        if (this.dom.statTotal) this.dom.statTotal.innerText = this.rawTrades.length;
         if (!this.dom.tradesBody) return;
 
         let html = '';
+        // In der Tabelle neueste Trades zuerst anzeigen
         const reversedTrades = [...this.rawTrades].reverse();
 
         reversedTrades.forEach(t => {
             const rawAction = (t["Action"] || "").toUpperCase();
-            if (rawAction !== 'BUY' && rawAction !== 'SELL') return;
-
             const isLong = rawAction === 'BUY';
             const typeLabel = isLong ? 'Long' : 'Short';
             const typeColor = isLong ? 'text-emerald-400' : 'text-rose-400';
@@ -396,10 +406,9 @@ class DualEngineApp {
             const closePrice = t["Close Price"] !== undefined ? Number(t["Close Price"]).toFixed(2) : '-';
             const lots = t["Units/Lots"] !== undefined ? `${Number(t["Units/Lots"]).toFixed(2)} Lots` : '-';
 
-            const gainVal = parseFloat(t["Gain"] || 0);
-            const isProfit = gainVal >= 0;
+            const isProfit = t.parsedGain >= 0;
             const profitClass = isProfit ? 'text-emerald-400' : 'text-rose-400';
-            const formattedGain = `${isProfit ? '+' : ''}${gainVal.toFixed(2)}%`;
+            const formattedGain = `${isProfit ? '+' : ''}${t.parsedGain.toFixed(2)}%`;
 
             const sonicLogo = `
                 <div class="flex items-center gap-2">
