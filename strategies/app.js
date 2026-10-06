@@ -227,7 +227,7 @@ class DualEngineApp {
                     const DD = parts[1].padStart(2, '0');
                     const YYYY = parts[2];
                     dt = `${YYYY}-${MM}-${DD}`;
-                    d = `${DD}.${MM}.${YYYY} ${dateString.split(" ")[1] || ''}`;
+                    d = `${DD}.${MM}.${YYYY}${dateString.split(" ")[1] || ''}`;
                 }
             }
 
@@ -475,7 +475,8 @@ class DualEngineApp {
                         borderWidth: 1.5,
                         borderDash: [4, 4],
                         pointRadius: 0,
-                        pointHoverRadius: 0,
+                        pointHoverRadius: 0, 
+                        pointHitRadius: 0, 
                         fill: false,
                         tension: 0
                     }
@@ -511,25 +512,31 @@ class DualEngineApp {
                         padding: 14,
                         displayColors: false,
                         filter: function(tooltipItem) {
-                            return tooltipItem.datasetIndex === 0;
+                            return tooltipItem.datasetIndex === 0; 
                         },
                         callbacks: {
                             title: (items) => `Datum: ${items[0].label}`,
                             label: (ctx) => {
-                                let val = '$' + ctx.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                return `Endguthaben: ${val}`;
-                            },
-                            afterBody: (items) => {
-                                let index = items[0].dataIndex;
-                                let invested = items[0].chart.data.datasets[1].data[index];
-                                let balance = items[0].parsed.y;
+                                let balance = ctx.parsed.y;
+                                let index = ctx.dataIndex;
+                                let invested = ctx.chart.data.datasets[1].data[index];
                                 let profit = balance - invested;
                                 let sign = profit >= 0 ? '+' : '';
                                 
-                                return `Investiert:  $${invested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n\nReingewinn:  ${sign}$${Math.abs(profit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                                return [
+                                    `Endguthaben: $${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                                    `Investiert:  $${invested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                                    ``,
+                                    `Reingewinn:  ${sign}$${Math.abs(profit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                ];
                             }
                         }
                     }
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                    axis: 'x'
                 },
                 scales: {
                     x: { 
@@ -547,8 +554,7 @@ class DualEngineApp {
                             callback: (val) => val >= 1000 ? '$' + (val / 1000).toFixed(1) + 'k' : '$' + val
                         }
                     }
-                },
-                interaction: { mode: 'index', intersect: false }
+                }
             }
         });
     }
@@ -706,6 +712,7 @@ class DualEngineApp {
         if (!this.dom.tradesBody) return;
 
         let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+        
         let tableTrades = [...tradesOnly].sort((a, b) => new Date(b.dt) - new Date(a.dt));
 
         if (!tableTrades || tableTrades.length === 0) {

@@ -80,6 +80,27 @@
         }
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 
+        input[type=range]::-moz-range-track { 
+            width: 100%; 
+            height: 3px; 
+            cursor: pointer; 
+            background: #1A2436; 
+            border-radius: 9999px;
+            border: none;
+        }
+        input[type=range]::-moz-range-thumb { 
+            height: 16px; 
+            width: 16px; 
+            border-radius: 50%; 
+            background: #00E5FF; 
+            cursor: pointer; 
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); 
+            border: 2px solid #040914; 
+            transition: transform 0.1s ease-in-out; 
+        }
+        input[type=range]::-moz-range-thumb:hover { transform: scale(1.2); }
+        input[type=range]::-moz-range-progress { background-color: transparent; }
+
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
@@ -127,17 +148,17 @@
                 <p class="text-[10px] text-zinc-500 mt-1 font-mono">Since Inception</p>
             </div>
             <div class="glass-panel p-6 text-center">
-                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2">Max Drawdown</p>
+                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="maxDrawdown">Max Drawdown</p>
                 <p class="text-3xl font-extrabold text-rose-400 font-mono" id="kpi-max-drawdown">---</p>
                 <p class="text-[10px] text-zinc-500 mt-1 font-mono">Account Risk</p>
             </div>
             <div class="glass-panel p-6 text-center">
-                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2">Verifizierte Trades</p>
+                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="liveTradesKpi">Verifizierte Trades</p>
                 <p class="text-3xl font-extrabold text-white font-mono" id="kpi-trades">---</p>
                 <p class="text-[10px] text-zinc-500 mt-1 font-mono">Publicly Tracked</p>
             </div>
             <div class="glass-panel p-6 text-center">
-                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2">Win Rate</p>
+                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="winRate">Win Rate</p>
                 <p class="text-3xl font-extrabold text-accentCyan font-mono" id="kpi-winrate-main">---</p>
                 <p class="text-[10px] text-zinc-500 mt-1 font-mono">Compound</p>
             </div>
@@ -370,8 +391,8 @@
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span data-i18n="btBadge">Echte Historische Daten</span>
                 </div>
-                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">Historical <span class="text-emerald-400">Backtest-Engine</span></h2>
-                <p class="text-xs md:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">Historical <span class="text-emerald-400" data-i18n="btTitle">Backtest-Engine</span></h2>
+                <p class="text-xs md:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed" data-i18n="btSub">
                     Simuliert den Trade-Verlauf mit synchronisierter Hebel-Skalierung (16.8x Netto) und monatlicher Zuzahlung.
                 </p>
             </div>
@@ -380,7 +401,7 @@
                 <div class="lg:col-span-5 glass-panel p-8 space-y-6">
                     <div>
                         <div class="flex justify-between items-end mb-2">
-                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Startkapital</label>
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="btCapital">Startkapital</label>
                             <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 transition-colors">
                                 <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
                                 <input type="number" id="bt-capital" value="10000" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
@@ -402,20 +423,20 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2">Startdatum</label>
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btStart">Startdatum</label>
                             <input type="date" id="bt-start-date" class="w-full bg-darkBg border border-cardBorder rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-emerald-400">
                         </div>
                         <div>
-                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2">Enddatum</label>
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btEnd">Enddatum</label>
                             <input type="date" id="bt-end-date" class="w-full bg-darkBg border border-cardBorder rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-emerald-400">
                         </div>
                     </div>
 
                     <div>
-                        <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2">Gewinn-Modus</label>
+                        <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btMode">Gewinn-Modus</label>
                         <select id="bt-mode-select" class="w-full appearance-none bg-darkBg border border-cardBorder rounded px-3 py-2.5 text-xs text-white font-mono font-semibold outline-none focus:border-emerald-400 cursor-pointer">
-                            <option value="reinvest">Täglich Reinvestieren (Zinseszins)</option>
-                            <option value="payout">Auszahlen (Konstantes Kapital)</option>
+                            <option value="reinvest" data-i18n="modeReinvest">Täglich Reinvestieren (Zinseszins)</option>
+                            <option value="payout" data-i18n="modePayout">Auszahlen (Konstantes Kapital)</option>
                         </select>
                     </div>
                 </div>
@@ -428,15 +449,15 @@
                         </div>
                         <div class="text-left sm:border-l sm:border-cardBorder sm:pl-6 lg:col-span-3">
                             <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Investiertes Kapital</p>
-                            <p class="text-lg font-mono font-bold text-zinc-300 whitespace-nowrap" id="bt-res-invested">$0.00</p>
+                            <p class="text-xl font-mono font-bold text-zinc-300 whitespace-nowrap" id="bt-res-invested">$0.00</p>
                         </div>
                         <div class="text-left sm:border-l sm:border-cardBorder sm:pl-6 lg:col-span-2">
                             <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btProfit">Reingewinn</p>
-                            <p class="text-lg font-mono font-bold text-white whitespace-nowrap" id="bt-res-profit">+$0.00</p>
+                            <p class="text-xl font-mono font-bold text-white whitespace-nowrap" id="bt-res-profit">+$0.00</p>
                         </div>
                         <div class="text-left sm:border-l sm:border-cardBorder sm:pl-6 lg:col-span-2">
                             <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btGrowth">Wachstum</p>
-                            <p class="text-lg font-mono font-bold text-emerald-400 whitespace-nowrap" id="bt-res-growth">+0.00%</p>
+                            <p class="text-xl font-mono font-bold text-emerald-400 whitespace-nowrap" id="bt-res-growth">+0.00%</p>
                         </div>
                     </div>
                     <div class="glass-panel p-6 flex-1 min-h-[260px] relative h-full">

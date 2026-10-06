@@ -81,6 +81,27 @@
         }
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 
+        input[type=range]::-moz-range-track { 
+            width: 100%; 
+            height: 3px; 
+            cursor: pointer; 
+            background: #1A2436; 
+            border-radius: 9999px;
+            border: none;
+        }
+        input[type=range]::-moz-range-thumb { 
+            height: 16px; 
+            width: 16px; 
+            border-radius: 50%; 
+            background: #00E5FF; 
+            cursor: pointer; 
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); 
+            border: 2px solid #040914; 
+            transition: transform 0.1s ease-in-out; 
+        }
+        input[type=range]::-moz-range-thumb:hover { transform: scale(1.2); }
+        input[type=range]::-moz-range-progress { background-color: transparent; }
+
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
@@ -429,15 +450,15 @@
                         </div>
                         <div class="text-left sm:border-l sm:border-cardBorder sm:pl-6 lg:col-span-3">
                             <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Investiertes Kapital</p>
-                            <p class="text-lg font-mono font-bold text-zinc-300 whitespace-nowrap" id="bt-res-invested">$0.00</p>
+                            <p class="text-xl font-mono font-bold text-zinc-300 whitespace-nowrap" id="bt-res-invested">$0.00</p>
                         </div>
                         <div class="text-left sm:border-l sm:border-cardBorder sm:pl-6 lg:col-span-2">
                             <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btProfit">Reingewinn</p>
-                            <p class="text-lg font-mono font-bold text-white whitespace-nowrap" id="bt-res-profit">+$0.00</p>
+                            <p class="text-xl font-mono font-bold text-white whitespace-nowrap" id="bt-res-profit">+$0.00</p>
                         </div>
                         <div class="text-left sm:border-l sm:border-cardBorder sm:pl-6 lg:col-span-2">
                             <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btGrowth">Wachstum</p>
-                            <p class="text-lg font-mono font-bold text-emerald-400 whitespace-nowrap" id="bt-res-growth">+0.00%</p>
+                            <p class="text-xl font-mono font-bold text-emerald-400 whitespace-nowrap" id="bt-res-growth">+0.00%</p>
                         </div>
                     </div>
                     <div class="glass-panel p-6 flex-1 min-h-[260px] relative h-full">
