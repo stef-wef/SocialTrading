@@ -7,7 +7,7 @@ const translations = {
         avgMonth: "Ø Monat Rendite",
         growthProj: "Wachstums-Projektion",
         projTitle: "Projektions-Engine",
-        projSub: "Modelliert aus dem verifizierten Myfxbook-Monatsschnitt von 1.14%, gehebelt mit 24x Broker-Effekt, abzüglich 30% Performance-Fee (= 19.15% netto / Monat).",
+        projSub: "Basierend auf dem echten historischen Monatsschnitt von +1.14%. Keine spekulativen Multiplikatoren.",
         projDeposit: "Startkapital",
         projTopup: "Monatliches Top-Up",
         projMonths: "Laufzeit (Monate)",
@@ -15,12 +15,12 @@ const translations = {
         monthsWord: "Monaten",
         fromWord: "Aus",
         investedWord: "investiert",
-        projCons: "Konservativ (~5.88% / Mo)",
-        projOpt: "Optimistisch (~35.28% / Mo)",
-        projMilestones: "Meilensteine (Konservativ / Durchschnitt / Optimistisch)",
+        projCons: "Konservativ (0.80% / Mo)",
+        projOpt: "Optimistisch (1.60% / Mo)",
+        projMilestones: "Meilensteine bei 1.14% / Monat",
         btBadge: "Echte Historische Daten",
         btTitle: "Backtest-Engine",
-        btSub: "Simuliert den tatsächlichen Trade-Verlauf über die verifizierten Daten.",
+        btSub: "Simuliert den tatsächlichen Trade-Verlauf über die verifizierten Daten inklusive monatlicher Zuzahlung.",
         btCapital: "Startkapital",
         btStart: "Startdatum",
         btEnd: "Enddatum",
@@ -28,7 +28,7 @@ const translations = {
         modeReinvest: "Täglich Reinvestieren (Zinseszins)",
         modePayout: "Auszahlen (Konstantes Kapital)",
         btSimBal: "Simuliertes Endguthaben",
-        btProfit: "Gewinn",
+        btProfit: "Reingewinn",
         btGrowth: "Wachstum"
     },
     en: {
@@ -39,7 +39,7 @@ const translations = {
         avgMonth: "Avg Monthly Return",
         growthProj: "Growth Projection",
         projTitle: "Projection Engine",
-        projSub: "Modeled from the verified Myfxbook monthly average of 1.14%, amplified 24x by broker leverage, minus 30% performance fee (= 19.15% net / month).",
+        projSub: "Based on the verified historical monthly average of +1.14%. No speculative multipliers.",
         projDeposit: "Starting Deposit",
         projTopup: "Monthly Top-Up",
         projMonths: "Time Horizon (Months)",
@@ -47,12 +47,12 @@ const translations = {
         monthsWord: "Months",
         fromWord: "From",
         investedWord: "invested",
-        projCons: "Conservative (~5.88% / Mo)",
-        projOpt: "Optimistic (~35.28% / Mo)",
-        projMilestones: "Milestones (Conservative / Average / Optimistic)",
+        projCons: "Conservative (0.80% / Mo)",
+        projOpt: "Optimistic (1.60% / Mo)",
+        projMilestones: "Milestones at 1.14% / Month",
         btBadge: "Real Historical Data",
         btTitle: "Backtest Engine",
-        btSub: "Simulates actual returns across the verified dataset.",
+        btSub: "Simulates actual returns across the verified dataset including monthly top-up.",
         btCapital: "Starting Capital",
         btStart: "Start Date",
         btEnd: "End Date",
@@ -60,7 +60,7 @@ const translations = {
         modeReinvest: "Daily Reinvest (Compound)",
         modePayout: "Daily Payout (Constant Capital)",
         btSimBal: "Simulated Balance",
-        btProfit: "Profit",
+        btProfit: "Net Profit",
         btGrowth: "Growth"
     }
 };
@@ -71,14 +71,15 @@ class DualEngineApp {
         this.btChart = null;
         this.currentLang = 'de';
 
+        // Reale monatliche Renditen ohne theoretische Multiplikatoren
         this.rates = {
-            cons: 0.0588,
-            avg: 0.19152,
-            opt: 0.3528
+            cons: 0.0080, // 0.80% / Monat
+            avg: 0.0114,  // 1.14% / Monat (der echte Myfxbook-Schnitt)
+            opt: 0.0160   // 1.60% / Monat
         };
 
         this.dom = {
-            // Rechner 1 (Projektion)
+            // Rechner 1
             projDepInput: document.getElementById('proj-deposit'),
             projDepSlider: document.getElementById('proj-deposit-slider'),
             projTopInput: document.getElementById('proj-topup'),
@@ -92,9 +93,11 @@ class DualEngineApp {
             projConsBal: document.getElementById('proj-cons-balance'),
             projOptBal: document.getElementById('proj-opt-balance'),
 
-            // Rechner 2 (Backtest)
+            // Rechner 2
             btDepInput: document.getElementById('bt-capital'),
             btDepSlider: document.getElementById('bt-capital-slider'),
+            btTopInput: document.getElementById('bt-topup'),
+            btTopSlider: document.getElementById('bt-topup-slider'),
             btStart: document.getElementById('bt-start-date'),
             btEnd: document.getElementById('bt-end-date'),
             btMode: document.getElementById('bt-mode-select'),
@@ -123,7 +126,6 @@ class DualEngineApp {
 
         await this.loadTradesData();
 
-        // Datumsfilter automatisch auf die ECHTE Spanne der JSON setzen
         if (this.rawTrades.length > 0) {
             this.dom.btStart.value = this.rawTrades[0].dt;
             this.dom.btEnd.value = this.rawTrades[this.rawTrades.length - 1].dt;
@@ -142,31 +144,28 @@ class DualEngineApp {
             if (!response.ok) response = await fetch('../trades_data.json');
             const data = await response.json();
 
-            // Nur echte Trading-Aktionen (BUY und SELL) verarbeiten
             const filteredTrades = data.filter(t => {
                 const action = (t["Action"] || "").toUpperCase();
                 return action === 'BUY' || action === 'SELL';
             });
 
-            // JSON ist neueste zuerst -> wir konvertieren & drehen auf chronologisch (älteste zuerst)
             this.rawTrades = filteredTrades.map(t => {
                 const dateString = t["Open Date"] || "";
                 let dt = "2025-01-01";
                 let d = "01.01.2025";
 
                 if (dateString) {
-                    const datePart = dateString.split(" ")[0]; // "MM/DD/YYYY"
+                    const datePart = dateString.split(" ")[0];
                     const parts = datePart.split("/");
                     if (parts.length === 3) {
                         const MM = parts[0].padStart(2, '0');
                         const DD = parts[1].padStart(2, '0');
                         const YYYY = parts[2];
-                        dt = `${YYYY}-${MM}-${DD}`; // YYYY-MM-DD für HTML-Date-Input & chronologischen Vergleich
+                        dt = `${YYYY}-${MM}-${DD}`;
                         d = `${DD}.${MM}.${YYYY} ${dateString.split(" ")[1] || ''}`;
                     }
                 }
 
-                // Sauberen Gain-Wert parsen
                 const gain = parseFloat(t["Gain"] || 0);
 
                 return {
@@ -175,7 +174,7 @@ class DualEngineApp {
                     d,
                     parsedGain: isNaN(gain) ? 0 : gain
                 };
-            }).reverse(); // Jetzt chronologisch: Mai 2025 -> Oktober 2026
+            }).reverse();
 
         } catch (e) {
             console.error("Trades konnten nicht geladen werden:", e);
@@ -198,6 +197,7 @@ class DualEngineApp {
 
     setupListeners() {
         const sync = (slider, input, cb) => {
+            if (!slider || !input) return;
             slider.addEventListener('input', () => { input.value = slider.value; cb(); });
             input.addEventListener('input', () => {
                 let v = parseFloat(input.value) || 0;
@@ -206,11 +206,14 @@ class DualEngineApp {
             });
         };
 
+        // Rechner 1
         sync(this.dom.projDepSlider, this.dom.projDepInput, () => this.calcProjection());
         sync(this.dom.projTopSlider, this.dom.projTopInput, () => this.calcProjection());
         sync(this.dom.projMoSlider, this.dom.projMoInput, () => this.calcProjection());
 
+        // Rechner 2
         sync(this.dom.btDepSlider, this.dom.btDepInput, () => this.calcBacktest());
+        sync(this.dom.btTopSlider, this.dom.btTopInput, () => this.calcBacktest());
         this.dom.btStart.addEventListener('change', () => this.calcBacktest());
         this.dom.btEnd.addEventListener('change', () => this.calcBacktest());
         this.dom.btMode.addEventListener('change', () => this.calcBacktest());
@@ -241,7 +244,7 @@ class DualEngineApp {
         let resCons = this.simulateProj(deposit, topup, months, this.rates.cons);
         let resOpt = this.simulateProj(deposit, topup, months, this.rates.opt);
 
-        let multiplier = resAvg.invested > 0 ? (resAvg.balance / resAvg.invested).toFixed(1) : '0.0';
+        let multiplier = resAvg.invested > 0 ? (resAvg.balance / resAvg.invested).toFixed(2) : '1.00';
 
         this.dom.projResBal.innerText = this.formatMoney(resAvg.balance);
         this.dom.projResInv.innerText = this.formatMoney(resAvg.invested);
@@ -257,7 +260,7 @@ class DualEngineApp {
         });
     }
 
-    // --- RECHNER 2: HISTORICAL BACKTEST ENGINE ---
+    // --- RECHNER 2: HISTORICAL BACKTEST ENGINE (INKL. TOP-UP) ---
     initBacktestChart() {
         const canvas = document.getElementById('backtestChart');
         if (!canvas) return;
@@ -326,24 +329,33 @@ class DualEngineApp {
     calcBacktest() {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
-        let capital = parseFloat(this.dom.btDepInput.value) || 60000;
+        let capital = parseFloat(this.dom.btDepInput.value) || 50000;
+        let topup = parseFloat(this.dom.btTopInput ? this.dom.btTopInput.value : 0) || 0;
         let mode = this.dom.btMode.value;
 
-        // Fallback: Wenn leer, den vollen Datensatz nehmen
         let startStr = this.dom.btStart.value || this.rawTrades[0].dt;
         let endStr = this.dom.btEnd.value || this.rawTrades[this.rawTrades.length - 1].dt;
 
-        // Trades exakt im Zeitraum filtern
         let filteredTrades = this.rawTrades.filter(t => t.dt >= startStr && t.dt <= endStr);
 
         let currentBalance = capital;
+        let totalInvested = capital;
         let totalPayouts = 0;
+        let lastMonth = '';
 
         let labels = [startStr];
         let dataPoints = [capital];
 
         filteredTrades.forEach((t, i) => {
-            // Echter prozentualer Gain direkt aus den Daten (z. B. 0.04 = 0.04%)
+            // Monatliches Top-Up hinzufügen, sobald ein neuer Monat beginnt
+            const currentMonth = t.dt.substring(0, 7);
+            if (lastMonth && currentMonth !== lastMonth && topup > 0) {
+                currentBalance += topup;
+                totalInvested += topup;
+            }
+            lastMonth = currentMonth;
+
+            // Trade Profit basierend auf aktuellem Kontostand
             let gainPercent = t.parsedGain;
             let tradeProfit = currentBalance * (gainPercent / 100);
 
@@ -352,10 +364,9 @@ class DualEngineApp {
                 dataPoints.push(currentBalance);
             } else {
                 totalPayouts += tradeProfit;
-                dataPoints.push(capital + totalPayouts);
+                dataPoints.push(currentBalance + totalPayouts);
             }
 
-            // Achsenbeschriftung sauber verteilen
             if (i % 15 === 0 || i === filteredTrades.length - 1) {
                 labels.push(t.dt);
             } else {
@@ -363,9 +374,9 @@ class DualEngineApp {
             }
         });
 
-        let finalBalance = mode === 'reinvest' ? dataPoints[dataPoints.length - 1] : (capital + totalPayouts);
-        let netProfit = finalBalance - capital;
-        let growth = capital > 0 ? (netProfit / capital) * 100 : 0;
+        let finalBalance = mode === 'reinvest' ? dataPoints[dataPoints.length - 1] : (currentBalance + totalPayouts);
+        let netProfit = finalBalance - totalInvested;
+        let growth = totalInvested > 0 ? (netProfit / totalInvested) * 100 : 0;
 
         this.dom.btResBal.innerText = '$' + finalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         this.dom.btResProf.innerText = (netProfit >= 0 ? '+' : '') + '$' + netProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -386,7 +397,6 @@ class DualEngineApp {
         if (!this.dom.tradesBody) return;
 
         let html = '';
-        // In der Tabelle neueste Trades zuerst anzeigen
         const reversedTrades = [...this.rawTrades].reverse();
 
         reversedTrades.forEach(t => {
