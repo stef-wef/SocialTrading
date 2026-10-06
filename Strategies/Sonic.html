@@ -33,16 +33,10 @@
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
-        
-        /* Dark Mode Kalender Fix */
         input[type="date"] { color-scheme: dark; }
-        input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
-        input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
-        
         .table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .table-scroll::-webkit-scrollbar-track { background: #0A101C; }
         .table-scroll::-webkit-scrollbar-thumb { background: #1A2436; border-radius: 4px; }
-        .table-scroll::-webkit-scrollbar-thumb:hover { background: #00E5FF; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -80,7 +74,7 @@
             </div>
         </div>
 
-        <!-- RECHNER 1: Profit Projection Engine (Zukunft) -->
+        <!-- RECHNER 1: Profit Projection Engine -->
         <div class="pt-4">
             <div class="text-center mb-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cardBg border border-cardBorder text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-4">
@@ -189,7 +183,6 @@
                         <input type="range" id="bt-capital-slider" min="100" max="100000" step="100" value="100000" class="!accent-emerald-400">
                     </div>
                     
-                    <!-- NEW: Risk Multiplier -->
                     <div>
                         <div class="flex justify-between items-end mb-2">
                             <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="btRiskLabel">Risiko-Faktor (Hebel)</label>
@@ -201,7 +194,6 @@
                         <input type="range" id="bt-risk-slider" min="1" max="10" step="0.5" value="1" class="!accent-emerald-400">
                     </div>
 
-                    <!-- Zeitraum-Auswahl -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btStart">Startdatum</label>
