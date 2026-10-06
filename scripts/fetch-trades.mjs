@@ -1,6 +1,3 @@
-import fs from 'fs';
-import path from 'path';
-
 const EMAIL = process.env.MYFXBOOK_EMAIL;
 const PASSWORD = process.env.MYFXBOOK_PASSWORD;
 
@@ -29,21 +26,20 @@ async function run() {
 
     const session = loginData.session;
 
-    // Alle mit dem Account verknüpften Konten abfragen
-    console.log('Frage verfügbare Accounts ab...');
+    console.log('Frage alle verknüpften Konten ab...');
     const accUrl = `https://www.myfxbook.com/api/get-my-accounts.json?session=${session}`;
     const accRes = await fetch(accUrl, { headers });
     const accData = await accRes.json();
 
-    console.log('--- GEFUNDENE KONTEN ---');
+    console.log('=== GEFUNDENE MYFXBOOK KONTEN ===');
     if (accData.accounts && accData.accounts.length > 0) {
       accData.accounts.forEach((acc) => {
-        console.log(`Name: "${acc.name}" | ID: ${acc.id} | Server: ${acc.server?.name || '-'}`);
+        console.log(`Name: "${acc.name}" --> ID: ${acc.id}`);
       });
     } else {
-      console.log('Keine Konten gefunden oder Antwort:', JSON.stringify(accData));
+      console.log('Keine Konten gefunden. Rückgabe:', JSON.stringify(accData));
     }
-    console.log('-------------------------');
+    console.log('=================================');
 
     await fetch(`https://www.myfxbook.com/api/logout.json?session=${session}`, { headers });
   } catch (error) {
