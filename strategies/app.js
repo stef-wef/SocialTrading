@@ -458,7 +458,7 @@ class DualEngineApp {
                         borderWidth: 1.5,
                         borderDash: [4, 4],
                         pointRadius: 0,
-                        pointHoverRadius: 3,
+                        pointHoverRadius: 0, // Keine Ankerpunkte hier
                         fill: false,
                         tension: 0
                     }
@@ -492,22 +492,24 @@ class DualEngineApp {
                         borderColor: '#1A2436',
                         borderWidth: 1,
                         padding: 14,
-                        displayColors: false,
+                        displayColors: false, // Kästchen und Farben entfernt
+                        filter: function(tooltipItem) {
+                            return tooltipItem.datasetIndex === 0; // Tooltip nur auf der Hauptlinie einrasten lassen
+                        },
                         callbacks: {
                             title: (items) => `Datum: ${items[0].label}`,
                             label: (ctx) => {
-                                let label = ctx.dataset.label === 'Portfolio Balance' ? 'Endguthaben' : 'Investiert';
                                 let val = '$' + ctx.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                return `${label}: ${val}`;
+                                return `Endguthaben: ${val}`;
                             },
                             afterBody: (items) => {
-                                if (items.length >= 2) {
-                                    let balance = items[0].parsed.y;
-                                    let invested = items[1].parsed.y;
-                                    let profit = balance - invested;
-                                    let sign = profit >= 0 ? '+' : '';
-                                    return `\nReingewinn: ${sign}$${profit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                                }
+                                let index = items[0].dataIndex;
+                                let invested = items[0].chart.data.datasets[1].data[index];
+                                let balance = items[0].parsed.y;
+                                let profit = balance - invested;
+                                let sign = profit >= 0 ? '+' : '';
+                                
+                                return `Investiert:  $${invested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n\nReingewinn:  ${sign}$${Math.abs(profit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                             }
                         }
                     }
