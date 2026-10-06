@@ -158,9 +158,11 @@ class DualEngineApp {
         await this.loadTradesData();
 
         const tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
-        if (tradesOnly.length > 0 && this.dom.btStart && this.dom.btEnd) {
-            this.dom.btStart.value = tradesOnly[0].dt;
-            this.dom.btEnd.value = tradesOnly[tradesOnly.length - 1].dt;
+        const chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
+
+        if (chronologicalTrades.length > 0 && this.dom.btStart && this.dom.btEnd) {
+            this.dom.btStart.value = chronologicalTrades[0].dt;
+            this.dom.btEnd.value = chronologicalTrades[chronologicalTrades.length - 1].dt;
         }
 
         this.setupListeners();
@@ -232,7 +234,7 @@ class DualEngineApp {
                 d,
                 parsedGain: isNaN(gain) ? 0 : gain
             };
-        }).reverse();
+        });
     }
 
     updateKPIs() {
@@ -302,8 +304,9 @@ class DualEngineApp {
         const formatMoney = (val) => '$' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
 
-        let firstDate = new Date(tradesOnly[0].dt);
-        let lastDate = new Date(tradesOnly[tradesOnly.length - 1].dt);
+        let chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
+        let firstDate = new Date(chronologicalTrades[0].dt);
+        let lastDate = new Date(chronologicalTrades[chronologicalTrades.length - 1].dt);
         let daysDiff = (lastDate - firstDate) / (1000 * 60 * 60 * 24);
         if (daysDiff < 1) daysDiff = 1;
         let monthsDiff = daysDiff / 30.44;
@@ -514,15 +517,16 @@ class DualEngineApp {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
         let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+        let chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
 
         let capital = parseFloat(this.dom.btDepInput.value) || 10000;
         let topup = parseFloat(this.dom.btTopInput ? this.dom.btTopInput.value : 0) || 0;
         let mode = this.dom.btMode ? this.dom.btMode.value : 'reinvest';
 
-        let startStr = (this.dom.btStart && this.dom.btStart.value) || tradesOnly[0].dt;
-        let endStr = (this.dom.btEnd && this.dom.btEnd.value) || tradesOnly[tradesOnly.length - 1].dt;
+        let startStr = (this.dom.btStart && this.dom.btStart.value) || chronologicalTrades[0].dt;
+        let endStr = (this.dom.btEnd && this.dom.btEnd.value) || chronologicalTrades[chronologicalTrades.length - 1].dt;
 
-        let filteredTrades = tradesOnly.filter(t => t.dt >= startStr && t.dt <= endStr);
+        let filteredTrades = chronologicalTrades.filter(t => t.dt >= startStr && t.dt <= endStr);
         if (filteredTrades.length === 0) return;
 
         let currentBalance = capital;
@@ -596,14 +600,15 @@ class DualEngineApp {
 
         if (this.rawTrades && this.rawTrades.length > 0) {
             let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
-            let step = Math.max(1, Math.floor(tradesOnly.length / 12));
+            let chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
+            let step = Math.max(1, Math.floor(chronologicalTrades.length / 12));
             let accumGain = 0;
 
-            for (let i = 0; i < tradesOnly.length; i++) {
-                accumGain += parseFloat(tradesOnly[i].Gain) || 0;
+            for (let i = 0; i < chronologicalTrades.length; i++) {
+                accumGain += parseFloat(chronologicalTrades[i].Gain) || 0;
                 
-                if (i % step === 0 || i === tradesOnly.length - 1) {
-                    let d = new Date(tradesOnly[i].dt);
+                if (i % step === 0 || i === chronologicalTrades.length - 1) {
+                    let d = new Date(chronologicalTrades[i].dt);
                     labels.push(d.toLocaleString('en-US', { month: 'short', day: '2-digit', year: '2-digit' }));
                     growthData.push(accumGain.toFixed(2));
                 }
@@ -657,8 +662,11 @@ class DualEngineApp {
         if (!this.dom.tradesBody) return;
 
         let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+        
+        // Sortiere absteigend nach Datum (Neueste zuerst)
+        let tableTrades = [...tradesOnly].sort((a, b) => new Date(b.dt) - new Date(a.dt));
 
-        if (!tradesOnly || tradesOnly.length === 0) {
+        if (!tableTrades || tableTrades.length === 0) {
             this.dom.tradesBody.innerHTML = `
                 <tr>
                     <td colspan="10" class="px-6 py-8 text-center text-zinc-500 font-sans">
@@ -670,7 +678,7 @@ class DualEngineApp {
         }
 
         let html = '';
-        tradesOnly.forEach(t => {
+        tableTrades.forEach(t => {
             const rawAction = (t.Action || "").toUpperCase();
             const isLong = rawAction === 'BUY';
             const typeLabel = isLong ? 'Long' : 'Short';
