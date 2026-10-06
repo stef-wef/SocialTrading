@@ -30,7 +30,6 @@ async function fetchAccountHistory(session, accountId) {
 
 async function run() {
   try {
-    // 1. Login
     console.log('Logge bei Myfxbook ein...');
     const loginUrl = `https://www.myfxbook.com/api/login.json?email=${encodeURIComponent(
       EMAIL
@@ -44,7 +43,6 @@ async function run() {
 
     const session = loginData.session;
 
-    // 2. Historie beider Accounts laden
     console.log('Lade Daten für Account 1...');
     const trades1 = await fetchAccountHistory(session, ACCOUNT_ID_1);
 
@@ -54,17 +52,15 @@ async function run() {
       trades2 = await fetchAccountHistory(session, ACCOUNT_ID_2);
     }
 
-    // 3. Logout
     await fetch(`https://www.myfxbook.com/api/logout.json?session=${session}`, { headers });
 
-    // 4. In public/trades.json speichern
     const output = {
       lastUpdated: new Date().toISOString(),
       strategy1: trades1,
       strategy2: trades2,
     };
 
-    const targetDir = path.resolve(process.cwd(), 'public');
+    const targetDir = path.resolve(process.cwd(), 'data');
     if (!fs.existsSync(targetDir)) {
       fs.mkdirSync(targetDir, { recursive: true });
     }
