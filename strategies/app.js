@@ -158,6 +158,7 @@ class DualEngineApp {
                 this.currentLang = this.currentLang === 'de' ? 'en' : 'de';
                 this.dom.langToggle.innerText = this.currentLang === 'de' ? 'EN' : 'DE';
                 this.applyTranslations();
+                this.calcProjection();
                 if (this.btChart) this.btChart.update();
             });
         }
@@ -433,6 +434,19 @@ class DualEngineApp {
         if (this.dom.projConsBal) this.dom.projConsBal.innerText = this.formatMoney(resCons.balance);
         if (this.dom.projOptBal) this.dom.projOptBal.innerText = this.formatMoney(resOpt.balance);
 
+        const projScenTitle = document.getElementById('proj-scen-title');
+        if (projScenTitle) {
+            if (mode === 'payout') {
+                projScenTitle.innerHTML = (this.currentLang === 'de')
+                    ? `Gesamtkapital + Auszahlungen nach <span id="proj-res-month">${months}</span> Monaten`
+                    : `Total Capital + Payouts After <span id="proj-res-month">${months}</span> Months`;
+            } else {
+                projScenTitle.innerHTML = (this.currentLang === 'de')
+                    ? `Szenario nach <span id="proj-res-month">${months}</span> Monaten`
+                    : `Scenario After <span id="proj-res-month">${months}</span> Months`;
+            }
+        }
+
         [1, 3, 6, 12].forEach(m => {
             let avgM = this.simulateProj(deposit, topup, m, this.rates.avg, mode).balance;
             const elAvg = document.getElementById(`ms${m}-avg`);
@@ -537,17 +551,21 @@ class DualEngineApp {
                                     ? investedData[index]
                                     : 0;
                                 let profit = balance - invested;
+                                let growth = invested > 0 ? (profit / invested) * 100 : 0;
                                 let signProfit = profit >= 0 ? '+' : '-';
+                                let signGrowth = growth >= 0 ? '+' : '-';
 
                                 let isDe = this.currentLang === 'de';
                                 let lblBalance = isDe ? 'Endguthaben' : 'Portfolio Balance';
                                 let lblInvested = isDe ? 'Investiert' : 'Invested Capital';
                                 let lblProfit = isDe ? 'Reingewinn' : 'Net Profit';
+                                let lblGrowth = isDe ? 'Wachstum' : 'Growth';
 
                                 return [
                                     `${lblBalance}: $${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
                                     `${lblInvested}:  $${invested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-                                    `${lblProfit}:  ${signProfit}$${Math.abs(profit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                    `${lblProfit}:  ${signProfit}$${Math.abs(profit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                                    `${lblGrowth}:    ${signGrowth}${Math.abs(growth).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
                                 ];
                             }
                         }
