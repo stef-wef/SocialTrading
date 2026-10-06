@@ -197,7 +197,7 @@
             </div>
         </div>
 
-        <!-- Equity Curve Panel (MyFXBook Dashboard) -->
+        <!-- Equity Curve Panel -->
         <div class="pt-4">
             <div class="text-center mb-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
@@ -214,7 +214,6 @@
             <div class="bg-[#FFFFFF] text-zinc-800 rounded-2xl overflow-hidden shadow-2xl border border-zinc-200">
                 <div class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-zinc-200 font-sans">
                     
-                    <!-- Linke Spalte: Stats & Info Tabelle -->
                     <div class="lg:col-span-4 p-5 flex flex-col justify-between text-xs bg-[#FAFBFD]">
                         <div>
                             <div class="flex gap-1 mb-4 border-b border-zinc-200 pb-2 text-[11px] font-semibold">
@@ -277,7 +276,6 @@
                         </div>
                     </div>
 
-                    <!-- Rechte Spalte: Chart -->
                     <div class="lg:col-span-8 p-5 flex flex-col justify-between bg-white">
                         <div>
                             <div class="flex justify-between items-center border-b border-zinc-200 pb-2 mb-3">
@@ -314,7 +312,7 @@
 
         <div class="border-t border-cardBorder w-full my-6"></div>
 
-        <!-- RECHNER 1: Profit Projection Engine (19.15% netto / Monat) -->
+        <!-- RECHNER 1: Profit Projection Engine -->
         <div class="pt-2">
             <div class="text-center mb-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cardBg border border-cardBorder text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
@@ -327,7 +325,6 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Eingaben -->
                 <div class="lg:col-span-5 glass-panel p-8 space-y-7">
                     <div>
                         <div class="flex justify-between items-end mb-1">
@@ -367,7 +364,6 @@
                     </div>
                 </div>
 
-                <!-- Ergebnisse -->
                 <div class="lg:col-span-7 flex flex-col gap-4">
                     <div class="glass-panel p-8 text-center flex-1 flex flex-col justify-center relative overflow-hidden">
                         <div class="absolute inset-0 bg-gradient-to-b from-accentCyan/5 to-transparent pointer-events-none"></div>
@@ -392,7 +388,7 @@
                     </div>
 
                     <div class="glass-panel p-5">
-                        <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-3 text-center" data-i18n="projMilestones">Meilensteine (Konservativ / Durchschnitt / Optimistisch)</p>
+                        <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-3 text-center" data-i18n="projMilestones">Meilensteine</p>
                         <div class="grid grid-cols-4 gap-2 text-center divide-x divide-cardBorder font-mono">
                             <div><p class="text-[9px] text-zinc-500 mb-1">M 1</p><p class="text-sm font-bold text-white" id="ms1-avg">$11'915</p></div>
                             <div><p class="text-[9px] text-zinc-500 mb-1">M 3</p><p class="text-sm font-bold text-white" id="ms3-avg">$16'916</p></div>
@@ -404,7 +400,7 @@
             </div>
         </div>
 
-        <!-- Risikohinweis & Modellierungs-Disclaimer -->
+        <!-- Risikohinweis -->
         <div class="mt-8 p-4 md:p-5 rounded-2xl bg-rose-950/10 border border-rose-500/25 flex items-start gap-3.5 text-left">
             <div class="p-1 rounded-md text-rose-400 shrink-0 mt-0.5">
                 <i data-lucide="alert-triangle" class="w-5 h-5"></i>
@@ -419,11 +415,11 @@
 
         <div class="border-t border-cardBorder w-full my-6"></div>
 
-        <!-- RECHNER 2: Historical Backtest Engine (Synchronisierte Hebelwirkung & Top-Up) -->
+        <!-- RECHNER 2: Historical Backtest Engine -->
         <div>
             <div class="text-center mb-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span data-i18n="btBadge">Echte Historische Daten (Gehebelt & Netto)</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span data-i18n="btBadge">Echte Historische Daten</span>
                 </div>
                 <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">Historical <span class="text-emerald-400" data-i18n="btTitle">Backtest-Engine</span></h2>
                 <p class="text-xs md:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed" data-i18n="btSub">
@@ -432,7 +428,6 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Eingaben mit Top-Up Slider -->
                 <div class="lg:col-span-5 glass-panel p-8 space-y-6">
                     <div>
                         <div class="flex justify-between items-end mb-2">
@@ -445,7 +440,6 @@
                         <input type="range" id="bt-capital-slider" min="100" max="100000" step="100" value="10000">
                     </div>
 
-                    <!-- Monatliches Top-Up für den Backtest -->
                     <div>
                         <div class="flex justify-between items-end mb-2">
                             <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Monatliches Top-Up</label>

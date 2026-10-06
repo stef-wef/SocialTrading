@@ -76,10 +76,9 @@ class DualEngineApp {
         this.equityChart = null;
         this.currentLang = 'de';
 
-        // Erkennt anhand der URL, welche Strategie aktiv ist
+        // Erkennt sicher, ob NEO.FX aktiv ist
         this.isNeo = window.location.pathname.toLowerCase().includes('neofx');
 
-        // Raten für Variante B
         this.rates = this.isNeo
             ? { cons: 0.050, avg: 0.145, opt: 0.220 }
             : { cons: 0.0588, avg: 0.19152, opt: 0.3528 };
@@ -145,50 +144,74 @@ class DualEngineApp {
     }
 
     async loadTradesData() {
-        try {
-            const primaryFile = this.isNeo ? '../data/NEO_TradesData.json' : '../data/Sonic_TradesData.json';
-            const fallbackFile = '../data/trades_data.json';
+        // Robuste Liste möglicher Dateipfade
+        const candidateFiles = this.isNeo
+            ? [
+                '../data/NEO_TradesData.json',
+                '../data/NEO_tradesdata.json',
+                '../data/neo_tradesdata.json',
+                '/data/NEO_TradesData.json',
+                'data/NEO_TradesData.json'
+            ]
+            : [
+                '../data/Sonic_TradesData.json',
+                '../data/Sonic_tradesdata.json',
+                '../data/trades_data.json',
+                '/data/Sonic_TradesData.json',
+                'data/Sonic_TradesData.json'
+            ];
 
-            let response = await fetch(primaryFile);
-            if (!response.ok) response = await fetch(fallbackFile);
-            const data = await response.json();
-
-            const filteredTrades = data.filter(t => {
-                const action = (t["Action"] || "").toUpperCase();
-                return action === 'BUY' || action === 'SELL';
-            });
-
-            this.rawTrades = filteredTrades.map(t => {
-                const dateString = t["Open Date"] || "";
-                let dt = "2025-01-01";
-                let d = "01.01.2025";
-
-                if (dateString) {
-                    const datePart = dateString.split(" ")[0];
-                    const parts = datePart.split("/");
-                    if (parts.length === 3) {
-                        const MM = parts[0].padStart(2, '0');
-                        const DD = parts[1].padStart(2, '0');
-                        const YYYY = parts[2];
-                        dt = `${YYYY}-${MM}-${DD}`;
-                        d = `${DD}.${MM}.${YYYY} ${dateString.split(" ")[1] || ''}`;
-                    }
+        let data = null;
+        for (const file of candidateFiles) {
+            try {
+                const response = await fetch(file);
+                if (response.ok) {
+                    data = await response.json();
+                    break;
                 }
-
-                const gain = parseFloat(t["Gain"] || 0);
-
-                return {
-                    ...t,
-                    dt,
-                    d,
-                    parsedGain: isNaN(gain) ? 0 : gain
-                };
-            }).reverse();
-
-        } catch (e) {
-            console.warn("Trades konnten nicht geladen werden:", e);
-            this.rawTrades = [];
+            } catch (e) {
+                // Nächsten Pfad versuchen
+            }
         }
+
+        if (!data || !Array.isArray(data)) {
+            console.warn("Konnte Daten nicht laden. Bitte prüfe das Vorhandensein im data/ Verzeichnis.");
+            this.rawTrades = [];
+            return;
+        }
+
+        // Filter: Nur BUY und SELL
+        const filteredTrades = data.filter(t => {
+            const action = (t["Action"] || "").toUpperCase();
+            return action === 'BUY' || action === 'SELL';
+        });
+
+        this.rawTrades = filteredTrades.map(t => {
+            const dateString = t["Open Date"] || "";
+            let dt = "2025-01-01";
+            let d = "01.01.2025";
+
+            if (dateString) {
+                const datePart = dateString.split(" ")[0];
+                const parts = datePart.split("/");
+                if (parts.length === 3) {
+                    const MM = parts[0].padStart(2, '0');
+                    const DD = parts[1].padStart(2, '0');
+                    const YYYY = parts[2];
+                    dt = `${YYYY}-${MM}-${DD}`;
+                    d = `${DD}.${MM}.${YYYY} ${dateString.split(" ")[1] || ''}`;
+                }
+            }
+
+            const gain = parseFloat(t["Gain"] || 0);
+
+            return {
+                ...t,
+                dt,
+                d,
+                parsedGain: isNaN(gain) ? 0 : gain
+            };
+        }).reverse();
     }
 
     applyTranslations() {
@@ -442,10 +465,20 @@ class DualEngineApp {
     }
 
     renderStatsAndTable() {
-        if (!this.rawTrades || this.rawTrades.length === 0) return;
+        if (!this.dom.tradesBody) return;
+
+        if (!this.rawTrades || this.rawTrades.length === 0) {
+            this.dom.tradesBody.innerHTML = `
+                <tr>
+                    <td colspan="10" class="px-6 py-8 text-center text-zinc-500 font-sans">
+                        Warte auf Trade-Daten. Bitte prüfe, ob die JSON-Datei im Ordner <code>data/</code> liegt.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
 
         if (this.dom.statTotal) this.dom.statTotal.innerText = this.rawTrades.length;
-        if (!this.dom.tradesBody) return;
 
         let html = '';
         const reversedTrades = [...this.rawTrades].reverse();
@@ -463,8 +496,12 @@ class DualEngineApp {
             let entryTime = openParts[1] || "-";
             let exitTime = closeParts[1] || "-";
 
-            const openPrice = t["Open Price"] !== undefined ? Number(t["Open Price"]).toFixed(t["Symbol"] === 'EURUSD' ? 5 : 2) : '-';
-            const closePrice = t["Close Price"] !== undefined ? Number(t["Close Price"]).toFixed(t["Symbol"] === 'EURUSD' ? 5 : 2) : '-';
+            const symbol = t["Symbol"] || (this.isNeo ? 'EURUSD' : 'XAUUSD');
+            const isForex = symbol.includes('EUR') || symbol.includes('USD') && !symbol.includes('XAU');
+            const decimals = isForex ? 5 : 2;
+
+            const openPrice = t["Open Price"] !== undefined ? Number(t["Open Price"]).toFixed(decimals) : '-';
+            const closePrice = t["Close Price"] !== undefined ? Number(t["Close Price"]).toFixed(decimals) : '-';
             const lots = t["Units/Lots"] !== undefined ? `${Number(t["Units/Lots"]).toFixed(2)} Lots` : '-';
 
             const isProfit = t.parsedGain >= 0;
@@ -472,7 +509,6 @@ class DualEngineApp {
             const formattedGain = `${isProfit ? '+' : ''}${t.parsedGain.toFixed(2)}%`;
 
             const stratName = this.isNeo ? 'NEO.FX' : 'SONIC';
-            const symbol = t["Symbol"] || (this.isNeo ? 'EURUSD' : 'XAUUSD');
 
             const logo = `
                 <div class="flex items-center gap-2">
