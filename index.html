@@ -54,10 +54,10 @@
     <!-- Hero Section -->
     <main class="flex-1 w-full max-w-6xl mx-auto px-6 py-20 text-center">
         <h2 class="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6 leading-tight">
-            <span data-i18n="heroTitle1">Fakten,</span> <span class="text-accentCyan" data-i18n="heroTitle2">keine Versprechen.</span>
+            <span data-i18n="heroTitle1">Performance neu definiert.</span> <span class="text-accentCyan" data-i18n="heroTitle2">Volle Transparenz.</span>
         </h2>
         <p class="text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto mb-12" data-i18n="heroSub">
-            Jeder Trade, jeden Monat — öffentlich verifizierbar. Analysiere die echte Historie direkt über die verbundene Broker-Schnittstelle.
+            Algorithmische Handelssysteme mit nachweisbarer Historie. Analysieren Sie alle Live-Ausführungen direkt über unsere verifizierten Schnittstellen.
         </p>
 
         <!-- Dynamisches Strategie-Grid -->
@@ -75,9 +75,9 @@
     <script>
         const i18n = {
             de: {
-                heroTitle1: "Fakten,",
-                heroTitle2: "keine Versprechen.",
-                heroSub: "Jeder Trade, jeden Monat — öffentlich verifizierbar. Analysiere die echte Historie direkt über die verbundene Broker-Schnittstelle.",
+                heroTitle1: "Performance neu definiert.",
+                heroTitle2: "Volle Transparenz.",
+                heroSub: "Algorithmische Handelssysteme mit nachweisbarer Historie. Analysieren Sie alle Live-Ausführungen direkt über unsere verifizierten Schnittstellen.",
                 footerText: "© 2026 Quantum Trading. Risikoaufklärung: Trading beinhaltet hohe Risiken. Die vergangene Performance ist keine Garantie für zukünftige Ergebnisse.",
                 tradesMade: "Trades Made",
                 tradesWon: "Trades Won",
@@ -90,9 +90,9 @@
                 descPhantom: "Aggressives Momentum-Trading auf den US30 Index. Maximiertes Wachstum für höhere Risikotoleranz."
             },
             en: {
-                heroTitle1: "Proof,",
-                heroTitle2: "not promises.",
-                heroSub: "Every trade, every month — publicly verifiable. Access our live accounts and analyze the real history directly via the connected broker API.",
+                heroTitle1: "Performance redefined.",
+                heroTitle2: "Absolute transparency.",
+                heroSub: "Algorithmic trading systems with a verifiable track record. Analyze all live executions directly through our verified interfaces.",
                 footerText: "© 2026 Quantum Trading. Risk Disclosure: Trading involves high risk. Past performance does not guarantee future results.",
                 tradesMade: "Trades Made",
                 tradesWon: "Trades Won",
@@ -180,7 +180,6 @@
         }
 
         async function initData() {
-            // Lade Sonic
             let sonicRes = await fetchStats([
                 'data/Sonic_TradesData.json',
                 'data/Sonic_tradesdata.json',
@@ -193,7 +192,6 @@
                 strategiesData[0].winRate = sonicRes.wr;
             }
             
-            // Lade Neo mit allen möglichen Pfaden für Render Case-Sensitivity
             let neoRes = await fetchStats([
                 'data/Neo_TradesData.json', 
                 'data/NEO_TradesData.json', 
