@@ -449,6 +449,17 @@ class DualEngineApp {
         Chart.defaults.font.family = "'JetBrains Mono', monospace";
         Chart.defaults.color = '#64748B';
 
+        if (!Chart.Tooltip.positioners.followGreenLine) {
+            Chart.Tooltip.positioners.followGreenLine = function(elements, eventPosition) {
+                if (!elements || elements.length === 0) return false;
+                const greenElement = elements.find(el => el.datasetIndex === 0) || elements[0];
+                return {
+                    x: greenElement.element.x,
+                    y: greenElement.element.y
+                };
+            };
+        }
+
         this.btChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -467,6 +478,19 @@ class DualEngineApp {
                         pointBorderWidth: 2,
                         fill: true,
                         tension: 0.15
+                    },
+                    {
+                        label: 'Invested Capital',
+                        data: [],
+                        borderColor: 'transparent',
+                        backgroundColor: 'transparent',
+                        borderWidth: 0,
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        pointHitRadius: 0,
+                        fill: false,
+                        tension: 0,
+                        hidden: true
                     }
                 ]
             },
@@ -486,24 +510,48 @@ class DualEngineApp {
                         display: false
                     },
                     tooltip: {
+                        position: 'followGreenLine',
                         backgroundColor: '#0A101C',
                         titleColor: '#00E5FF',
                         titleFont: { size: 13, family: "'JetBrains Mono', monospace", weight: 'bold' },
                         bodyColor: '#E2E8F0',
                         bodyFont: { size: 12, family: "'JetBrains Mono', monospace" },
-                        bodySpacing: 8,
+                        bodySpacing: 6,
                         borderColor: '#1A2436',
                         borderWidth: 1,
                         padding: 14,
                         displayColors: false,
+                        filter: function(tooltipItem) {
+                            return tooltipItem.datasetIndex === 0;
+                        },
                         callbacks: {
                             title: (items) => `Datum: ${items[0].label}`,
                             label: (ctx) => {
-                                let val = '$' + ctx.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                return `Endguthaben: ${val}`;
+                                let balance = ctx.parsed.y;
+                                let index = ctx.dataIndex;
+                                let investedData = ctx.chart.data.datasets[1] ? ctx.chart.data.datasets[1].data : [];
+                                let invested = (investedData && investedData[index] !== undefined)
+                                    ? investedData[index]
+                                    : 0;
+                                let profit = balance - invested;
+                                let growth = invested > 0 ? (profit / invested) * 100 : 0;
+                                let signProfit = profit >= 0 ? '+' : '-';
+                                let signGrowth = growth >= 0 ? '+' : '-';
+
+                                return [
+                                    `Endguthaben: $${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                                    `Investiert:  $${invested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                                    `Reingewinn:  ${signProfit}$${Math.abs(profit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                                    `Wachstum:    ${signGrowth}${Math.abs(growth).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
+                                ];
                             }
                         }
                     }
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                    axis: 'x'
                 },
                 scales: {
                     x: { 
@@ -521,8 +569,7 @@ class DualEngineApp {
                             callback: (val) => val >= 1000 ? '$' + (val / 1000).toFixed(1) + 'k' : '$' + val
                         }
                     }
-                },
-                interaction: { mode: 'index', intersect: false }
+                }
             }
         });
     }
@@ -550,6 +597,7 @@ class DualEngineApp {
 
         let labels = [];
         let dataPoints = [];
+        let investedPoints = [];
 
         const formatDate = (dateStr) => {
             if (!dateStr) return '';
@@ -558,9 +606,7 @@ class DualEngineApp {
             return dateStr;
         };
 
-        let step = Math.max(1, Math.floor(filteredTrades.length / 6));
-
-        filteredTrades.forEach((t, i) => {
+        filteredTrades.forEach((t) => {
             const currentMonth = t.dt.substring(0, 7);
             if (lastMonth && currentMonth !== lastMonth && topup > 0) {
                 currentBalance += topup;
@@ -578,6 +624,7 @@ class DualEngineApp {
                 totalPayouts += tradeProfit;
                 dataPoints.push(currentBalance + totalPayouts);
             }
+            investedPoints.push(totalInvested);
 
             labels.push(formatDate(t.dt));
         });
@@ -601,6 +648,7 @@ class DualEngineApp {
         if (this.btChart) {
             this.btChart.data.labels = labels;
             this.btChart.data.datasets[0].data = dataPoints;
+            this.btChart.data.datasets[1].data = investedPoints;
             this.btChart.update();
         }
     }
