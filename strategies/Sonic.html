@@ -303,7 +303,7 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
                 <!-- Linke Spalte: Rechner & Schalter -->
                 <div class="lg:col-span-5 glass-panel p-8 space-y-7 flex flex-col justify-between">
                     <div class="space-y-7">
@@ -323,7 +323,7 @@
                                 <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="projTopup">Monatliches Top-Up</label>
                                 <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-accentCyan focus-within:shadow-[0_2px_10px_rgba(0,229,255,0.4)] transition-all">
                                     <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
-                                    <input type="number" id="proj-topup" value="0" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
+                                    <input type="number" id="proj-topup" value="0" class="w-24 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
                                 </div>
                             </div>
                             <input type="range" id="proj-topup-slider" min="0" max="10000" step="50" value="0">
@@ -388,7 +388,7 @@
 
         <div class="border-t border-cardBorder w-full my-6"></div>
 
-        <!-- RECHNER 2: Historical Backtest Engine (Mit Banner oben & Chart darunter) -->
+        <!-- RECHNER 2: Historical Backtest Engine (Dashboard Banner & Chart darunter) -->
         <div>
             <div class="text-center mb-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
@@ -407,7 +407,7 @@
                     <p class="text-2xl md:text-3xl font-mono font-extrabold text-emerald-400 tracking-tight" id="bt-res-balance">$0.00</p>
                 </div>
                 <div class="text-left sm:border-l sm:border-cardBorder sm:pl-6">
-                    <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Investiertes Kapital</p>
+                    <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btInvested">Investiertes Kapital</p>
                     <p class="text-xl md:text-2xl font-mono font-bold text-zinc-300" id="bt-res-invested">$0.00</p>
                 </div>
                 <div class="text-left pt-4 sm:pt-0 border-t sm:border-t-0 border-cardBorder lg:border-l lg:pl-6">
@@ -477,6 +477,17 @@
             </div>
         </div>
 
+        <!-- Disclaimer Warning Box -->
+        <div class="p-6 rounded-2xl bg-[#0d0914]/80 border border-rose-500/30 flex items-start gap-4">
+            <div class="text-rose-500 shrink-0 mt-0.5">
+                <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+            </div>
+            <p class="text-xs text-zinc-400 leading-relaxed font-sans">
+                <strong class="text-white font-semibold" data-i18n="disclaimerTitle">Nur zur Veranschaulichung — keine Erfolgsgarantie.</strong>
+                <span data-i18n="disclaimerText">Dies ist eine mathematische Veranschaulichung basierend auf der historischen Durchschnitts-Performance und keine verbindliche Prognose. Einzelne Monate schwankten ungehebelt zwischen +0.35% und +2.10%. Die 24× Hebelannahme ist eine rechnerische Näherung — realer gehebelter Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist keine Garantie für zukünftige Ergebnisse. Sie können Ihr investiertes Kapital teilweise oder ganz verlieren. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie verkraften können.</span>
+            </p>
+        </div>
+
         <!-- Trade Historie Tabelle -->
         <div class="glass-panel overflow-hidden mt-6">
             <div class="px-6 py-5 border-b border-cardBorder flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardBg/60">
@@ -512,7 +523,7 @@
                             <th class="px-6 py-3.5 font-semibold text-right">PnL (%)</th>
                         </tr>
                     </thead>
-                    <tbody id="trades-table-body" class="divide-y divide-cardBorder/40 text-zinc-300 font-mono">
+                    <tbody id="trades-table-body" class="divide-y border-cardBorder/40 text-zinc-300 font-mono">
                     </tbody>
                 </table>
             </div>

@@ -44,10 +44,11 @@ const translations = {
         projModeReinvest: "Täglich Reinvestieren (Zinseszins)",
         projModePayout: "Auszahlen (Konstantes Kapital)",
         btSimBal: "Simuliertes Endguthaben",
+        btInvested: "Investiertes Kapital",
         btProfit: "Reingewinn",
         btGrowth: "Wachstum",
         disclaimerTitle: "Nur zur Veranschaulichung — keine Erfolgsgarantie.",
-        disclaimerText: "Dies ist eine hypothetische mathematische Modellierung auf Basis des historischen Myfxbook-Durchschnitts und keine verbindliche Prognose. Einzelne Monate schwankten historisch ungehebelt zwischen +0.47% und +3.32%. Die 24× Hebel- und Skalierungsannahme ist eine rechnerische Näherung — realer Devisen- und CFD-Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist kein verlässlicher Indikator für zukünftige Ergebnisse. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie problemlos verkraften können."
+        disclaimerText: "Dies ist eine mathematische Veranschaulichung basierend auf der historischen Durchschnitts-Performance und keine verbindliche Prognose. Einzelne Monate schwankten ungehebelt zwischen +0.35% und +2.10%. Die 24× Hebelannahme ist eine rechnerische Näherung — realer gehebelter Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist keine Garantie für zukünftige Ergebnisse. Sie können Ihr investiertes Kapital teilweise oder ganz verlieren. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie verkraften können."
     },
     en: {
         back: "Back",
@@ -94,10 +95,11 @@ const translations = {
         projModeReinvest: "Daily Reinvest (Compound)",
         projModePayout: "Daily Payout (Constant Capital)",
         btSimBal: "Simulated Balance",
+        btInvested: "Invested Capital",
         btProfit: "Net Profit",
         btGrowth: "Growth",
         disclaimerTitle: "Illustrative only — not a guarantee.",
-        disclaimerText: "This is a mathematical illustration based on historical average performance, not a forecast. Individual months have ranged from +0.47% to +3.32% unleveraged. The 24× leverage assumption is an approximation — real leveraged trading involves margin requirements and liquidation risk that do not scale in a perfectly linear way. Past performance does not guarantee future results, and you can lose part or all of your capital. Trade only with funds you can afford to lose."
+        disclaimerText: "This is a mathematical illustration based on historical average performance, not a forecast. Individual months have ranged from +0.35% to +2.10% unleveraged. The 24× leverage assumption is an approximation — real leveraged trading involves margin requirements and liquidation risk that do not scale in a perfectly linear way. Past performance does not guarantee future results, and you can lose part or all of your capital. Trade only with funds you can afford to lose."
     }
 };
 
@@ -156,6 +158,7 @@ class DualEngineApp {
                 this.currentLang = this.currentLang === 'de' ? 'en' : 'de';
                 this.dom.langToggle.innerText = this.currentLang === 'de' ? 'EN' : 'DE';
                 this.applyTranslations();
+                if (this.btChart) this.btChart.update();
             });
         }
         this.applyTranslations();
@@ -534,15 +537,17 @@ class DualEngineApp {
                                     ? investedData[index]
                                     : 0;
                                 let profit = balance - invested;
-                                let growth = invested > 0 ? (profit / invested) * 100 : 0;
                                 let signProfit = profit >= 0 ? '+' : '-';
-                                let signGrowth = growth >= 0 ? '+' : '-';
+
+                                let isDe = this.currentLang === 'de';
+                                let lblBalance = isDe ? 'Endguthaben' : 'Portfolio Balance';
+                                let lblInvested = isDe ? 'Investiert' : 'Invested Capital';
+                                let lblProfit = isDe ? 'Reingewinn' : 'Net Profit';
 
                                 return [
-                                    `Endguthaben: $${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-                                    `Investiert:  $${invested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-                                    `Reingewinn:  ${signProfit}$${Math.abs(profit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-                                    `Wachstum:    ${signGrowth}${Math.abs(growth).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
+                                    `${lblBalance}: $${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                                    `${lblInvested}:  $${invested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                                    `${lblProfit}:  ${signProfit}$${Math.abs(profit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                                 ];
                             }
                         }
