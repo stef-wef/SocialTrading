@@ -297,7 +297,7 @@
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cardBg border border-cardBorder text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
                     <span class="w-1.5 h-1.5 rounded-full bg-accentCyan"></span> Wachstums-Projektion
                 </div>
-                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">Profit <span class="text-accentCyan" data-i18n="projTitle">Projektions-Engine</span></h2>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">Profit <span class="text-accentCyan drop-shadow-[0_0_15px_rgba(0,229,255,0.6)]" data-i18n="projTitle">Projektions-Engine</span></h2>
                 <p class="text-xs md:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed" data-i18n="projSub">
                     Modelliert aus dem verifizierten Myfxbook-Monatsschnitt von <strong>1.14%</strong>, gehebelt mit <strong>24x</strong> Broker-Effekt, abzüglich <strong>30%</strong> Performance-Fee (= <strong>19.15%</strong> netto / Monat).
                 </p>
@@ -305,7 +305,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <!-- Inputs -->
-                <div class="lg:col-span-5 glass-panel p-8 space-y-7">
+                <div class="lg:col-span-4 glass-panel p-8 space-y-7">
                     <div>
                         <div class="flex justify-between items-end mb-1">
                             <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="projDeposit">Startkapital</label>
@@ -348,7 +348,7 @@
                 </div>
 
                 <!-- Ergebnisse -->
-                <div class="lg:col-span-7 flex flex-col gap-4">
+                <div class="lg:col-span-8 flex flex-col gap-4">
                     <div class="glass-panel p-8 text-center flex-1 flex flex-col justify-center relative overflow-hidden">
                         <div class="absolute inset-0 bg-gradient-to-b from-accentCyan/5 to-transparent pointer-events-none"></div>
                         <p class="text-[10px] text-accentCyan uppercase tracking-widest font-bold mb-2">
@@ -392,14 +392,14 @@
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span data-i18n="btBadge">Echte Historische Daten</span>
                 </div>
-                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">Historical <span class="text-emerald-400" data-i18n="btTitle">Backtest-Engine</span></h2>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">Historical <span class="text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.6)]" data-i18n="btTitle">Backtest-Engine</span></h2>
                 <p class="text-xs md:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed" data-i18n="btSub">
                     Simuliert den Trade-Verlauf mit synchronisierter Hebel-Skalierung (16.8x Netto) und monatlicher Zuzahlung.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-5 glass-panel p-8 space-y-6">
+                <div class="lg:col-span-4 glass-panel p-8 space-y-6">
                     <div>
                         <div class="flex justify-between items-end mb-2">
                             <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="btCapital">Startkapital</label>
@@ -442,26 +442,26 @@
                     </div>
                 </div>
 
-                <div class="lg:col-span-7 flex flex-col gap-4">
-                    <div class="glass-panel p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
+                <div class="lg:col-span-8 flex flex-col gap-4">
+                    <div class="glass-panel p-6 grid grid-cols-2 lg:grid-cols-4 gap-4 items-center">
                         <div class="text-left">
                             <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btSimBal">Simuliertes Endguthaben</p>
-                            <p class="text-xl md:text-2xl font-mono font-extrabold text-emerald-400 tracking-tight truncate" id="bt-res-balance">$0.00</p>
+                            <p class="text-xl md:text-2xl font-mono font-extrabold text-emerald-400 tracking-tight" id="bt-res-balance">$0.00</p>
                         </div>
-                        <div class="text-left sm:border-l sm:border-cardBorder sm:pl-6">
+                        <div class="text-left border-l border-cardBorder pl-4">
                             <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Investiertes Kapital</p>
-                            <p class="text-xl md:text-2xl font-mono font-bold text-zinc-300 truncate" id="bt-res-invested">$0.00</p>
+                            <p class="text-xl md:text-2xl font-mono font-bold text-zinc-300" id="bt-res-invested">$0.00</p>
                         </div>
-                        <div class="text-left pt-4 sm:pt-0 border-t sm:border-t-0 border-cardBorder lg:border-l lg:pl-6">
+                        <div class="text-left border-t lg:border-t-0 lg:border-l border-cardBorder pt-4 lg:pt-0 lg:pl-4">
                             <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btProfit">Reingewinn</p>
-                            <p class="text-xl md:text-2xl font-mono font-bold text-white truncate" id="bt-res-profit">+$0.00</p>
+                            <p class="text-xl md:text-2xl font-mono font-bold text-white" id="bt-res-profit">+$0.00</p>
                         </div>
-                        <div class="text-left sm:border-l sm:border-cardBorder sm:pl-6 pt-4 sm:pt-0 border-t sm:border-t-0 border-cardBorder">
+                        <div class="text-left border-t lg:border-t-0 border-l border-cardBorder pt-4 lg:pt-0 pl-4">
                             <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btGrowth">Wachstum</p>
-                            <p class="text-xl md:text-2xl font-mono font-bold text-emerald-400 truncate" id="bt-res-growth">+0.00%</p>
+                            <p class="text-xl md:text-2xl font-mono font-bold text-emerald-400" id="bt-res-growth">+0.00%</p>
                         </div>
                     </div>
-                    <div class="glass-panel p-6 flex-1 min-h-[260px] relative h-full">
+                    <div class="glass-panel p-6 flex-1 min-h-[300px] relative">
                         <canvas id="backtestChart"></canvas>
                     </div>
                 </div>

@@ -227,7 +227,7 @@ class DualEngineApp {
                     const DD = parts[1].padStart(2, '0');
                     const YYYY = parts[2];
                     dt = `${YYYY}-${MM}-${DD}`;
-                    d = `${DD}.${MM}.${YYYY}${dateString.split(" ")[1] || ''}`;
+                    d = `${DD}.${MM}.${YYYY} ${dateString.split(" ")[1] || ''}`;
                 }
             }
 
@@ -467,18 +467,6 @@ class DualEngineApp {
                         pointBorderWidth: 2,
                         fill: true,
                         tension: 0.15
-                    },
-                    {
-                        label: 'Invested Capital',
-                        data: [],
-                        borderColor: '#64748B',
-                        borderWidth: 1.5,
-                        borderDash: [4, 4],
-                        pointRadius: 0,
-                        pointHoverRadius: 0, 
-                        pointHitRadius: 0, 
-                        fill: false,
-                        tension: 0
                     }
                 ]
             },
@@ -495,10 +483,7 @@ class DualEngineApp {
                 },
                 plugins: {
                     legend: { 
-                        display: true, 
-                        position: 'top',
-                        align: 'end',
-                        labels: { boxWidth: 12, font: { size: 10 }, color: '#94A3B8' }
+                        display: false
                     },
                     tooltip: {
                         backgroundColor: '#0A101C',
@@ -511,32 +496,14 @@ class DualEngineApp {
                         borderWidth: 1,
                         padding: 14,
                         displayColors: false,
-                        filter: function(tooltipItem) {
-                            return tooltipItem.datasetIndex === 0; 
-                        },
                         callbacks: {
                             title: (items) => `Datum: ${items[0].label}`,
                             label: (ctx) => {
-                                let balance = ctx.parsed.y;
-                                let index = ctx.dataIndex;
-                                let invested = ctx.chart.data.datasets[1].data[index];
-                                let profit = balance - invested;
-                                let sign = profit >= 0 ? '+' : '';
-                                
-                                return [
-                                    `Endguthaben: $${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-                                    `Investiert:  $${invested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-                                    ``,
-                                    `Reingewinn:  ${sign}$${Math.abs(profit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                                ];
+                                let val = '$' + ctx.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                return `Endguthaben: ${val}`;
                             }
                         }
                     }
-                },
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                    axis: 'x'
                 },
                 scales: {
                     x: { 
@@ -554,7 +521,8 @@ class DualEngineApp {
                             callback: (val) => val >= 1000 ? '$' + (val / 1000).toFixed(1) + 'k' : '$' + val
                         }
                     }
-                }
+                },
+                interaction: { mode: 'index', intersect: false }
             }
         });
     }
@@ -582,7 +550,6 @@ class DualEngineApp {
 
         let labels = [];
         let dataPoints = [];
-        let investedPoints = [];
 
         const formatDate = (dateStr) => {
             if (!dateStr) return '';
@@ -611,7 +578,6 @@ class DualEngineApp {
                 totalPayouts += tradeProfit;
                 dataPoints.push(currentBalance + totalPayouts);
             }
-            investedPoints.push(totalInvested);
 
             labels.push(formatDate(t.dt));
         });
@@ -635,7 +601,6 @@ class DualEngineApp {
         if (this.btChart) {
             this.btChart.data.labels = labels;
             this.btChart.data.datasets[0].data = dataPoints;
-            this.btChart.data.datasets[1].data = investedPoints;
             this.btChart.update();
         }
     }
@@ -712,7 +677,6 @@ class DualEngineApp {
         if (!this.dom.tradesBody) return;
 
         let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
-        
         let tableTrades = [...tradesOnly].sort((a, b) => new Date(b.dt) - new Date(a.dt));
 
         if (!tableTrades || tableTrades.length === 0) {
