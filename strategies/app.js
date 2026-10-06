@@ -41,6 +41,8 @@ const translations = {
         btMode: "Gewinn-Modus",
         modeReinvest: "Täglich Reinvestieren (Zinseszins)",
         modePayout: "Auszahlen (Konstantes Kapital)",
+        projModeReinvest: "Monatlich Reinvestieren (Zinseszins)",
+        projModePayout: "Auszahlen (Konstantes Kapital)",
         btSimBal: "Simuliertes Endguthaben",
         btProfit: "Reingewinn",
         btGrowth: "Wachstum",
@@ -89,6 +91,8 @@ const translations = {
         btMode: "Profit Mode",
         modeReinvest: "Daily Reinvest (Compound)",
         modePayout: "Daily Payout (Constant Capital)",
+        projModeReinvest: "Monthly Reinvest (Compound)",
+        projModePayout: "Monthly Payout (Constant Capital)",
         btSimBal: "Simulated Balance",
         btProfit: "Net Profit",
         btGrowth: "Growth",
@@ -119,6 +123,7 @@ class DualEngineApp {
             projTopSlider: document.getElementById('proj-topup-slider'),
             projMoInput: document.getElementById('proj-months'),
             projMoSlider: document.getElementById('proj-months-slider'),
+            projModeSelect: document.getElementById('proj-mode-select'),
             projResMo: document.getElementById('proj-res-month'),
             projResBal: document.getElementById('proj-res-balance'),
             projResInv: document.getElementById('proj-res-invested'),
@@ -372,6 +377,8 @@ class DualEngineApp {
         sync(this.dom.projTopSlider, this.dom.projTopInput, () => this.calcProjection());
         sync(this.dom.projMoSlider, this.dom.projMoInput, () => this.calcProjection());
 
+        if (this.dom.projModeSelect) this.dom.projModeSelect.addEventListener('change', () => this.calcProjection());
+
         sync(this.dom.btDepSlider, this.dom.btDepInput, () => this.calcBacktest());
         sync(this.dom.btTopSlider, this.dom.btTopInput, () => this.calcBacktest());
         if (this.dom.btStart) this.dom.btStart.addEventListener('change', () => this.calcBacktest());
@@ -379,17 +386,26 @@ class DualEngineApp {
         if (this.dom.btMode) this.dom.btMode.addEventListener('change', () => this.calcBacktest());
     }
 
-    simulateProj(deposit, topup, months, rate) {
+    simulateProj(deposit, topup, months, rate, mode) {
         let balance = deposit;
         let invested = deposit;
+        let payouts = 0;
         for (let m = 1; m <= months; m++) {
-            balance = balance * (1 + rate);
-            if (m < months) {
-                balance += topup;
-                invested += topup;
+            if (mode === 'payout') {
+                payouts += balance * rate;
+                if (m < months) {
+                    balance += topup;
+                    invested += topup;
+                }
+            } else {
+                balance = balance * (1 + rate);
+                if (m < months) {
+                    balance += topup;
+                    invested += topup;
+                }
             }
         }
-        return { balance, invested };
+        return { balance: mode === 'payout' ? balance + payouts : balance, invested };
     }
 
     calcProjection() {
@@ -397,12 +413,13 @@ class DualEngineApp {
         let deposit = parseFloat(this.dom.projDepInput.value) || 0;
         let topup = parseFloat(this.dom.projTopInput ? this.dom.projTopInput.value : 0) || 0;
         let months = parseInt(this.dom.projMoInput.value) || 12;
+        let mode = this.dom.projModeSelect ? this.dom.projModeSelect.value : 'reinvest';
 
         if (this.dom.projResMo) this.dom.projResMo.innerText = months;
 
-        let resAvg = this.simulateProj(deposit, topup, months, this.rates.avg);
-        let resCons = this.simulateProj(deposit, topup, months, this.rates.cons);
-        let resOpt = this.simulateProj(deposit, topup, months, this.rates.opt);
+        let resAvg = this.simulateProj(deposit, topup, months, this.rates.avg, mode);
+        let resCons = this.simulateProj(deposit, topup, months, this.rates.cons, mode);
+        let resOpt = this.simulateProj(deposit, topup, months, this.rates.opt, mode);
 
         let multiplier = resAvg.invested > 0 ? (resAvg.balance / resAvg.invested).toFixed(1) : '0.0';
 
@@ -414,7 +431,7 @@ class DualEngineApp {
         if (this.dom.projOptBal) this.dom.projOptBal.innerText = this.formatMoney(resOpt.balance);
 
         [1, 3, 6, 12].forEach(m => {
-            let avgM = this.simulateProj(deposit, topup, m, this.rates.avg).balance;
+            let avgM = this.simulateProj(deposit, topup, m, this.rates.avg, mode).balance;
             const elAvg = document.getElementById(`ms${m}-avg`);
             if (elAvg) elAvg.innerText = this.formatMoney(avgM);
         });
@@ -458,7 +475,7 @@ class DualEngineApp {
                         borderWidth: 1.5,
                         borderDash: [4, 4],
                         pointRadius: 0,
-                        pointHoverRadius: 0, // Keine Ankerpunkte hier
+                        pointHoverRadius: 0,
                         fill: false,
                         tension: 0
                     }
@@ -492,9 +509,9 @@ class DualEngineApp {
                         borderColor: '#1A2436',
                         borderWidth: 1,
                         padding: 14,
-                        displayColors: false, // Kästchen und Farben entfernt
+                        displayColors: false,
                         filter: function(tooltipItem) {
-                            return tooltipItem.datasetIndex === 0; // Tooltip nur auf der Hauptlinie einrasten lassen
+                            return tooltipItem.datasetIndex === 0;
                         },
                         callbacks: {
                             title: (items) => `Datum: ${items[0].label}`,
