@@ -469,9 +469,9 @@ class DualEngineApp {
                 maintainAspectRatio: false,
                 layout: {
                     padding: {
-                        left: 15,
-                        right: 15,
-                        top: 10,
+                        left: 20,
+                        right: 20,
+                        top: 15,
                         bottom: 5
                     }
                 },
@@ -597,6 +597,10 @@ class DualEngineApp {
         let growth = totalInvested > 0 ? (netProfit / totalInvested) * 100 : 0;
 
         if (this.dom.btResBal) this.dom.btResBal.innerText = '$' + finalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        
+        let resInvestedEl = document.getElementById('bt-res-invested');
+        if (resInvestedEl) resInvestedEl.innerText = '$' + totalInvested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
         if (this.dom.btResProf) this.dom.btResProf.innerText = (netProfit >= 0 ? '+' : '') + '$' + netProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         if (this.dom.btResGrowth) this.dom.btResGrowth.innerText = (growth >= 0 ? '+' : '') + growth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
 
