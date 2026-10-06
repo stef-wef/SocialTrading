@@ -255,7 +255,7 @@ class DualEngineApp {
         let wins = 0, losses = 0;
         let grossProfit = 0, grossLoss = 0;
         let tradeProfitUSD = 0;
-        let totalDurationMs = 0, validDurations = 0;
+        let durations = [];
 
         tradesOnly.forEach(t => {
             let p = parseFloat(t.Profit) || 0;
@@ -267,11 +267,17 @@ class DualEngineApp {
                 let parts = t["Duration (DD:HH:MM:SS)"].split(':');
                 if(parts.length === 4) {
                     let ms = (parseInt(parts[0])*86400 + parseInt(parts[1])*3600 + parseInt(parts[2])*60 + parseInt(parts[3])) * 1000;
-                    totalDurationMs += ms;
-                    validDurations++;
+                    durations.push(ms);
                 }
             }
         });
+
+        durations.sort((a, b) => a - b);
+        let medianDurationMs = 0;
+        if (durations.length > 0) {
+            let mid = Math.floor(durations.length / 2);
+            medianDurationMs = durations.length % 2 !== 0 ? durations[mid] : (durations[mid - 1] + durations[mid]) / 2;
+        }
 
         let deposits = 0, withdrawals = 0, currentBal = 0, highestBal = 0;
         let currentGain = 0, peakGain = 0, maxDrawdown = 0;
@@ -303,11 +309,12 @@ class DualEngineApp {
         let profitFactor = grossLoss > 0 ? (grossProfit / grossLoss).toFixed(2) : (grossProfit > 0 ? grossProfit.toFixed(2) : "0.00");
 
         let avgDurationStr = "~12 min";
+        let validDurations = durations.length;
         if (validDurations > 0) {
-            let mins = Math.round((totalDurationMs / validDurations) / 60000);
+            let mins = Math.round((medianDurationMs) / 60000);
             if (mins > 1440) avgDurationStr = "~" + Math.round(mins/1440) + " d";
             else if (mins > 60) avgDurationStr = "~" + Math.round(mins/60) + " h";
-            else avgDurationStr = "~" + mins + " min";
+            else avgDurationStr = "~" + (mins < 1 ? 1 : mins) + " min";
         }
 
         const formatMoney = (val) => '$' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
