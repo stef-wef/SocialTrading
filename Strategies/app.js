@@ -1,14 +1,13 @@
 const translations = {
     de: {
         back: "Zurück",
-        verifiedLive: "Verified by Myfxbook - Live",
         totalGain: "Gesamtrendite",
         maxDrawdown: "Max Drawdown",
         liveTradesKpi: "Live Trades",
         avgMonth: "Ø Monat",
         growthProj: "Wachstums-Projektion",
         projTitle: "Projektions-Engine",
-        projSub: "Basierend auf dem verifizierten Durchschnitt von 1.14%, multipliziert mit 24x Hebelwirkung, abzüglich 30% Performance-Fee.",
+        projSub: "Basierend auf dem monatlichen Performance-Schnitt der Historie, hochgerechnet mit Hebelwirkung abzüglich 30% Performance-Fee.",
         projDeposit: "Startkapital",
         projTopup: "Monatliches Top-Up",
         projMonths: "Laufzeit (Monate)",
@@ -36,23 +35,17 @@ const translations = {
         totalTrades: "Total Trades",
         winningTrades: "Gewonnen",
         losingTrades: "Verloren",
-        winRate: "Win Rate",
-        ledgerTitle1: "Die komplette Trade-Historie,",
-        ledgerTitle2: "Zeile für Zeile.",
-        colDate: "Datum / Zeit",
-        colAsset: "Asset / Typ",
-        colProfit: "Profit %"
+        winRate: "Win Rate"
     },
     en: {
         back: "Back",
-        verifiedLive: "Verified by Myfxbook - Live",
         totalGain: "Total Gain",
         maxDrawdown: "Max Drawdown",
         liveTradesKpi: "Live Trades",
         avgMonth: "Avg / Month",
         growthProj: "Growth Projection",
         projTitle: "Projection Engine",
-        projSub: "Modeled from the verified MyFXBook average monthly return of 1.14%, amplified 24x by broker leverage, minus a 30% performance fee.",
+        projSub: "Based on the verified monthly performance average, amplified by leverage minus a 30% performance fee.",
         projDeposit: "Starting Deposit",
         projTopup: "Monthly Top-Up",
         projMonths: "Time Horizon (Months)",
@@ -80,12 +73,7 @@ const translations = {
         totalTrades: "Total Trades",
         winningTrades: "Wins",
         losingTrades: "Losses",
-        winRate: "Win Rate",
-        ledgerTitle1: "A live trade ledger,",
-        ledgerTitle2: "line by line.",
-        colDate: "Date / Time",
-        colAsset: "Asset / Type",
-        colProfit: "Profit %"
+        winRate: "Win Rate"
     }
 };
 
@@ -94,7 +82,8 @@ class DualEngineApp {
         this.rawTrades = [];
         this.btChart = null;
         this.currentLang = 'de';
-        this.rates = { cons: 0.0588, avg: 0.19152, opt: 0.3528 };
+        // Dynamische Raten, basieren auf aggregierten Monatsdaten
+        this.rates = { cons: 0.08, avg: 0.25, opt: 0.40 };
 
         this.dom = {
             // Rechner 1
@@ -129,6 +118,8 @@ class DualEngineApp {
             statLosses: document.getElementById('stat-losses'),
             statWinrate: document.getElementById('stat-winrate'),
             kpiTrades: document.getElementById('kpi-trades'),
+            kpiTotalGain: document.getElementById('kpi-total-gain'),
+            kpiAvgMonth: document.getElementById('kpi-avg-month'),
             tradesBody: document.getElementById('trades-table-body'),
             langToggle: document.getElementById('langToggle')
         };
@@ -146,12 +137,8 @@ class DualEngineApp {
         }
         this.applyTranslations();
 
-        // Asynchrones Laden der JSON-Daten aus dem Data Ordner
         await this.loadTradesData();
 
-        if (!this.dom.projDepInput) return;
-
-        // Start und Enddatum für den Backtest automatisch belegen
         if (this.rawTrades.length > 0) {
             this.dom.btStart.value = this.rawTrades[0].dt;
             this.dom.btEnd.value = this.rawTrades[this.rawTrades.length - 1].dt;
@@ -159,33 +146,34 @@ class DualEngineApp {
 
         this.setupListeners();
         this.initBacktestChart();
-        this.calcProjection();
         this.renderStatsAndTable();
+        this.calcProjection();
         this.calcBacktest();
     }
 
     async loadTradesData() {
         try {
-            // Lade die genaue Datei aus dem Ordner, der im Screenshot referenziert ist
-            const response = await fetch('../data/trades_data.json');
+            // Suchpfad relativ zum Ordner "Strategies"
+            let response = await fetch('../data/trades_data.json');
+            if (!response.ok) {
+                response = await fetch('../trades_data.json');
+            }
             const data = await response.json();
             
-            // Die Trades sind meistens aktuellste zuerst (Index 0 = z.B. 2026), 
-            // für die Backtest Kurve brauchen wir sie chronologisch aufsteigend (älteste zuerst).
             this.rawTrades = data.map(t => {
                 const dateString = t["Open Date"] || "";
-                let dt = "2024-01-01"; 
-                let d = "01.01.2024";
+                let dt = "2025-01-01"; 
+                let d = "01.01.2025";
 
                 if (dateString) {
-                    const datePart = dateString.split(" ")[0]; // "10/02/2026"
+                    const datePart = dateString.split(" ")[0];
                     const parts = datePart.split("/");
-                    if(parts.length === 3) {
+                    if (parts.length === 3) {
                         const MM = parts[0].padStart(2, '0');
                         const DD = parts[1].padStart(2, '0');
                         const YYYY = parts[2];
-                        dt = `${YYYY}-${MM}-${DD}`; // Datumsformat für HTML input type=date
-                        d = `${DD}.${MM}.${YYYY} ${dateString.split(" ")[1] || ''}`; // Format für Tabelle
+                        dt = `${YYYY}-${MM}-${DD}`;
+                        d = `${DD}.${MM}.${YYYY} ${dateString.split(" ")[1] || ''}`;
                     }
                 }
 
@@ -197,7 +185,7 @@ class DualEngineApp {
             }).reverse();
 
         } catch (e) {
-            console.error("Trades konnten nicht geladen werden. Läuft das Projekt über einen lokalen Server?", e);
+            console.error("Trades konnten nicht geladen werden:", e);
             this.rawTrades = [];
         }
     }
@@ -225,12 +213,10 @@ class DualEngineApp {
             });
         };
 
-        // Rechner 1
         syncSliderInput(this.dom.projDepSlider, this.dom.projDepInput, () => this.calcProjection());
         syncSliderInput(this.dom.projTopSlider, this.dom.projTopInput, () => this.calcProjection());
         syncSliderInput(this.dom.projMoSlider, this.dom.projMoInput, () => this.calcProjection());
 
-        // Rechner 2
         syncSliderInput(this.dom.btDepSlider, this.dom.btDepInput, () => this.calcBacktest());
         syncSliderInput(this.dom.btRiskSlider, this.dom.btRiskInput, () => this.calcBacktest());
         this.dom.btStart.addEventListener('change', () => this.calcBacktest());
@@ -276,7 +262,7 @@ class DualEngineApp {
         });
     }
 
-    // --- RECHNER 2: BACKTEST (HISTORISCHE TRADES) ---
+    // --- RECHNER 2: HISTORISCHER BACKTEST ---
     initBacktestChart() {
         const canvas = document.getElementById('backtestChart');
         if (!canvas) return;
@@ -314,7 +300,7 @@ class DualEngineApp {
                     legend: { display: false },
                     tooltip: {
                         backgroundColor: '#0A101C',
-                        titleColor: '#94A3B8',
+                        titleColor: '#94959A',
                         bodyColor: '#FFFFFF',
                         borderColor: '#1A2436',
                         borderWidth: 1,
@@ -346,13 +332,12 @@ class DualEngineApp {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
         let capital = parseFloat(this.dom.btDepInput.value) || 10000;
-        let riskMult = parseFloat(this.dom.btRiskInput.value) || 1; // Der neue Risiko-Faktor
+        let riskMult = parseFloat(this.dom.btRiskInput.value) || 1;
         let mode = this.dom.btMode.value;
 
-        let startStr = this.dom.btStart.value || '2024-01-01';
+        let startStr = this.dom.btStart.value || '2025-01-01';
         let endStr = this.dom.btEnd.value || '2099-12-31';
 
-        // Filter nach Zeitraum
         let filteredTrades = this.rawTrades.filter(t => t.dt >= startStr && t.dt <= endStr);
 
         let currentBalance = capital;
@@ -362,7 +347,6 @@ class DualEngineApp {
         let dataPoints = [capital];
 
         filteredTrades.forEach((t, i) => {
-            // Gain berechnen unter Berücksichtigung des gewählten Risiko-Faktors
             let gainPercent = parseFloat(t["Gain"] || 0) * riskMult;
             let tradeProfit = currentBalance * (gainPercent / 100);
 
@@ -375,7 +359,7 @@ class DualEngineApp {
             }
 
             if (i % 15 === 0 || i === filteredTrades.length - 1) {
-                labels.push(t.d.split(" ")[0]); // Nur das Datum fürs Chart
+                labels.push(t.d.split(" ")[0]);
             } else {
                 labels.push('');
             }
@@ -396,21 +380,39 @@ class DualEngineApp {
         }
     }
 
+    // --- MONATLICHE AGGREGATION & TABELLEN RENDERING ---
     renderStatsAndTable() {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
         let wins = 0;
         let losses = 0;
         let activeTrades = 0;
+        let totalGainSum = 0;
+        const monthlyGains = {};
 
         this.rawTrades.forEach(t => {
             const action = (t["Action"] || "").toLowerCase();
             if (action === 'buy' || action === 'sell') {
                 activeTrades++;
-                if (parseFloat(t["Gain"] || 0) >= 0) wins++;
+                const gain = parseFloat(t["Gain"] || 0);
+                totalGainSum += gain;
+
+                if (gain >= 0) wins++;
                 else losses++;
+
+                // Monatliche Renditen zusammenrechnen
+                const monthKey = (t.dt || "").substring(0, 7);
+                if (monthKey) {
+                    monthlyGains[monthKey] = (monthlyGains[monthKey] || 0) + gain;
+                }
             }
         });
+
+        // Echten monatlichen Durchschnitt ermitteln
+        const months = Object.keys(monthlyGains);
+        const avgMonthlyGain = months.length > 0 
+            ? (Object.values(monthlyGains).reduce((a, b) => a + b, 0) / months.length)
+            : 0;
 
         let total = wins + losses;
         let winRate = total > 0 ? ((wins / total) * 100).toFixed(2) : '0.00';
@@ -421,6 +423,14 @@ class DualEngineApp {
         if (this.dom.statLosses) this.dom.statLosses.innerText = losses;
         if (this.dom.statWinrate) this.dom.statWinrate.innerText = winRate + '%';
 
+        if (this.dom.kpiTotalGain) this.dom.kpiTotalGain.innerText = '+' + totalGainSum.toFixed(2) + '%';
+        if (this.dom.kpiAvgMonth) this.dom.kpiAvgMonth.innerText = '+' + avgMonthlyGain.toFixed(2) + '%';
+
+        // Rechner-Raten dynamisch anpassen
+        this.rates.avg = (avgMonthlyGain * 24 * 0.7) / 100;
+        this.rates.cons = this.rates.avg * 0.4;
+        this.rates.opt = this.rates.avg * 1.8;
+
         if (!this.dom.tradesBody) return;
 
         let html = '';
@@ -428,23 +438,19 @@ class DualEngineApp {
 
         reversedTrades.forEach(t => {
             const rawAction = (t["Action"] || "").toUpperCase();
-            if (rawAction !== 'BUY' && rawAction !== 'SELL') return; // Deposits/Withdrawals ausblenden
+            if (rawAction !== 'BUY' && rawAction !== 'SELL') return;
 
-            // Direction & Typ mapping (Long = Buy, Short = Sell)
             const isLong = rawAction === 'BUY';
             const typeLabel = isLong ? 'Long' : 'Short';
             const typeColor = isLong ? 'text-emerald-400' : 'text-rose-400';
 
-            // Zeitstempel zerlegen (z.B. "10/02/2026 16:27")
             const openParts = (t["Open Date"] || "").split(" ");
             const closeParts = (t["Close Date"] || "").split(" ");
             
-            // Reines Datum & Uhrzeiten formatieren
             let dateStr = t.dt || "-";
             let entryTime = openParts[1] || "-";
             let exitTime = closeParts[1] || "-";
 
-            // Preise, Lots & Gain
             const openPrice = t["Open Price"] !== undefined ? Number(t["Open Price"]).toFixed(2) : '-';
             const closePrice = t["Close Price"] !== undefined ? Number(t["Close Price"]).toFixed(2) : '-';
             const lots = t["Units/Lots"] !== undefined ? `${Number(t["Units/Lots"]).toFixed(2)} Lots` : '-';
@@ -454,7 +460,6 @@ class DualEngineApp {
             const profitClass = isProfit ? 'text-emerald-400' : 'text-rose-400';
             const formattedGain = `${isProfit ? '+' : ''}${gainVal.toFixed(2)}%`;
 
-            // SVG Sonic Logo Badge wie im Screenshot
             const sonicLogo = `
                 <div class="flex items-center gap-2">
                     <div class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px]">

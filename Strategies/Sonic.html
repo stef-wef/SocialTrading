@@ -54,11 +54,11 @@
             <p class="text-sm text-zinc-400 font-medium">Gold (XAU/USD) · Tag Markets · 1:500 Leverage</p>
         </div>
 
-        <!-- 4 Haupt-KPIs -->
+        <!-- 4 Haupt-KPIs (Berechnet aus trades_data.json) -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="glass-panel p-6 text-center">
                 <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="totalGain">Gesamtrendite</p>
-                <p class="text-3xl font-extrabold text-emerald-400 font-mono">+29.23%</p>
+                <p class="text-3xl font-extrabold text-emerald-400 font-mono" id="kpi-total-gain">+25.24%</p>
             </div>
             <div class="glass-panel p-6 text-center">
                 <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="maxDrawdown">Max Drawdown</p>
@@ -66,11 +66,11 @@
             </div>
             <div class="glass-panel p-6 text-center">
                 <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="liveTradesKpi">Live Trades</p>
-                <p class="text-3xl font-extrabold text-white font-mono" id="kpi-trades">0</p>
+                <p class="text-3xl font-extrabold text-white font-mono" id="kpi-trades">235</p>
             </div>
             <div class="glass-panel p-6 text-center">
                 <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="avgMonth">Ø Monat</p>
-                <p class="text-3xl font-extrabold text-accentCyan font-mono">+1.14%</p>
+                <p class="text-3xl font-extrabold text-accentCyan font-mono" id="kpi-avg-month">+1.49%</p>
             </div>
         </div>
 
@@ -82,7 +82,7 @@
                 </div>
                 <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">Profit <span class="text-accentCyan" data-i18n="projTitle">Projektions-Engine</span></h2>
                 <p class="text-xs md:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed" data-i18n="projSub">
-                    Basierend auf dem verifizierten Durchschnitt von 1.14%, multipliziert mit 24x Hebelwirkung, abzüglich 30% Performance-Fee.
+                    Basierend auf dem monatlichen Performance-Schnitt der Historie, hochgerechnet mit Hebelwirkung abzüglich 30% Performance-Fee.
                 </p>
             </div>
 
@@ -127,28 +127,28 @@
                     <div class="glass-panel p-8 text-center flex-1 flex flex-col justify-center relative overflow-hidden">
                         <div class="absolute inset-0 bg-gradient-to-b from-accentCyan/5 to-transparent pointer-events-none"></div>
                         <p class="text-[10px] text-accentCyan uppercase tracking-widest font-bold mb-2"><span data-i18n="projAvgScen">Szenario nach</span> <span id="proj-res-month">12</span> <span data-i18n="monthsWord">Monaten</span></p>
-                        <p class="text-5xl md:text-6xl font-mono font-extrabold text-accentCyan tracking-tight mb-3" id="proj-res-balance">$81'887</p>
-                        <p class="text-xs text-zinc-400 font-mono"><span data-i18n="fromWord">Aus</span> <span class="text-white font-bold" id="proj-res-invested">$10'000</span> <span data-i18n="investedWord">investiert</span> · <strong class="text-emerald-400" id="proj-res-mult">8.2x</strong></p>
+                        <p class="text-5xl md:text-6xl font-mono font-extrabold text-accentCyan tracking-tight mb-3" id="proj-res-balance">$0</p>
+                        <p class="text-xs text-zinc-400 font-mono"><span data-i18n="fromWord">Aus</span> <span class="text-white font-bold" id="proj-res-invested">$10'000</span> <span data-i18n="investedWord">investiert</span> · <strong class="text-emerald-400" id="proj-res-mult">0.0x</strong></p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="glass-panel p-5">
                             <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="projCons">Konservativ</p>
-                            <p class="text-lg font-mono font-bold text-white mb-0.5" id="proj-cons-balance">$19'850</p>
+                            <p class="text-lg font-mono font-bold text-white mb-0.5" id="proj-cons-balance">$0</p>
                         </div>
                         <div class="glass-panel p-5">
                             <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="projOpt">Optimistisch</p>
-                            <p class="text-lg font-mono font-bold text-white mb-0.5" id="proj-opt-balance">$232'500</p>
+                            <p class="text-lg font-mono font-bold text-white mb-0.5" id="proj-opt-balance">$0</p>
                         </div>
                     </div>
 
                     <div class="glass-panel p-5 hidden md:block">
                         <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-4 text-center" data-i18n="projMilestones">Meilensteine</p>
                         <div class="grid grid-cols-4 gap-2 text-center divide-x divide-cardBorder font-mono">
-                            <div><p class="text-[9px] text-zinc-500 mb-2">M 1</p><p class="text-sm font-bold text-white" id="ms1-avg">$11'915</p></div>
-                            <div><p class="text-[9px] text-zinc-500 mb-2">M 3</p><p class="text-sm font-bold text-white" id="ms3-avg">$16'916</p></div>
-                            <div><p class="text-[9px] text-zinc-500 mb-2">M 6</p><p class="text-sm font-bold text-white" id="ms6-avg">$28'616</p></div>
-                            <div><p class="text-[9px] text-zinc-500 mb-2">M 12</p><p class="text-sm font-bold text-accentCyan" id="ms12-avg">$81'887</p></div>
+                            <div><p class="text-[9px] text-zinc-500 mb-2">M 1</p><p class="text-sm font-bold text-white" id="ms1-avg">$0</p></div>
+                            <div><p class="text-[9px] text-zinc-500 mb-2">M 3</p><p class="text-sm font-bold text-white" id="ms3-avg">$0</p></div>
+                            <div><p class="text-[9px] text-zinc-500 mb-2">M 6</p><p class="text-sm font-bold text-white" id="ms6-avg">$0</p></div>
+                            <div><p class="text-[9px] text-zinc-500 mb-2">M 12</p><p class="text-sm font-bold text-accentCyan" id="ms12-avg">$0</p></div>
                         </div>
                     </div>
                 </div>
@@ -239,40 +239,63 @@
             </div>
         </div>
 
-        <!-- Trade Historie / Closed Trades Table -->
-        <div class="glass-panel overflow-hidden">
-            <div class="px-6 py-5 border-b border-cardBorder flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardBg/60">
-                <div>
-                    <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
-                        <span>Trades</span>
-                    </h2>
-                    <p class="text-xs text-zinc-400 mt-0.5">Öffentlich verifizierte Ausführungen direkt aus dem Broker-Feed</p>
+        <!-- Trade Statistiken -->
+        <div class="pt-8">
+            <h2 class="text-xl font-extrabold text-white tracking-tight mb-4 px-2" data-i18n="tradeStats">Trade Statistiken</h2>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="glass-panel p-5 border-l-2 border-l-accentCyan">
+                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="totalTrades">Total Trades</p>
+                    <p class="text-2xl font-bold text-white font-mono" id="stat-total">0</p>
                 </div>
-                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Closed Trades
+                <div class="glass-panel p-5 border-l-2 border-l-emerald-500">
+                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="winningTrades">Gewonnen</p>
+                    <p class="text-2xl font-bold text-emerald-400 font-mono" id="stat-wins">0</p>
+                </div>
+                <div class="glass-panel p-5 border-l-2 border-l-rose-500">
+                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="losingTrades">Verloren</p>
+                    <p class="text-2xl font-bold text-rose-400 font-mono" id="stat-losses">0</p>
+                </div>
+                <div class="glass-panel p-5 border-l-2 border-l-sky-500">
+                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="winRate">Win Rate</p>
+                    <p class="text-2xl font-bold text-sky-400 font-mono" id="stat-winrate">0.00%</p>
                 </div>
             </div>
 
-            <div class="overflow-x-auto max-h-[600px] table-scroll">
-                <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
-                    <thead class="sticky top-0 bg-[#060B16] z-10 shadow-md">
-                        <tr class="text-zinc-400 uppercase tracking-wider text-[11px] border-b border-cardBorder">
-                            <th class="px-6 py-3.5 font-semibold">Strategy</th>
-                            <th class="px-6 py-3.5 font-semibold">Instrument</th>
-                            <th class="px-6 py-3.5 font-semibold">Type</th>
-                            <th class="px-6 py-3.5 font-semibold">Size</th>
-                            <th class="px-6 py-3.5 font-semibold">Date</th>
-                            <th class="px-6 py-3.5 font-semibold">Entry Price</th>
-                            <th class="px-6 py-3.5 font-semibold">Exit Price</th>
-                            <th class="px-6 py-3.5 font-semibold">Entry Time</th>
-                            <th class="px-6 py-3.5 font-semibold">Exit Time</th>
-                            <th class="px-6 py-3.5 font-semibold text-right">PnL (%)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="trades-table-body" class="divide-y divide-cardBorder/40 text-zinc-300 font-mono">
-                        <!-- Wird dynamisch durch app.js befüllt -->
-                    </tbody>
-                </table>
+            <!-- TagMarkets Portal Styled Table -->
+            <div class="glass-panel overflow-hidden">
+                <div class="px-6 py-5 border-b border-cardBorder flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardBg/60">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                            <span>Trades</span>
+                        </h2>
+                        <p class="text-xs text-zinc-400 mt-0.5">Öffentlich verifizierte Ausführungen direkt aus dem Broker-Feed</p>
+                    </div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Closed Trades
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto max-h-[600px] table-scroll">
+                    <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
+                        <thead class="sticky top-0 bg-[#060B16] z-10 shadow-md">
+                            <tr class="text-zinc-400 uppercase tracking-wider text-[11px] border-b border-cardBorder">
+                                <th class="px-6 py-3.5 font-semibold">Strategy</th>
+                                <th class="px-6 py-3.5 font-semibold">Instrument</th>
+                                <th class="px-6 py-3.5 font-semibold">Type</th>
+                                <th class="px-6 py-3.5 font-semibold">Size</th>
+                                <th class="px-6 py-3.5 font-semibold">Date</th>
+                                <th class="px-6 py-3.5 font-semibold">Entry Price</th>
+                                <th class="px-6 py-3.5 font-semibold">Exit Price</th>
+                                <th class="px-6 py-3.5 font-semibold">Entry Time</th>
+                                <th class="px-6 py-3.5 font-semibold">Exit Time</th>
+                                <th class="px-6 py-3.5 font-semibold text-right">PnL (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trades-table-body" class="divide-y divide-cardBorder/40 text-zinc-300 font-mono">
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
