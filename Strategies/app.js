@@ -29,7 +29,9 @@ const translations = {
         modePayout: "Auszahlen (Konstantes Kapital)",
         btSimBal: "Simuliertes Endguthaben",
         btProfit: "Reingewinn",
-        btGrowth: "Wachstum"
+        btGrowth: "Wachstum",
+        disclaimerTitle: "Nur zur Veranschaulichung — keine Erfolgsgarantie.",
+        disclaimerText: "Dies ist eine hypothetische mathematische Modellierung auf Basis des historischen Myfxbook-Durchschnitts und keine verbindliche Prognose. Einzelne Monate schwankten historisch ungehebelt zwischen +0.47% und +3.32%. Die 24× Hebel- und Skalierungsannahme ist eine rechnerische Näherung — realer Devisen- und CFD-Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist kein verlässlicher Indikator für zukünftige Ergebnisse. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie problemlos verkraften können."
     },
     en: {
         back: "Back",
@@ -61,7 +63,9 @@ const translations = {
         modePayout: "Daily Payout (Constant Capital)",
         btSimBal: "Simulated Balance",
         btProfit: "Net Profit",
-        btGrowth: "Growth"
+        btGrowth: "Growth",
+        disclaimerTitle: "Illustrative only — not a guarantee.",
+        disclaimerText: "This is a mathematical illustration based on historical average performance, not a forecast. Individual months have ranged from +0.47% to +3.32% unleveraged. The 24× leverage assumption is an approximation — real leveraged trading involves margin requirements and liquidation risk that do not scale in a perfectly linear way. Past performance does not guarantee future results, and you can lose part or all of your capital. Trade only with funds you can afford to lose.",
     }
 };
 
