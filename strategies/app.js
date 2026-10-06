@@ -671,6 +671,8 @@ class DualEngineApp {
         if (!this.dom.tradesBody) return;
 
         let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+        
+        // Sortierung absteigend (neueste Trades ganz oben)
         let tableTrades = [...tradesOnly].sort((a, b) => new Date(b.dt) - new Date(a.dt));
 
         if (!tableTrades || tableTrades.length === 0) {
