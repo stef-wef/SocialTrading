@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sonic AI | Performance & Rechner</title>
     
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%230A101C'/><path d='M36 8 L18 34 L32 34 L26 56 L46 28 L32 28 Z' fill='%2300E5FF'/></svg>">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -26,7 +26,7 @@
     </script>
     <style>
         body { background-color: #040914; color: #F8FAFC; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; }
-        .glass-panel { background-color: #0A101C; border: 1px solid #1A2436; border-radius: 12px; }
+        .glass-panel { background-color: #0A101C; border: 1px solid #1A2436; border-radius: 14px; }
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; height: 20px; }
         input[type=range]:focus { outline: none; }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; cursor: pointer; background: #1A2436; }
@@ -41,64 +41,102 @@
     </style>
 </head>
 <body class="p-4 md:p-8">
-    <div class="max-w-[1200px] mx-auto space-y-12">
+    <div class="max-w-[1240px] mx-auto space-y-10">
 
-        <!-- Navigation & Header mit 1:30 Leverage Angabe -->
-        <div class="text-center pt-8 pb-4 relative">
-            <a href="../index.html" class="absolute left-0 top-8 text-zinc-400 hover:text-accentCyan flex items-center gap-2 text-xs font-bold uppercase tracking-wider transition-colors">
+        <!-- Navigation & Header -->
+        <div class="text-center pt-6 pb-2 relative">
+            <a href="../index.html" class="absolute left-0 top-6 text-zinc-400 hover:text-accentCyan flex items-center gap-2 text-xs font-bold uppercase tracking-wider transition-colors">
                 <i data-lucide="arrow-left" class="w-4 h-4"></i> <span data-i18n="back">Zurück</span>
             </a>
-            <button id="langToggle" class="absolute right-0 top-8 text-xs font-bold text-zinc-400 hover:text-white px-2 py-1 border border-cardBorder rounded transition-colors">
+            <button id="langToggle" class="absolute right-0 top-6 text-xs font-bold text-zinc-400 hover:text-white px-2.5 py-1 border border-cardBorder rounded-lg transition-colors">
                 EN
             </button>
-            <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4 mt-6">Sonic AI.</h1>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/20 text-accentCyan text-[11px] font-mono font-bold tracking-widest uppercase mb-3">
+                <span class="w-1.5 h-1.5 rounded-full bg-accentCyan animate-pulse"></span> Verified by Myfxbook Live
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-2">Sonic AI.</h1>
             <p class="text-sm text-zinc-400 font-medium">Gold (XAU/USD) · Tag Markets · 1:30 Leverage</p>
         </div>
 
-        <!-- 4 Haupt-KPIs (Live aus dem TagMarkets Dashboard) -->
+        <!-- 4 Haupt-KPIs -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="glass-panel p-6 text-center">
                 <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="totalGain">Gesamtrendite</p>
-                <p class="text-3xl font-extrabold text-emerald-400 font-mono" id="kpi-total-gain">+153.45%</p>
+                <p class="text-3xl font-extrabold text-emerald-400 font-mono">+29.23%</p>
+                <p class="text-[10px] text-zinc-500 mt-1 font-mono">Since Inception</p>
             </div>
             <div class="glass-panel p-6 text-center">
                 <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="maxDrawdown">Max Drawdown</p>
-                <p class="text-3xl font-extrabold text-rose-400 font-mono">0.26%</p>
+                <p class="text-3xl font-extrabold text-rose-400 font-mono">0.86%</p>
+                <p class="text-[10px] text-zinc-500 mt-1 font-mono">1x Base Risk</p>
             </div>
             <div class="glass-panel p-6 text-center">
-                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="liveTradesKpi">Trading Days</p>
-                <p class="text-3xl font-extrabold text-white font-mono" id="kpi-trades">235</p>
+                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="liveTradesKpi">Verifizierte Trades</p>
+                <p class="text-3xl font-extrabold text-white font-mono" id="kpi-trades">604</p>
+                <p class="text-[10px] text-zinc-500 mt-1 font-mono">Publicly Tracked</p>
             </div>
             <div class="glass-panel p-6 text-center">
-                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="avgMonth">Ø Monat</p>
-                <p class="text-3xl font-extrabold text-accentCyan font-mono" id="kpi-avg-month">+1.49%</p>
+                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="avgMonth">Ø Monat Rendite</p>
+                <p class="text-3xl font-extrabold text-accentCyan font-mono">+1.14%</p>
+                <p class="text-[10px] text-zinc-500 mt-1 font-mono">Compounded</p>
             </div>
         </div>
 
-        <!-- RECHNER 1: Profit Projection Engine (1:30 Hebel & 30% Fee fest kalkuliert) -->
-        <div class="pt-4">
+        <!-- Erweiterte Kennzahlen-Grid (8 Performance Metrics aus Vorlage) -->
+        <div class="glass-panel p-6">
+            <div class="flex items-center justify-between pb-4 mb-4 border-b border-cardBorder">
+                <div>
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-zinc-300">Performance Metrics</h2>
+                    <p class="text-xs text-zinc-500 mt-0.5">Statistische Auswertung des verifizierten Myfxbook-Kontos</p>
+                </div>
+                <span class="text-xs font-mono font-bold text-accentCyan bg-accentCyan/10 border border-accentCyan/20 px-2.5 py-1 rounded-md">
+                    23 / 23 Monate positiv
+                </span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 font-mono text-left">
+                <div class="p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
+                    <p class="text-[10px] text-zinc-500 uppercase">Tages-Durchschnitt</p>
+                    <p class="text-lg font-bold text-emerald-400 mt-0.5">+0.04%</p>
+                </div>
+                <div class="p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
+                    <p class="text-[10px] text-zinc-500 uppercase">Profit Factor</p>
+                    <p class="text-lg font-bold text-white mt-0.5">3.31</p>
+                </div>
+                <div class="p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
+                    <p class="text-[10px] text-zinc-500 uppercase">Ø Trade-Dauer</p>
+                    <p class="text-lg font-bold text-white mt-0.5">~12 min</p>
+                </div>
+                <div class="p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
+                    <p class="text-[10px] text-zinc-500 uppercase">Verlust-Monate</p>
+                    <p class="text-lg font-bold text-emerald-400 mt-0.5">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RECHNER 1: Profit Projection Engine (Exakte Formel aus Vorlage) -->
+        <div class="pt-2">
             <div class="text-center mb-8">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cardBg border border-cardBorder text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cardBg border border-cardBorder text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
                     <span class="w-1.5 h-1.5 rounded-full bg-accentCyan"></span> <span data-i18n="growthProj">Wachstums-Projektion</span>
                 </div>
-                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">Profit <span class="text-accentCyan" data-i18n="projTitle">Projektions-Engine</span></h2>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">Profit <span class="text-accentCyan" data-i18n="projTitle">Projektions-Engine</span></h2>
                 <p class="text-xs md:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed" data-i18n="projSub">
-                    Basierend auf der aggregierten Monatsrendite mit festem 1:30 Hebel, abzüglich 30% Performance-Fee.
+                    Modelliert aus dem verifizierten Myfxbook-Monatsschnitt von <strong>1.14%</strong>, gehebelt mit <strong>24x</strong> Broker-Effekt, abzüglich <strong>30%</strong> Performance-Fee (= <strong>19.15%</strong> netto / Monat).
                 </p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Controls -->
+                <!-- Eingaben -->
                 <div class="lg:col-span-5 glass-panel p-8 space-y-7">
                     <div>
                         <div class="flex justify-between items-end mb-1">
                             <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="projDeposit">Startkapital</label>
                             <div class="flex items-center">
                                 <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
-                                <input type="number" id="proj-deposit" value="10000" class="w-24 bg-transparent text-white font-mono font-bold text-right text-base outline-none">
+                                <input type="number" id="proj-deposit" value="10000" class="w-28 bg-transparent text-white font-mono font-bold text-right text-base outline-none">
                             </div>
                         </div>
-                        <input type="range" id="proj-deposit-slider" min="10" max="100000" step="10" value="10000">
+                        <input type="range" id="proj-deposit-slider" min="10" max="100000" step="50" value="10000">
                     </div>
 
                     <div>
@@ -116,69 +154,78 @@
                         <div class="flex justify-between items-end mb-1">
                             <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="projMonths">Laufzeit (Monate)</label>
                             <div class="flex items-center">
-                                <input type="number" id="proj-months" value="12" class="w-12 bg-transparent text-white font-mono font-bold text-right text-base outline-none">
+                                <input type="number" id="proj-months" value="12" min="1" max="12" class="w-12 bg-transparent text-white font-mono font-bold text-right text-base outline-none">
                             </div>
                         </div>
                         <input type="range" id="proj-months-slider" min="1" max="12" step="1" value="12">
                     </div>
+
+                    <!-- Berechnungsformel Info -->
+                    <div class="p-3 bg-darkBg/60 border border-cardBorder rounded-lg text-[11px] font-mono text-zinc-400 space-y-1">
+                        <p class="text-zinc-300 font-bold">Formel:</p>
+                        <p>net monthly = (1.14% × 24) × (1 - 30%) = <span class="text-accentCyan font-bold">19.15%</span></p>
+                    </div>
                 </div>
 
-                <!-- Ergebnisse -->
+                <!-- Ergebnisse & Meilensteine -->
                 <div class="lg:col-span-7 flex flex-col gap-4">
                     <div class="glass-panel p-8 text-center flex-1 flex flex-col justify-center relative overflow-hidden">
                         <div class="absolute inset-0 bg-gradient-to-b from-accentCyan/5 to-transparent pointer-events-none"></div>
-                        <p class="text-[10px] text-accentCyan uppercase tracking-widest font-bold mb-2"><span data-i18n="projAvgScen">Szenario nach</span> <span id="proj-res-month">12</span> <span data-i18n="monthsWord">Monaten</span></p>
-                        <p class="text-5xl md:text-6xl font-mono font-extrabold text-accentCyan tracking-tight mb-3" id="proj-res-balance">$0</p>
-                        <p class="text-xs text-zinc-400 font-mono"><span data-i18n="fromWord">Aus</span> <span class="text-white font-bold" id="proj-res-invested">$10'000</span> <span data-i18n="investedWord">investiert</span> · <strong class="text-emerald-400" id="proj-res-mult">0.0x</strong></p>
+                        <p class="text-[10px] text-accentCyan uppercase tracking-widest font-bold mb-2">
+                            <span data-i18n="projAvgScen">Szenario nach</span> <span id="proj-res-month">12</span> <span data-i18n="monthsWord">Monaten</span>
+                        </p>
+                        <p class="text-5xl md:text-6xl font-mono font-extrabold text-accentCyan tracking-tight mb-3" id="proj-res-balance">$81'887</p>
+                        <p class="text-xs text-zinc-400 font-mono">
+                            <span data-i18n="fromWord">Aus</span> <span class="text-white font-bold" id="proj-res-invested">$10'000</span> <span data-i18n="investedWord">investiert</span> · <strong class="text-emerald-400" id="proj-res-mult">8.2x</strong> your capital
+                        </p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="glass-panel p-5">
-                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="projCons">Konservativ</p>
-                            <p class="text-lg font-mono font-bold text-white mb-0.5" id="proj-cons-balance">$0</p>
+                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="projCons">Konservativ (~5.88% / Mo)</p>
+                            <p class="text-xl font-mono font-bold text-white mb-0.5" id="proj-cons-balance">$19'858</p>
                         </div>
                         <div class="glass-panel p-5">
-                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="projOpt">Optimistisch</p>
-                            <p class="text-lg font-mono font-bold text-white mb-0.5" id="proj-opt-balance">$0</p>
+                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="projOpt">Optimistisch (~35.28% / Mo)</p>
+                            <p class="text-xl font-mono font-bold text-white mb-0.5" id="proj-opt-balance">$368'805</p>
                         </div>
                     </div>
 
-                    <div class="glass-panel p-5 hidden md:block">
-                        <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-4 text-center" data-i18n="projMilestones">Meilensteine</p>
+                    <div class="glass-panel p-5">
+                        <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-3 text-center" data-i18n="projMilestones">Meilensteine (Konservativ / Durchschnitt / Optimistisch)</p>
                         <div class="grid grid-cols-4 gap-2 text-center divide-x divide-cardBorder font-mono">
-                            <div><p class="text-[9px] text-zinc-500 mb-2">M 1</p><p class="text-sm font-bold text-white" id="ms1-avg">$0</p></div>
-                            <div><p class="text-[9px] text-zinc-500 mb-2">M 3</p><p class="text-sm font-bold text-white" id="ms3-avg">$0</p></div>
-                            <div><p class="text-[9px] text-zinc-500 mb-2">M 6</p><p class="text-sm font-bold text-white" id="ms6-avg">$0</p></div>
-                            <div><p class="text-[9px] text-zinc-500 mb-2">M 12</p><p class="text-sm font-bold text-accentCyan" id="ms12-avg">$0</p></div>
+                            <div><p class="text-[9px] text-zinc-500 mb-1">M 1</p><p class="text-sm font-bold text-white" id="ms1-avg">$11'915</p></div>
+                            <div><p class="text-[9px] text-zinc-500 mb-1">M 3</p><p class="text-sm font-bold text-white" id="ms3-avg">$16'916</p></div>
+                            <div><p class="text-[9px] text-zinc-500 mb-1">M 6</p><p class="text-sm font-bold text-white" id="ms6-avg">$28'616</p></div>
+                            <div><p class="text-[9px] text-zinc-500 mb-1">M 12</p><p class="text-sm font-bold text-accentCyan" id="ms12-avg">$81'887</p></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="border-t border-cardBorder w-full my-8"></div>
+        <div class="border-t border-cardBorder w-full my-6"></div>
 
-        <!-- RECHNER 2: Historical Backtest Engine (1:1 Echtzeit-Daten, ohne künstlichen Multiplikator) -->
+        <!-- RECHNER 2: Historical Backtest Engine (1:1 reale Trades) -->
         <div>
             <div class="text-center mb-8">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-widest uppercase mb-4">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span data-i18n="btBadge">Echte Historische Daten (1:30 Hebel)</span>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span data-i18n="btBadge">Echte Historische Daten</span>
                 </div>
-                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">Historical <span class="text-emerald-400" data-i18n="btTitle">Backtest-Engine</span></h2>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">Historical <span class="text-emerald-400" data-i18n="btTitle">Backtest-Engine</span></h2>
                 <p class="text-xs md:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed" data-i18n="btSub">
-                    Simuliert den realen Gewinnverlauf 1:1 über historische Trades mit Original-Hebelwirkung.
+                    Simuliert den tatsächlichen Trade-Verlauf über die verifizierten Daten.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Controls -->
                 <div class="lg:col-span-5 glass-panel p-8 space-y-6">
                     <div>
                         <div class="flex justify-between items-end mb-2">
                             <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="btCapital">Startkapital</label>
                             <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 transition-colors">
                                 <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
-                                <input type="number" id="bt-capital" value="100000" class="w-24 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
+                                <input type="number" id="bt-capital" value="100000" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
                             </div>
                         </div>
                         <input type="range" id="bt-capital-slider" min="100" max="100000" step="100" value="100000" class="!accent-emerald-400">
@@ -204,7 +251,6 @@
                     </div>
                 </div>
 
-                <!-- Ergebnisse & Chart -->
                 <div class="lg:col-span-7 flex flex-col gap-4">
                     <div class="glass-panel p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div class="text-left w-full">
@@ -229,63 +275,39 @@
             </div>
         </div>
 
-        <!-- Trade Statistiken -->
-        <div class="pt-8">
-            <h2 class="text-xl font-extrabold text-white tracking-tight mb-4 px-2" data-i18n="tradeStats">Trade Statistiken</h2>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div class="glass-panel p-5 border-l-2 border-l-accentCyan">
-                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="totalTrades">Total Trades</p>
-                    <p class="text-2xl font-bold text-white font-mono" id="stat-total">0</p>
+        <!-- Trade Historie Tabelle -->
+        <div class="glass-panel overflow-hidden">
+            <div class="px-6 py-5 border-b border-cardBorder flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardBg/60">
+                <div>
+                    <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                        <span>Trades</span>
+                    </h2>
+                    <p class="text-xs text-zinc-400 mt-0.5">Öffentlich verifizierte Ausführungen direkt aus dem Broker-Feed</p>
                 </div>
-                <div class="glass-panel p-5 border-l-2 border-l-emerald-500">
-                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="winningTrades">Gewonnen</p>
-                    <p class="text-2xl font-bold text-emerald-400 font-mono" id="stat-wins">0</p>
-                </div>
-                <div class="glass-panel p-5 border-l-2 border-l-rose-500">
-                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="losingTrades">Verloren</p>
-                    <p class="text-2xl font-bold text-rose-400 font-mono" id="stat-losses">0</p>
-                </div>
-                <div class="glass-panel p-5 border-l-2 border-l-sky-500">
-                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="winRate">Win Rate</p>
-                    <p class="text-2xl font-bold text-sky-400 font-mono" id="stat-winrate">86.34%</p>
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold font-mono">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Closed Trades (<span id="stat-total">0</span>)
                 </div>
             </div>
 
-            <!-- Portal Styled Table -->
-            <div class="glass-panel overflow-hidden">
-                <div class="px-6 py-5 border-b border-cardBorder flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardBg/60">
-                    <div>
-                        <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
-                            <span>Trades</span>
-                        </h2>
-                        <p class="text-xs text-zinc-400 mt-0.5">Öffentlich verifizierte Ausführungen direkt aus dem Broker-Feed</p>
-                    </div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Closed Trades
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto max-h-[600px] table-scroll">
-                    <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
-                        <thead class="sticky top-0 bg-[#060B16] z-10 shadow-md">
-                            <tr class="text-zinc-400 uppercase tracking-wider text-[11px] border-b border-cardBorder">
-                                <th class="px-6 py-3.5 font-semibold">Strategy</th>
-                                <th class="px-6 py-3.5 font-semibold">Instrument</th>
-                                <th class="px-6 py-3.5 font-semibold">Type</th>
-                                <th class="px-6 py-3.5 font-semibold">Size</th>
-                                <th class="px-6 py-3.5 font-semibold">Date</th>
-                                <th class="px-6 py-3.5 font-semibold">Entry Price</th>
-                                <th class="px-6 py-3.5 font-semibold">Exit Price</th>
-                                <th class="px-6 py-3.5 font-semibold">Entry Time</th>
-                                <th class="px-6 py-3.5 font-semibold">Exit Time</th>
-                                <th class="px-6 py-3.5 font-semibold text-right">PnL (%)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="trades-table-body" class="divide-y divide-cardBorder/40 text-zinc-300 font-mono">
-                        </tbody>
-                    </table>
-                </div>
+            <div class="overflow-x-auto max-h-[600px] table-scroll">
+                <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
+                    <thead class="sticky top-0 bg-[#060B16] z-10 shadow-md">
+                        <tr class="text-zinc-400 uppercase tracking-wider text-[11px] border-b border-cardBorder">
+                            <th class="px-6 py-3.5 font-semibold">Strategy</th>
+                            <th class="px-6 py-3.5 font-semibold">Instrument</th>
+                            <th class="px-6 py-3.5 font-semibold">Type</th>
+                            <th class="px-6 py-3.5 font-semibold">Size</th>
+                            <th class="px-6 py-3.5 font-semibold">Date</th>
+                            <th class="px-6 py-3.5 font-semibold">Entry Price</th>
+                            <th class="px-6 py-3.5 font-semibold">Exit Price</th>
+                            <th class="px-6 py-3.5 font-semibold">Entry Time</th>
+                            <th class="px-6 py-3.5 font-semibold">Exit Time</th>
+                            <th class="px-6 py-3.5 font-semibold text-right">PnL (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trades-table-body" class="divide-y divide-cardBorder/40 text-zinc-300 font-mono">
+                    </tbody>
+                </table>
             </div>
         </div>
 

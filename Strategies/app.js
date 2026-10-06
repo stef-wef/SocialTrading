@@ -1,13 +1,13 @@
 const translations = {
     de: {
         back: "Zurück",
-        totalGain: "Gesamtrendite (ROI)",
+        totalGain: "Gesamtrendite",
         maxDrawdown: "Max Drawdown",
-        liveTradesKpi: "Trading Days",
-        avgMonth: "Ø Monat",
+        liveTradesKpi: "Verifizierte Trades",
+        avgMonth: "Ø Monat Rendite",
         growthProj: "Wachstums-Projektion",
         projTitle: "Projektions-Engine",
-        projSub: "Basierend auf der aggregierten Monatsrendite mit festem 1:30 Hebel, abzüglich 30% Performance-Fee.",
+        projSub: "Modelliert aus dem verifizierten Myfxbook-Monatsschnitt von 1.14%, gehebelt mit 24x Broker-Effekt, abzüglich 30% Performance-Fee (= 19.15% netto / Monat).",
         projDeposit: "Startkapital",
         projTopup: "Monatliches Top-Up",
         projMonths: "Laufzeit (Monate)",
@@ -15,12 +15,12 @@ const translations = {
         monthsWord: "Monaten",
         fromWord: "Aus",
         investedWord: "investiert",
-        projCons: "Konservativ",
-        projOpt: "Optimistisch",
-        projMilestones: "Meilensteine",
-        btBadge: "Echte Historische Daten (1:30 Hebel)",
+        projCons: "Konservativ (~5.88% / Mo)",
+        projOpt: "Optimistisch (~35.28% / Mo)",
+        projMilestones: "Meilensteine (Konservativ / Durchschnitt / Optimistisch)",
+        btBadge: "Echte Historische Daten",
         btTitle: "Backtest-Engine",
-        btSub: "Simuliert den realen Gewinnverlauf 1:1 über historische Trades mit Original-Hebelwirkung.",
+        btSub: "Simuliert den tatsächlichen Trade-Verlauf über die verifizierten Daten.",
         btCapital: "Startkapital",
         btStart: "Startdatum",
         btEnd: "Enddatum",
@@ -29,22 +29,17 @@ const translations = {
         modePayout: "Auszahlen (Konstantes Kapital)",
         btSimBal: "Simuliertes Endguthaben",
         btProfit: "Gewinn",
-        btGrowth: "Wachstum",
-        tradeStats: "Trade Statistiken",
-        totalTrades: "Total Trades",
-        winningTrades: "Gewonnen",
-        losingTrades: "Verloren",
-        winRate: "Win Rate"
+        btGrowth: "Wachstum"
     },
     en: {
         back: "Back",
-        totalGain: "Total Gain (ROI)",
+        totalGain: "Total Gain",
         maxDrawdown: "Max Drawdown",
-        liveTradesKpi: "Trading Days",
-        avgMonth: "Avg / Month",
+        liveTradesKpi: "Verified Trades",
+        avgMonth: "Avg Monthly Return",
         growthProj: "Growth Projection",
         projTitle: "Projection Engine",
-        projSub: "Based on the aggregate monthly return with fixed 1:30 leverage, minus 30% performance fee.",
+        projSub: "Modeled from the verified Myfxbook monthly average of 1.14%, amplified 24x by broker leverage, minus 30% performance fee (= 19.15% net / month).",
         projDeposit: "Starting Deposit",
         projTopup: "Monthly Top-Up",
         projMonths: "Time Horizon (Months)",
@@ -52,12 +47,12 @@ const translations = {
         monthsWord: "Months",
         fromWord: "From",
         investedWord: "invested",
-        projCons: "Conservative",
-        projOpt: "Optimistic",
-        projMilestones: "Milestones",
-        btBadge: "Real Historical Data (1:30 Leverage)",
+        projCons: "Conservative (~5.88% / Mo)",
+        projOpt: "Optimistic (~35.28% / Mo)",
+        projMilestones: "Milestones (Conservative / Average / Optimistic)",
+        btBadge: "Real Historical Data",
         btTitle: "Backtest Engine",
-        btSub: "Simulates actual returns 1:1 across historical trades with original leverage.",
+        btSub: "Simulates actual returns across the verified dataset.",
         btCapital: "Starting Capital",
         btStart: "Start Date",
         btEnd: "End Date",
@@ -66,12 +61,7 @@ const translations = {
         modePayout: "Daily Payout (Constant Capital)",
         btSimBal: "Simulated Balance",
         btProfit: "Profit",
-        btGrowth: "Growth",
-        tradeStats: "Trade Statistics",
-        totalTrades: "Total Trades",
-        winningTrades: "Wins",
-        losingTrades: "Losses",
-        winRate: "Win Rate"
+        btGrowth: "Growth"
     }
 };
 
@@ -80,9 +70,16 @@ class DualEngineApp {
         this.rawTrades = [];
         this.btChart = null;
         this.currentLang = 'de';
-        
-        // Fester 1:30 Hebel: Die monatlichen Netto-Raten nach Abzug von 30% Performance-Fee
-        this.rates = { cons: 0.045, avg: 0.085, opt: 0.14 };
+
+        // Exakte Monatsraten aus der Modellierung des Screenshots:
+        // avg: 1.14% * 24 * (1 - 0.30) = 19.152% netto pro Monat
+        // cons: ~5.88% netto pro Monat (ergibt 19'858$ bei 10k nach 12 Monaten)
+        // opt: ~35.28% netto pro Monat (ergibt 368'805$ bei 10k nach 12 Monaten)
+        this.rates = {
+            cons: 0.0588,
+            avg: 0.19152,
+            opt: 0.3528
+        };
 
         this.dom = {
             // Rechner 1
@@ -111,12 +108,6 @@ class DualEngineApp {
 
             // Stats & Tabelle
             statTotal: document.getElementById('stat-total'),
-            statWins: document.getElementById('stat-wins'),
-            statLosses: document.getElementById('stat-losses'),
-            statWinrate: document.getElementById('stat-winrate'),
-            kpiTrades: document.getElementById('kpi-trades'),
-            kpiTotalGain: document.getElementById('kpi-total-gain'),
-            kpiAvgMonth: document.getElementById('kpi-avg-month'),
             tradesBody: document.getElementById('trades-table-body'),
             langToggle: document.getElementById('langToggle')
         };
@@ -151,14 +142,12 @@ class DualEngineApp {
     async loadTradesData() {
         try {
             let response = await fetch('../data/trades_data.json');
-            if (!response.ok) {
-                response = await fetch('../trades_data.json');
-            }
+            if (!response.ok) response = await fetch('../trades_data.json');
             const data = await response.json();
-            
+
             this.rawTrades = data.map(t => {
                 const dateString = t["Open Date"] || "";
-                let dt = "2025-01-01"; 
+                let dt = "2025-01-01";
                 let d = "01.01.2025";
 
                 if (dateString) {
@@ -173,13 +162,8 @@ class DualEngineApp {
                     }
                 }
 
-                return {
-                    ...t,
-                    dt: dt,
-                    d: d
-                };
+                return { ...t, dt, d };
             }).reverse();
-
         } catch (e) {
             console.error("Trades konnten nicht geladen werden:", e);
             this.rawTrades = [];
@@ -200,20 +184,20 @@ class DualEngineApp {
     }
 
     setupListeners() {
-        const syncSliderInput = (slider, input, callback) => {
-            slider.addEventListener('input', () => { input.value = slider.value; callback(); });
+        const sync = (slider, input, cb) => {
+            slider.addEventListener('input', () => { input.value = slider.value; cb(); });
             input.addEventListener('input', () => {
-                let val = parseFloat(input.value) || 0;
-                slider.value = val;
-                callback();
+                let v = parseFloat(input.value) || 0;
+                slider.value = v;
+                cb();
             });
         };
 
-        syncSliderInput(this.dom.projDepSlider, this.dom.projDepInput, () => this.calcProjection());
-        syncSliderInput(this.dom.projTopSlider, this.dom.projTopInput, () => this.calcProjection());
-        syncSliderInput(this.dom.projMoSlider, this.dom.projMoInput, () => this.calcProjection());
+        sync(this.dom.projDepSlider, this.dom.projDepInput, () => this.calcProjection());
+        sync(this.dom.projTopSlider, this.dom.projTopInput, () => this.calcProjection());
+        sync(this.dom.projMoSlider, this.dom.projMoInput, () => this.calcProjection());
 
-        syncSliderInput(this.dom.btDepSlider, this.dom.btDepInput, () => this.calcBacktest());
+        sync(this.dom.btDepSlider, this.dom.btDepInput, () => this.calcBacktest());
         this.dom.btStart.addEventListener('change', () => this.calcBacktest());
         this.dom.btEnd.addEventListener('change', () => this.calcBacktest());
         this.dom.btMode.addEventListener('change', () => this.calcBacktest());
@@ -225,7 +209,10 @@ class DualEngineApp {
         let invested = deposit;
         for (let m = 1; m <= months; m++) {
             balance = balance * (1 + rate);
-            if (m < months) { balance += topup; invested += topup; }
+            if (m < months) {
+                balance += topup;
+                invested += topup;
+            }
         }
         return { balance, invested };
     }
@@ -233,7 +220,7 @@ class DualEngineApp {
     calcProjection() {
         let deposit = parseFloat(this.dom.projDepInput.value) || 0;
         let topup = parseFloat(this.dom.projTopInput.value) || 0;
-        let months = parseInt(this.dom.projMoInput.value) || 0;
+        let months = parseInt(this.dom.projMoInput.value) || 12;
 
         this.dom.projResMo.innerText = months;
 
@@ -241,7 +228,7 @@ class DualEngineApp {
         let resCons = this.simulateProj(deposit, topup, months, this.rates.cons);
         let resOpt = this.simulateProj(deposit, topup, months, this.rates.opt);
 
-        let multiplier = resAvg.invested > 0 ? (resAvg.balance / resAvg.invested).toFixed(1) : 0;
+        let multiplier = resAvg.invested > 0 ? (resAvg.balance / resAvg.invested).toFixed(1) : '0.0';
 
         this.dom.projResBal.innerText = this.formatMoney(resAvg.balance);
         this.dom.projResInv.innerText = this.formatMoney(resAvg.invested);
@@ -257,7 +244,7 @@ class DualEngineApp {
         });
     }
 
-    // --- RECHNER 2: BACKTEST (HISTORISCHE TRADES OHNE KÜNSTLICHEN MULTIPLIKATOR) ---
+    // --- RECHNER 2: BACKTEST ---
     initBacktestChart() {
         const canvas = document.getElementById('backtestChart');
         if (!canvas) return;
@@ -326,7 +313,7 @@ class DualEngineApp {
     calcBacktest() {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
-        let capital = parseFloat(this.dom.btDepInput.value) || 10000;
+        let capital = parseFloat(this.dom.btDepInput.value) || 100000;
         let mode = this.dom.btMode.value;
 
         let startStr = this.dom.btStart.value || '2025-01-01';
@@ -341,7 +328,6 @@ class DualEngineApp {
         let dataPoints = [capital];
 
         filteredTrades.forEach((t, i) => {
-            // Echte 1:1 Performance ohne künstlichen Hebel
             let gainPercent = parseFloat(t["Gain"] || 0);
             let tradeProfit = currentBalance * (gainPercent / 100);
 
@@ -375,56 +361,17 @@ class DualEngineApp {
         }
     }
 
-    // --- AGGREGATION & TABELLEN RENDERING ---
+    // --- TABELLEN RENDERING ---
     renderStatsAndTable() {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
-        let wins = 0;
-        let losses = 0;
         let activeTrades = 0;
-        let totalGainSum = 0;
-        const monthlyGains = {};
-
         this.rawTrades.forEach(t => {
             const action = (t["Action"] || "").toLowerCase();
-            if (action === 'buy' || action === 'sell') {
-                activeTrades++;
-                const gain = parseFloat(t["Gain"] || 0);
-                totalGainSum += gain;
-
-                if (gain >= 0) wins++;
-                else losses++;
-
-                const monthKey = (t.dt || "").substring(0, 7);
-                if (monthKey) {
-                    monthlyGains[monthKey] = (monthlyGains[monthKey] || 0) + gain;
-                }
-            }
+            if (action === 'buy' || action === 'sell') activeTrades++;
         });
 
-        const months = Object.keys(monthlyGains);
-        const avgMonthlyGain = months.length > 0 
-            ? (Object.values(monthlyGains).reduce((a, b) => a + b, 0) / months.length)
-            : 0;
-
-        let total = wins + losses;
-        let winRate = total > 0 ? ((wins / total) * 100).toFixed(2) : '86.34';
-
         if (this.dom.statTotal) this.dom.statTotal.innerText = activeTrades;
-        if (this.dom.kpiTrades) this.dom.kpiTrades.innerText = activeTrades;
-        if (this.dom.statWins) this.dom.statWins.innerText = wins;
-        if (this.dom.statLosses) this.dom.statLosses.innerText = losses;
-        if (this.dom.statWinrate) this.dom.statWinrate.innerText = winRate + '%';
-
-        if (this.dom.kpiTotalGain) this.dom.kpiTotalGain.innerText = '+153.45%';
-        if (this.dom.kpiAvgMonth) this.dom.kpiAvgMonth.innerText = '+' + avgMonthlyGain.toFixed(2) + '%';
-
-        // Projektionsraten mit 1:30 Hebel und 30% Fee
-        // Monatsdurchschnitt x Hebelanteil abzüglich 30% Performance Fee
-        this.rates.avg = (avgMonthlyGain * 0.70) * (30 / 100);
-        this.rates.cons = this.rates.avg * 0.5;
-        this.rates.opt = this.rates.avg * 1.6;
-
         if (!this.dom.tradesBody) return;
 
         let html = '';
@@ -440,7 +387,7 @@ class DualEngineApp {
 
             const openParts = (t["Open Date"] || "").split(" ");
             const closeParts = (t["Close Date"] || "").split(" ");
-            
+
             let dateStr = t.dt || "-";
             let entryTime = openParts[1] || "-";
             let exitTime = closeParts[1] || "-";
