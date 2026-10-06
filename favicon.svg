@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A101C"/>
+      <stop offset="100%" stop-color="#040914"/>
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF"/>
+      <stop offset="100%" stop-color="#00A3FF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Abgerundeter Hintergrund -->
+  <rect width="64" height="64" rx="16" fill="url(#bgGrad)" stroke="#1A2436" stroke-width="2"/>
+
+  <!-- Dynamisches Sonic/Trading Icon -->
+  <path d="M36 8 L18 34 L32 34 L26 56 L46 28 L32 28 Z" 
+        fill="url(#cyanGrad)" 
+        stroke="#00E5FF" 
+        stroke-width="1.5" 
+        stroke-linejoin="round"/>
+</svg>

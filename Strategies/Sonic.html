@@ -18,26 +18,134 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
-                    colors: { darkBg: '#040914', cardBg: '#0A101C', cardBorder: '#1A2436', accentCyan: '#00E5FF' }
+                    fontFamily: { 
+                        sans: ['Plus Jakarta Sans', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'], 
+                        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'] 
+                    },
+                    colors: { 
+                        darkBg: '#040914', 
+                        cardBg: '#0A101C', 
+                        cardBorder: '#1A2436', 
+                        accentCyan: '#00E5FF' 
+                    }
                 }
             }
         }
     </script>
     <style>
-        body { background-color: #040914; color: #F8FAFC; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; }
-        .glass-panel { background-color: #0A101C; border: 1px solid #1A2436; border-radius: 14px; }
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; height: 20px; }
-        input[type=range]:focus { outline: none; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; cursor: pointer; background: #1A2436; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #00E5FF; cursor: pointer; margin-top: -7px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.4); border: 2px solid #040914; transition: transform 0.1s; }
-        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
-        input[type="date"] { color-scheme: dark; }
+        /* Cross-Browser Font & Antialiasing */
+        html, body {
+            background-color: #040914 !important;
+            color: #F8FAFC;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        .glass-panel { 
+            background-color: #0A101C; 
+            border: 1px solid #1A2436; 
+            border-radius: 14px; 
+        }
+
+        /* --- CROSS-BROWSER RANGE SLIDER (Chrome & Firefox Fix) --- */
+        input[type=range] { 
+            -webkit-appearance: none; 
+            -moz-appearance: none;
+            appearance: none;
+            width: 100%; 
+            background: transparent; 
+            height: 20px; 
+            cursor: pointer;
+        }
+        input[type=range]:focus { 
+            outline: none; 
+        }
+
+        /* WebKit / Chrome / Safari Track & Thumb */
+        input[type=range]::-webkit-slider-runnable-track { 
+            width: 100%; 
+            height: 3px; 
+            cursor: pointer; 
+            background: #1A2436; 
+            border-radius: 9999px;
+            border: none;
+        }
+        input[type=range]::-webkit-slider-thumb { 
+            -webkit-appearance: none; 
+            appearance: none;
+            height: 16px; 
+            width: 16px; 
+            border-radius: 50%; 
+            background: #00E5FF; 
+            cursor: pointer; 
+            margin-top: -6.5px; 
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); 
+            border: 2px solid #040914; 
+            transition: transform 0.1s ease-in-out; 
+        }
+        input[type=range]::-webkit-slider-thumb:hover { 
+            transform: scale(1.2); 
+        }
+
+        /* Gecko / Firefox Track & Thumb */
+        input[type=range]::-moz-range-track { 
+            width: 100%; 
+            height: 3px; 
+            cursor: pointer; 
+            background: #1A2436; 
+            border-radius: 9999px;
+            border: none;
+        }
+        input[type=range]::-moz-range-thumb { 
+            height: 14px; 
+            width: 14px; 
+            border-radius: 50%; 
+            background: #00E5FF; 
+            cursor: pointer; 
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); 
+            border: 2px solid #040914; 
+            transition: transform 0.1s ease-in-out; 
+        }
+        input[type=range]::-moz-range-thumb:hover { 
+            transform: scale(1.2); 
+        }
+        input[type=range]::-moz-range-progress {
+            background-color: transparent;
+        }
+
+        /* Number Inputs ohne Pfeile (Firefox & Chrome) */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] { 
+            -moz-appearance: textfield; 
+            appearance: textfield;
+        }
+
+        /* Dark-Mode Kalenderanzeige für Firefox & Chrome */
+        input[type="date"] { 
+            color-scheme: dark; 
+        }
+
+        /* Scrollbars einheitlich (Firefox & WebKit) */
+        .table-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #1A2436 #0A101C;
+        }
         .table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .table-scroll::-webkit-scrollbar-track { background: #0A101C; }
         .table-scroll::-webkit-scrollbar-thumb { background: #1A2436; border-radius: 4px; }
+        .table-scroll::-webkit-scrollbar-thumb:hover { background: #00E5FF; }
+
+        /* Firefox Sticky-Border-Fix in Tabellen */
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -82,7 +190,7 @@
             </div>
         </div>
 
-        <!-- Erweiterte Kennzahlen-Grid (8 Performance Metrics aus Vorlage) -->
+        <!-- Performance Metrics Grid -->
         <div class="glass-panel p-6">
             <div class="flex items-center justify-between pb-4 mb-4 border-b border-cardBorder">
                 <div>
@@ -113,7 +221,7 @@
             </div>
         </div>
 
-        <!-- RECHNER 1: Profit Projection Engine (Exakte Formel aus Vorlage) -->
+        <!-- RECHNER 1: Profit Projection Engine -->
         <div class="pt-2">
             <div class="text-center mb-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cardBg border border-cardBorder text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
@@ -160,14 +268,13 @@
                         <input type="range" id="proj-months-slider" min="1" max="12" step="1" value="12">
                     </div>
 
-                    <!-- Berechnungsformel Info -->
                     <div class="p-3 bg-darkBg/60 border border-cardBorder rounded-lg text-[11px] font-mono text-zinc-400 space-y-1">
                         <p class="text-zinc-300 font-bold">Formel:</p>
                         <p>net monthly = (1.14% × 24) × (1 - 30%) = <span class="text-accentCyan font-bold">19.15%</span></p>
                     </div>
                 </div>
 
-                <!-- Ergebnisse & Meilensteine -->
+                <!-- Ergebnisse -->
                 <div class="lg:col-span-7 flex flex-col gap-4">
                     <div class="glass-panel p-8 text-center flex-1 flex flex-col justify-center relative overflow-hidden">
                         <div class="absolute inset-0 bg-gradient-to-b from-accentCyan/5 to-transparent pointer-events-none"></div>
@@ -206,7 +313,7 @@
 
         <div class="border-t border-cardBorder w-full my-6"></div>
 
-        <!-- RECHNER 2: Historical Backtest Engine (1:1 reale Trades) -->
+        <!-- RECHNER 2: Historical Backtest Engine -->
         <div>
             <div class="text-center mb-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
@@ -228,7 +335,7 @@
                                 <input type="number" id="bt-capital" value="100000" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
                             </div>
                         </div>
-                        <input type="range" id="bt-capital-slider" min="100" max="100000" step="100" value="100000" class="!accent-emerald-400">
+                        <input type="range" id="bt-capital-slider" min="100" max="100000" step="100" value="100000">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -290,7 +397,7 @@
             </div>
 
             <div class="overflow-x-auto max-h-[600px] table-scroll">
-                <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
+                <table class="w-full text-left text-xs whitespace-nowrap">
                     <thead class="sticky top-0 bg-[#060B16] z-10 shadow-md">
                         <tr class="text-zinc-400 uppercase tracking-wider text-[11px] border-b border-cardBorder">
                             <th class="px-6 py-3.5 font-semibold">Strategy</th>
