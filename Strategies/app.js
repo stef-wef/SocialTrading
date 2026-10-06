@@ -7,7 +7,7 @@ const translations = {
         avgMonth: "Ø Monat Rendite",
         growthProj: "Wachstums-Projektion",
         projTitle: "Projektions-Engine",
-        projSub: "Basierend auf dem echten historischen Monatsschnitt von +1.14%. Keine spekulativen Multiplikatoren.",
+        projSub: "Modelliert aus dem verifizierten Myfxbook-Monatsschnitt von 1.14%, gehebelt mit 24x Broker-Effekt, abzüglich 30% Performance-Fee (= 19.15% netto / Monat).",
         projDeposit: "Startkapital",
         projTopup: "Monatliches Top-Up",
         projMonths: "Laufzeit (Monate)",
@@ -15,12 +15,12 @@ const translations = {
         monthsWord: "Monaten",
         fromWord: "Aus",
         investedWord: "investiert",
-        projCons: "Konservativ (0.80% / Mo)",
-        projOpt: "Optimistisch (1.60% / Mo)",
-        projMilestones: "Meilensteine bei 1.14% / Monat",
-        btBadge: "Echte Historische Daten",
+        projCons: "Konservativ (~5.88% / Mo)",
+        projOpt: "Optimistisch (~35.28% / Mo)",
+        projMilestones: "Meilensteine (Konservativ / Durchschnitt / Optimistisch)",
+        btBadge: "Echte Historische Daten (Gehebelt & Netto)",
         btTitle: "Backtest-Engine",
-        btSub: "Simuliert den tatsächlichen Trade-Verlauf über die verifizierten Daten inklusive monatlicher Zuzahlung.",
+        btSub: "Simuliert den Trade-Verlauf mit synchronisierter Hebel-Skalierung (16.8x Netto) und monatlicher Zuzahlung.",
         btCapital: "Startkapital",
         btStart: "Startdatum",
         btEnd: "Enddatum",
@@ -39,7 +39,7 @@ const translations = {
         avgMonth: "Avg Monthly Return",
         growthProj: "Growth Projection",
         projTitle: "Projection Engine",
-        projSub: "Based on the verified historical monthly average of +1.14%. No speculative multipliers.",
+        projSub: "Modeled from the verified Myfxbook monthly average of 1.14%, amplified 24x by broker leverage, minus 30% performance fee (= 19.15% net / month).",
         projDeposit: "Starting Deposit",
         projTopup: "Monthly Top-Up",
         projMonths: "Time Horizon (Months)",
@@ -47,12 +47,12 @@ const translations = {
         monthsWord: "Months",
         fromWord: "From",
         investedWord: "invested",
-        projCons: "Conservative (0.80% / Mo)",
-        projOpt: "Optimistic (1.60% / Mo)",
-        projMilestones: "Milestones at 1.14% / Month",
-        btBadge: "Real Historical Data",
+        projCons: "Conservative (~5.88% / Mo)",
+        projOpt: "Optimistic (~35.28% / Mo)",
+        projMilestones: "Milestones (Conservative / Average / Optimistic)",
+        btBadge: "Real Historical Data (Leveraged Net)",
         btTitle: "Backtest Engine",
-        btSub: "Simulates actual returns across the verified dataset including monthly top-up.",
+        btSub: "Simulates trade history with synchronized leverage scaling (16.8x net) and monthly top-up.",
         btCapital: "Starting Capital",
         btStart: "Start Date",
         btEnd: "End Date",
@@ -71,12 +71,16 @@ class DualEngineApp {
         this.btChart = null;
         this.currentLang = 'de';
 
-        // Reale monatliche Renditen ohne theoretische Multiplikatoren
+        // Variante B: Aggressive Hebel-Raten (19.152% netto pro Monat)
         this.rates = {
-            cons: 0.0080, // 0.80% / Monat
-            avg: 0.0114,  // 1.14% / Monat (der echte Myfxbook-Schnitt)
-            opt: 0.0160   // 1.60% / Monat
+            cons: 0.0588,
+            avg: 0.19152,
+            opt: 0.3528
         };
+
+        // Skalierungsfaktor für Variante B im Backtest:
+        // 24x Hebel abzüglich 30% Fee -> 24 * (1 - 0.30) = 16.8
+        this.backtestLeverageMult = 24 * 0.70;
 
         this.dom = {
             // Rechner 1
@@ -219,7 +223,7 @@ class DualEngineApp {
         this.dom.btMode.addEventListener('change', () => this.calcBacktest());
     }
 
-    // --- RECHNER 1: PROJEKTION ---
+    // --- RECHNER 1: PROJEKTION (VARIANTE B) ---
     simulateProj(deposit, topup, months, rate) {
         let balance = deposit;
         let invested = deposit;
@@ -244,7 +248,7 @@ class DualEngineApp {
         let resCons = this.simulateProj(deposit, topup, months, this.rates.cons);
         let resOpt = this.simulateProj(deposit, topup, months, this.rates.opt);
 
-        let multiplier = resAvg.invested > 0 ? (resAvg.balance / resAvg.invested).toFixed(2) : '1.00';
+        let multiplier = resAvg.invested > 0 ? (resAvg.balance / resAvg.invested).toFixed(1) : '0.0';
 
         this.dom.projResBal.innerText = this.formatMoney(resAvg.balance);
         this.dom.projResInv.innerText = this.formatMoney(resAvg.invested);
@@ -260,7 +264,7 @@ class DualEngineApp {
         });
     }
 
-    // --- RECHNER 2: HISTORICAL BACKTEST ENGINE (INKL. TOP-UP) ---
+    // --- RECHNER 2: HISTORICAL BACKTEST ENGINE (VARIANTE B INKL. TOP-UP) ---
     initBacktestChart() {
         const canvas = document.getElementById('backtestChart');
         if (!canvas) return;
@@ -329,7 +333,7 @@ class DualEngineApp {
     calcBacktest() {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
-        let capital = parseFloat(this.dom.btDepInput.value) || 50000;
+        let capital = parseFloat(this.dom.btDepInput.value) || 10000;
         let topup = parseFloat(this.dom.btTopInput ? this.dom.btTopInput.value : 0) || 0;
         let mode = this.dom.btMode.value;
 
@@ -347,7 +351,7 @@ class DualEngineApp {
         let dataPoints = [capital];
 
         filteredTrades.forEach((t, i) => {
-            // Monatliches Top-Up hinzufügen, sobald ein neuer Monat beginnt
+            // Monatliches Top-Up hinzufügen
             const currentMonth = t.dt.substring(0, 7);
             if (lastMonth && currentMonth !== lastMonth && topup > 0) {
                 currentBalance += topup;
@@ -355,9 +359,9 @@ class DualEngineApp {
             }
             lastMonth = currentMonth;
 
-            // Trade Profit basierend auf aktuellem Kontostand
-            let gainPercent = t.parsedGain;
-            let tradeProfit = currentBalance * (gainPercent / 100);
+            // Variante B: Trade-Gain wird mit der Netto-Hebelskalierung (16.8x) gerechnet
+            let scaledGainPercent = t.parsedGain * this.backtestLeverageMult;
+            let tradeProfit = currentBalance * (scaledGainPercent / 100);
 
             if (mode === 'reinvest') {
                 currentBalance += tradeProfit;
