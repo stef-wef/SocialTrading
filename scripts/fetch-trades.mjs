@@ -3,10 +3,10 @@ import path from 'path';
 
 const EMAIL = process.env.MYFXBOOK_EMAIL;
 const PASSWORD = process.env.MYFXBOOK_PASSWORD;
-const ACCOUNT_ID_1 = process.env.MYFXBOOK_ACCOUNT_ID_1;
-const ACCOUNT_ID_2 = process.env.MYFXBOOK_ACCOUNT_ID_2;
+const SONIC_ACCOUNT_ID = process.env.MYFXBOOK_ACCOUNT_ID_1; // Sonic Strategy
+const NEO_ACCOUNT_ID = process.env.MYFXBOOK_ACCOUNT_ID_2;   // Neo Strategy
 
-if (!EMAIL || !PASSWORD || !ACCOUNT_ID_1) {
+if (!EMAIL || !PASSWORD || !SONIC_ACCOUNT_ID) {
   console.error('Fehlende Umgebungsvariablen.');
   process.exit(1);
 }
@@ -43,32 +43,30 @@ async function run() {
 
     const session = loginData.session;
 
-    console.log('Lade Daten für Account 1...');
-    const trades1 = await fetchAccountHistory(session, ACCOUNT_ID_1);
-
-    let trades2 = [];
-    if (ACCOUNT_ID_2) {
-      console.log('Lade Daten für Account 2...');
-      trades2 = await fetchAccountHistory(session, ACCOUNT_ID_2);
-    }
-
-    await fetch(`https://www.myfxbook.com/api/logout.json?session=${session}`, { headers });
-
-    const output = {
-      lastUpdated: new Date().toISOString(),
-      strategy1: trades1,
-      strategy2: trades2,
-    };
-
     const targetDir = path.resolve(process.cwd(), 'data');
     if (!fs.existsSync(targetDir)) {
       fs.mkdirSync(targetDir, { recursive: true });
     }
 
-    const filePath = path.join(targetDir, 'trades.json');
-    fs.writeFileSync(filePath, JSON.stringify(output, null, 2), 'utf-8');
+    // 1. Sonic Trades holen und speichern
+    console.log('Lade Daten für Sonic...');
+    const sonicTrades = await fetchAccountHistory(session, SONIC_ACCOUNT_ID);
+    const sonicPath = path.join(targetDir, 'Sonic_TradesData.json');
+    fs.writeFileSync(sonicPath, JSON.stringify(sonicTrades, null, 2), 'utf-8');
+    console.log(`Sonic gespeichert in: ${sonicPath}`);
 
-    console.log(`Erfolgreich gespeichert in: ${filePath}`);
+    // 2. NEO Trades holen und speichern (falls Secret vorhanden)
+    if (NEO_ACCOUNT_ID) {
+      console.log('Lade Daten für NEO...');
+      const neoTrades = await fetchAccountHistory(session, NEO_ACCOUNT_ID);
+      const neoPath = path.join(targetDir, 'NEO_TradesData.json');
+      fs.writeFileSync(neoPath, JSON.stringify(neoTrades, null, 2), 'utf-8');
+      console.log(`NEO gespeichert in: ${neoPath}`);
+    }
+
+    // Logout
+    await fetch(`https://www.myfxbook.com/api/logout.json?session=${session}`, { headers });
+    console.log('Erfolgreich abgeschlossen.');
   } catch (error) {
     console.error('Fehler beim Abrufen der Trades:', error);
     process.exit(1);
