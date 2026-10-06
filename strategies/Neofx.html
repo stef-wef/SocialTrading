@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="de" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEO.FX | Performance & Rechner</title>
+    
+    <!-- Online Favicon -->
+    <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/lucide:zap.svg?color=%2300E5FF">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['Plus Jakarta Sans', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'], 
+                        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'] 
+                    },
+                    colors: { 
+                        darkBg: '#040914', 
+                        cardBg: '#0A101C', 
+                        cardBorder: '#1A2436', 
+                        accentCyan: '#00E5FF' 
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html, body {
+            background-color: #040914 !important;
+            color: #F8FAFC;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        .glass-panel { 
+            background-color: #0A101C; 
+            border: 1px solid #1A2436; 
+            border-radius: 14px; 
+        }
+
+        input[type=range] { 
+            -webkit-appearance: none; 
+            -moz-appearance: none;
+            appearance: none;
+            width: 100%; 
+            background: transparent; 
+            height: 20px; 
+            cursor: pointer;
+        }
+        input[type=range]:focus { outline: none; }
+
+        input[type=range]::-webkit-slider-runnable-track { 
+            width: 100%; 
+            height: 3px; 
+            cursor: pointer; 
+            background: #1A2436; 
+            border-radius: 9999px;
+        }
+        input[type=range]::-webkit-slider-thumb { 
+            -webkit-appearance: none; 
+            appearance: none;
+            height: 16px; 
+            width: 16px; 
+            border-radius: 50%; 
+            background: #00E5FF; 
+            cursor: pointer; 
+            margin-top: -6.5px; 
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); 
+            border: 2px solid #040914; 
+            transition: transform 0.1s ease-in-out; 
+        }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        input[type=range]::-moz-range-track { 
+            width: 100%; 
+            height: 3px; 
+            cursor: pointer; 
+            background: #1A2436; 
+            border-radius: 9999px;
+        }
+        input[type=range]::-moz-range-thumb { 
+            height: 14px; 
+            width: 14px; 
+            border-radius: 50%; 
+            background: #00E5FF; 
+            cursor: pointer; 
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); 
+            border: 2px solid #040914; 
+            transition: transform 0.1s ease-in-out; 
+        }
+        input[type=range]::-moz-range-thumb:hover { transform: scale(1.2); }
+        input[type=range]::-moz-range-progress { background-color: transparent; }
+
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] { 
+            -moz-appearance: textfield; 
+            appearance: textfield;
+        }
+
+        input[type="date"] { color-scheme: dark; }
+
+        .table-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #1A2436 #0A101C;
+        }
+        .table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .table-scroll::-webkit-scrollbar-track { background: #0A101C; }
+        .table-scroll::-webkit-scrollbar-thumb { background: #1A2436; border-radius: 4px; }
+        .table-scroll::-webkit-scrollbar-thumb:hover { background: #00E5FF; }
+
+        table { border-collapse: separate; border-spacing: 0; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-[1240px] mx-auto space-y-12">
+
+        <!-- Header -->
+        <div class="text-center pt-8 pb-2 relative">
+            <a href="../index.html" class="absolute left-0 top-8 text-zinc-400 hover:text-accentCyan flex items-center gap-2 text-xs font-bold uppercase tracking-wider transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> <span data-i18n="back">Zurück</span>
+            </a>
+            <button id="langToggle" class="absolute right-0 top-8 text-xs font-bold text-zinc-400 hover:text-white px-2.5 py-1 border border-cardBorder rounded-lg transition-colors">
+                EN
+            </button>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-2">NEO.FX</h1>
+            <p class="text-sm text-zinc-400 font-medium">Forex (EUR/USD) · Tag Markets · 1:30 Leverage</p>
+        </div>
+
+        <!-- 4 Haupt-KPIs -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="glass-panel p-6 text-center">
+                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2">Gesamtrendite (ROI)</p>
+                <p class="text-3xl font-extrabold text-emerald-400 font-mono">+74.52%</p>
+                <p class="text-[10px] text-zinc-500 mt-1 font-mono">+$745.22 USD</p>
+            </div>
+            <div class="glass-panel p-6 text-center">
+                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2">Max Drawdown</p>
+                <p class="text-3xl font-extrabold text-rose-400 font-mono">0.90%</p>
+                <p class="text-[10px] text-zinc-500 mt-1 font-mono">Account Risk</p>
+            </div>
+            <div class="glass-panel p-6 text-center">
+                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2">Trading Days</p>
+                <p class="text-3xl font-extrabold text-white font-mono" id="kpi-trades">153</p>
+                <p class="text-[10px] text-zinc-500 mt-1 font-mono">156 Closed Trades</p>
+            </div>
+            <div class="glass-panel p-6 text-center">
+                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2">Win Rate</p>
+                <p class="text-3xl font-extrabold text-accentCyan font-mono">91.03%</p>
+                <p class="text-[10px] text-zinc-500 mt-1 font-mono">142 Win / 14 Lose</p>
+            </div>
+        </div>
+
+        <!-- Details Grid -->
+        <div class="glass-panel p-6">
+            <div class="flex items-center justify-between pb-4 mb-4 border-b border-cardBorder">
+                <div>
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-zinc-300">Account & Pool Details</h2>
+                    <p class="text-xs text-zinc-500 mt-0.5">Offizieller Amplify-Pool auf Tag Markets</p>
+                </div>
+                <span class="text-xs font-mono font-bold text-accentCyan bg-accentCyan/10 border border-accentCyan/20 px-2.5 py-1 rounded-md">
+                    Followers: 43'814
+                </span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 font-mono text-left">
+                <div class="p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
+                    <p class="text-[10px] text-zinc-500 uppercase">AUM Pool</p>
+                    <p class="text-base sm:text-lg font-bold text-emerald-400 mt-0.5">$20,700,689</p>
+                </div>
+                <div class="p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
+                    <p class="text-[10px] text-zinc-500 uppercase">Performance Fee</p>
+                    <p class="text-base sm:text-lg font-bold text-white mt-0.5">30%</p>
+                </div>
+                <div class="p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
+                    <p class="text-[10px] text-zinc-500 uppercase">Ø Trade-Dauer</p>
+                    <p class="text-base sm:text-lg font-bold text-white mt-0.5">0.04 Days</p>
+                </div>
+                <div class="p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
+                    <p class="text-[10px] text-zinc-500 uppercase">Min. Investment</p>
+                    <p class="text-base sm:text-lg font-bold text-white mt-0.5">$10.00</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RECHNER 1: Profit Projection Engine -->
+        <div class="pt-2">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cardBg border border-cardBorder text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
+                    <span class="w-1.5 h-1.5 rounded-full bg-accentCyan"></span> Wachstums-Projektion
+                </div>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">NEO.FX <span class="text-accentCyan">Projektions-Engine</span></h2>
+                <p class="text-xs md:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+                    Modelliert aus der verifizierten Performance von EUR/USD, hochgerechnet mit 1:30 Hebel abzüglich 30% Performance-Fee.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Inputs -->
+                <div class="lg:col-span-5 glass-panel p-8 space-y-7">
+                    <div>
+                        <div class="flex justify-between items-end mb-1">
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Startkapital</label>
+                            <div class="flex items-center">
+                                <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
+                                <input type="number" id="proj-deposit" value="10000" class="w-28 bg-transparent text-white font-mono font-bold text-right text-base outline-none">
+                            </div>
+                        </div>
+                        <input type="range" id="proj-deposit-slider" min="100" max="100000" step="100" value="10000">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-end mb-1">
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Monatliches Top-Up</label>
+                            <div class="flex items-center">
+                                <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
+                                <input type="number" id="proj-topup" value="0" class="w-24 bg-transparent text-white font-mono font-bold text-right text-base outline-none">
+                            </div>
+                        </div>
+                        <input type="range" id="proj-topup-slider" min="0" max="10000" step="50" value="0">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-end mb-1">
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Laufzeit (Monate)</label>
+                            <div class="flex items-center">
+                                <input type="number" id="proj-months" value="12" min="1" max="24" class="w-12 bg-transparent text-white font-mono font-bold text-right text-base outline-none">
+                            </div>
+                        </div>
+                        <input type="range" id="proj-months-slider" min="1" max="24" step="1" value="12">
+                    </div>
+
+                    <div class="p-3 bg-darkBg/60 border border-cardBorder rounded-lg text-[11px] font-mono text-zinc-400 space-y-1">
+                        <p class="text-zinc-300 font-bold">Formel (EUR/USD Amplify):</p>
+                        <p>Netto monatliche Skalierung nach Gebühr = <span class="text-accentCyan font-bold">~14.50%</span></p>
+                    </div>
+                </div>
+
+                <!-- Ergebnisse -->
+                <div class="lg:col-span-7 flex flex-col gap-4">
+                    <div class="glass-panel p-8 text-center flex-1 flex flex-col justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-b from-accentCyan/5 to-transparent pointer-events-none"></div>
+                        <p class="text-[10px] text-accentCyan uppercase tracking-widest font-bold mb-2">
+                            Szenario nach <span id="proj-res-month">12</span> Monaten
+                        </p>
+                        <p class="text-5xl md:text-6xl font-mono font-extrabold text-accentCyan tracking-tight mb-3" id="proj-res-balance">$50'725</p>
+                        <p class="text-xs text-zinc-400 font-mono">
+                            Aus <span class="text-white font-bold" id="proj-res-invested">$10'000</span> investiert · <strong class="text-emerald-400" id="proj-res-mult">5.1x</strong>
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="glass-panel p-5">
+                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Konservativ (~5.0% / Mo)</p>
+                            <p class="text-xl font-mono font-bold text-white mb-0.5" id="proj-cons-balance">$17'958</p>
+                        </div>
+                        <div class="glass-panel p-5">
+                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Optimistisch (~22.0% / Mo)</p>
+                            <p class="text-xl font-mono font-bold text-white mb-0.5" id="proj-opt-balance">$108'722</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-5">
+                        <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-3 text-center">Meilensteine</p>
+                        <div class="grid grid-cols-4 gap-2 text-center divide-x divide-cardBorder font-mono">
+                            <div><p class="text-[9px] text-zinc-500 mb-1">M 1</p><p class="text-sm font-bold text-white" id="ms1-avg">$11'450</p></div>
+                            <div><p class="text-[9px] text-zinc-500 mb-1">M 3</p><p class="text-sm font-bold text-white" id="ms3-avg">$15'010</p></div>
+                            <div><p class="text-[9px] text-zinc-500 mb-1">M 6</p><p class="text-sm font-bold text-white" id="ms6-avg">$22'531</p></div>
+                            <div><p class="text-[9px] text-zinc-500 mb-1">M 12</p><p class="text-sm font-bold text-accentCyan" id="ms12-avg">$50'725</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risikohinweis -->
+        <div class="mt-8 p-4 md:p-5 rounded-2xl bg-rose-950/10 border border-rose-500/25 flex items-start gap-3.5 text-left">
+            <div class="p-1 rounded-md text-rose-400 shrink-0 mt-0.5">
+                <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+            </div>
+            <div class="text-[11px] md:text-xs leading-relaxed text-zinc-400 font-sans">
+                <strong class="text-white font-semibold">Nur zur Veranschaulichung — keine Erfolgsgarantie.</strong>
+                <span>
+                    Dies ist eine mathematische Veranschaulichung basierend auf dem bisherigen Track Record und keine Renditegarantie. Der Devisen- und CFD-Handel beinhaltet erhebliche Risiken für Ihr eingesetztes Kapital. Handeln Sie nur mit Geldern, deren Verlust Sie sich leisten können.
+                </span>
+            </div>
+        </div>
+
+        <div class="border-t border-cardBorder w-full my-6"></div>
+
+        <!-- RECHNER 2: Historical Backtest Engine -->
+        <div>
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Echte Historische Daten (NEO.FX)
+                </div>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">Historical <span class="text-emerald-400">Backtest-Engine</span></h2>
+                <p class="text-xs md:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+                    Simuliert den realen Gewinnverlauf über geschlossene Trades inklusive monatlicher Zuzahlung.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-5 glass-panel p-8 space-y-6">
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Startkapital</label>
+                            <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 transition-colors">
+                                <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
+                                <input type="number" id="bt-capital" value="10000" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
+                            </div>
+                        </div>
+                        <input type="range" id="bt-capital-slider" min="100" max="100000" step="100" value="10000">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Monatliches Top-Up</label>
+                            <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 transition-colors">
+                                <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
+                                <input type="number" id="bt-topup" value="0" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
+                            </div>
+                        </div>
+                        <input type="range" id="bt-topup-slider" min="0" max="10000" step="50" value="0">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2">Startdatum</label>
+                            <input type="date" id="bt-start-date" class="w-full bg-darkBg border border-cardBorder rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-emerald-400">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2">Enddatum</label>
+                            <input type="date" id="bt-end-date" class="w-full bg-darkBg border border-cardBorder rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-emerald-400">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2">Gewinn-Modus</label>
+                        <select id="bt-mode-select" class="w-full appearance-none bg-darkBg border border-cardBorder rounded px-3 py-2.5 text-xs text-white font-mono font-semibold outline-none focus:border-emerald-400 cursor-pointer">
+                            <option value="reinvest">Täglich Reinvestieren (Zinseszins)</option>
+                            <option value="payout">Auszahlen (Konstantes Kapital)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 flex flex-col gap-4">
+                    <div class="glass-panel p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="text-left w-full">
+                            <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Simuliertes Endguthaben</p>
+                            <p class="text-4xl font-mono font-extrabold text-emerald-400 tracking-tight" id="bt-res-balance">$0.00</p>
+                        </div>
+                        <div class="flex gap-6 w-full justify-end border-t sm:border-t-0 sm:border-l border-cardBorder pt-4 sm:pt-0 sm:pl-6">
+                            <div>
+                                <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Reingewinn</p>
+                                <p class="text-lg font-mono font-bold text-white" id="bt-res-profit">+$0.00</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Wachstum</p>
+                                <p class="text-lg font-mono font-bold text-emerald-400" id="bt-res-growth">+0.00%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 flex-1 min-h-[260px] relative">
+                        <canvas id="backtestChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trade Historie Tabelle -->
+        <div class="glass-panel overflow-hidden">
+            <div class="px-6 py-5 border-b border-cardBorder flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardBg/60">
+                <div>
+                    <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                        <span>Trades</span>
+                    </h2>
+                    <p class="text-xs text-zinc-400 mt-0.5">Öffentlich verifizierte EUR/USD Ausführungen</p>
+                </div>
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold font-mono">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Closed Trades (<span id="stat-total">156</span>)
+                </div>
+            </div>
+
+            <div class="overflow-x-auto max-h-[600px] table-scroll">
+                <table class="w-full text-left text-xs whitespace-nowrap">
+                    <thead class="sticky top-0 bg-[#060B16] z-10 shadow-md">
+                        <tr class="text-zinc-400 uppercase tracking-wider text-[11px] border-b border-cardBorder">
+                            <th class="px-6 py-3.5 font-semibold">Strategy</th>
+                            <th class="px-6 py-3.5 font-semibold">Instrument</th>
+                            <th class="px-6 py-3.5 font-semibold">Type</th>
+                            <th class="px-6 py-3.5 font-semibold">Size</th>
+                            <th class="px-6 py-3.5 font-semibold">Date</th>
+                            <th class="px-6 py-3.5 font-semibold">Entry Price</th>
+                            <th class="px-6 py-3.5 font-semibold">Exit Price</th>
+                            <th class="px-6 py-3.5 font-semibold">Entry Time</th>
+                            <th class="px-6 py-3.5 font-semibold">Exit Time</th>
+                            <th class="px-6 py-3.5 font-semibold text-right">PnL (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trades-table-body" class="divide-y divide-cardBorder/40 text-zinc-300 font-mono">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+    <script>if (typeof lucide !== 'undefined') lucide.createIcons();</script>
+</body>
+</html>
