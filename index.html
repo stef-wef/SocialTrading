@@ -39,23 +39,17 @@
     <!-- Header -->
     <header class="w-full border-b border-cardBorder px-6 py-4 flex justify-between items-center bg-darkBg/90 backdrop-blur-md sticky top-0 z-50">
         <div class="flex items-center gap-3">
-            <h1 class="text-xl font-extrabold tracking-tight text-white">TAG<span class="text-accentCyan">MARKETS</span></h1>
+            <h1 class="text-3xl italic font-black tracking-tighter text-white">TAG</h1>
         </div>
         <div class="flex items-center gap-4">
             <button id="langToggle" class="text-xs font-bold text-zinc-400 hover:text-white px-2 py-1 border border-cardBorder rounded transition-colors">
                 EN
             </button>
-            <div class="flex items-center gap-2 px-3 py-1.5 rounded bg-cardBg border border-cardBorder text-[10px] text-zinc-300 font-mono">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> <span data-i18n="apiConnected">Myfxbook API Verbunden</span>
-            </div>
         </div>
     </header>
 
     <!-- Hero Section -->
     <main class="flex-1 w-full max-w-6xl mx-auto px-6 py-20 text-center">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-6">
-            <span class="w-1.5 h-1.5 rounded-full bg-accentCyan"></span> <span data-i18n="verifiedBadge">Verified by Myfxbook - Live Account</span>
-        </div>
         <h2 class="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6 leading-tight">
             <span data-i18n="heroTitle1">Fakten,</span> <span class="text-accentCyan" data-i18n="heroTitle2">keine Versprechen.</span>
         </h2>
@@ -78,8 +72,6 @@
     <script>
         const i18n = {
             de: {
-                apiConnected: "Myfxbook API Verbunden",
-                verifiedBadge: "Verifiziert durch Myfxbook",
                 heroTitle1: "Fakten,",
                 heroTitle2: "keine Versprechen.",
                 heroSub: "Jeder Trade, jeden Monat — öffentlich verifizierbar. Analysiere die echte Historie direkt über die verbundene Broker-Schnittstelle.",
@@ -89,11 +81,11 @@
                 tradesLost: "Trades Lost",
                 winRate: "Winrate",
                 checkPerformance: "Performance prüfen",
-                descSonic: "Vollautomatisiertes Handelssystem für Gold. Konstantes Wachstum, algorithmische Risikoabsicherung."
+                descSonic: "Vollautomatisiertes Handelssystem für Gold. Konstantes Wachstum, algorithmische Risikoabsicherung.",
+                descNeo: "Hochpräziser Forex-Bot mit Fokus auf EUR/USD Paare. Konstante Gewinne bei geringer Volatilität.",
+                descPhantom: "Aggressives Momentum-Trading auf den US30 Index. Maximiertes Wachstum für höhere Risikotoleranz."
             },
             en: {
-                apiConnected: "Myfxbook API Connected",
-                verifiedBadge: "Verified by Myfxbook",
                 heroTitle1: "Proof,",
                 heroTitle2: "not promises.",
                 heroSub: "Every trade, every month — publicly verifiable. Access our live accounts and analyze the real history directly via the connected broker API.",
@@ -103,7 +95,9 @@
                 tradesLost: "Trades Lost",
                 winRate: "Winrate",
                 checkPerformance: "Check Performance",
-                descSonic: "Fully automated trading system for gold. Consistent growth with algorithmic risk hedging."
+                descSonic: "Fully automated trading system for gold. Consistent growth with algorithmic risk hedging.",
+                descNeo: "High-precision Forex bot focusing on EUR/USD. Consistent profits during low volatility.",
+                descPhantom: "Aggressive momentum trading on the US30 Index. Maximized growth for higher risk tolerance."
             }
         };
 
@@ -123,6 +117,7 @@
             updateLang();
         });
 
+        // Strategien inkl. neuen Platzhaltern
         const strategiesData = [
             {
                 id: "sonic-ai",
@@ -134,6 +129,28 @@
                 tradesLost: "101",
                 winRate: "83.84%",
                 url: "Strategies/Sonic.html"
+            },
+            {
+                id: "neo-fx",
+                name: "NEO.FX",
+                asset: "EURUSD",
+                descKey: "descNeo",
+                tradesMade: "1450",
+                tradesWon: "1042",
+                tradesLost: "408",
+                winRate: "71.87%",
+                url: "#"
+            },
+            {
+                id: "phantom",
+                name: "PHANTOM",
+                asset: "US30",
+                descKey: "descPhantom",
+                tradesMade: "320",
+                tradesWon: "250",
+                tradesLost: "70",
+                winRate: "78.12%",
+                url: "#"
             }
         ];
 
