@@ -195,7 +195,7 @@ class DualEngineApp {
         let data = null;
         for (const file of candidateFiles) {
             try {
-                const response = await fetch(file);
+                let response = await fetch(file);
                 if (response.ok) {
                     data = await response.json();
                     break;
@@ -476,18 +476,27 @@ class DualEngineApp {
                     },
                     tooltip: {
                         backgroundColor: '#0A101C',
-                        titleColor: '#94959A',
+                        titleColor: '#00E5FF',
                         bodyColor: '#FFFFFF',
                         borderColor: '#1A2436',
                         borderWidth: 1,
                         padding: 12,
                         displayColors: true,
                         callbacks: {
-                            title: (items) => items[0].label || '',
+                            title: (items) => `📅 Datum: ${items[0].label}`,
                             label: (ctx) => {
                                 let label = ctx.dataset.label || '';
                                 let val = '$' + ctx.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                                 return `${label}: ${val}`;
+                            },
+                            afterBody: (items) => {
+                                if (items.length >= 2) {
+                                    let balance = items[0].parsed.y;
+                                    let invested = items[1].parsed.y;
+                                    let profit = balance - invested;
+                                    let sign = profit >= 0 ? '+' : '';
+                                    return `\n💰 Net Profit: ${sign}$${profit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                                }
                             }
                         }
                     }
@@ -662,8 +671,6 @@ class DualEngineApp {
         if (!this.dom.tradesBody) return;
 
         let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
-        
-        // Sortiere absteigend nach Datum (Neueste zuerst)
         let tableTrades = [...tradesOnly].sort((a, b) => new Date(b.dt) - new Date(a.dt));
 
         if (!tableTrades || tableTrades.length === 0) {
