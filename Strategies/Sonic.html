@@ -239,55 +239,40 @@
             </div>
         </div>
 
-        <!-- Trade Statistiken -->
-        <div class="pt-8">
-            <h2 class="text-xl font-extrabold text-white tracking-tight mb-4 px-2" data-i18n="tradeStats">Trade Statistiken</h2>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div class="glass-panel p-5 border-l-2 border-l-accentCyan">
-                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="totalTrades">Total Trades</p>
-                    <p class="text-2xl font-bold text-white font-mono" id="stat-total">0</p>
+        <!-- Trade Historie / Closed Trades Table -->
+        <div class="glass-panel overflow-hidden">
+            <div class="px-6 py-5 border-b border-cardBorder flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardBg/60">
+                <div>
+                    <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                        <span>Trades</span>
+                    </h2>
+                    <p class="text-xs text-zinc-400 mt-0.5">Öffentlich verifizierte Ausführungen direkt aus dem Broker-Feed</p>
                 </div>
-                <div class="glass-panel p-5 border-l-2 border-l-emerald-500">
-                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="winningTrades">Gewonnen</p>
-                    <p class="text-2xl font-bold text-emerald-400 font-mono" id="stat-wins">0</p>
-                </div>
-                <div class="glass-panel p-5 border-l-2 border-l-rose-500">
-                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="losingTrades">Verloren</p>
-                    <p class="text-2xl font-bold text-rose-400 font-mono" id="stat-losses">0</p>
-                </div>
-                <div class="glass-panel p-5 border-l-2 border-l-sky-500">
-                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="winRate">Win Rate</p>
-                    <p class="text-2xl font-bold text-sky-400 font-mono" id="stat-winrate">0.00%</p>
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Closed Trades
                 </div>
             </div>
 
-            <!-- Ledger -->
-            <div class="glass-panel overflow-hidden">
-                <div class="px-6 py-5 border-b border-cardBorder flex justify-between items-center bg-cardBg/50">
-                    <div>
-                        <div class="inline-flex items-center gap-2 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[9px] font-mono font-bold tracking-widest uppercase mb-2">
-                            Read-Only Ledger
-                        </div>
-                        <h2 class="text-xl font-extrabold text-white tracking-tight"><span data-i18n="ledgerTitle1">Die komplette Trade-Historie,</span> <span class="text-accentCyan" data-i18n="ledgerTitle2">Zeile für Zeile.</span></h2>
-                    </div>
-                </div>
-                <div class="overflow-x-auto max-h-[550px] table-scroll">
-                    <table class="w-full text-left border-collapse text-xs font-mono whitespace-nowrap">
-                        <thead class="sticky top-0 bg-darkBg z-10 shadow-md">
-                            <tr class="text-zinc-500 uppercase tracking-widest border-b border-cardBorder">
-                                <th class="px-6 py-4 font-semibold" data-i18n="colDate">Datum / Zeit</th>
-                                <th class="px-6 py-4 font-semibold" data-i18n="colAsset">Asset</th>
-                                <th class="px-6 py-4 font-semibold">Einstieg ➔ Ausstieg</th>
-                                <th class="px-6 py-4 font-semibold">Dauer</th>
-                                <th class="px-6 py-4 font-semibold">Pips</th>
-                                <th class="px-6 py-4 font-semibold text-right" data-i18n="colProfit">Profit %</th>
-                            </tr>
-                        </thead>
-                        <tbody id="trades-table-body" class="divide-y divide-cardBorder/50 text-zinc-300">
-                        </tbody>
-                    </table>
-                </div>
+            <div class="overflow-x-auto max-h-[600px] table-scroll">
+                <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
+                    <thead class="sticky top-0 bg-[#060B16] z-10 shadow-md">
+                        <tr class="text-zinc-400 uppercase tracking-wider text-[11px] border-b border-cardBorder">
+                            <th class="px-6 py-3.5 font-semibold">Strategy</th>
+                            <th class="px-6 py-3.5 font-semibold">Instrument</th>
+                            <th class="px-6 py-3.5 font-semibold">Type</th>
+                            <th class="px-6 py-3.5 font-semibold">Size</th>
+                            <th class="px-6 py-3.5 font-semibold">Date</th>
+                            <th class="px-6 py-3.5 font-semibold">Entry Price</th>
+                            <th class="px-6 py-3.5 font-semibold">Exit Price</th>
+                            <th class="px-6 py-3.5 font-semibold">Entry Time</th>
+                            <th class="px-6 py-3.5 font-semibold">Exit Time</th>
+                            <th class="px-6 py-3.5 font-semibold text-right">PnL (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trades-table-body" class="divide-y divide-cardBorder/40 text-zinc-300 font-mono">
+                        <!-- Wird dynamisch durch app.js befüllt -->
+                    </tbody>
+                </table>
             </div>
         </div>
 

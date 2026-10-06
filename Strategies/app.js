@@ -396,7 +396,6 @@ class DualEngineApp {
         }
     }
 
-    // --- STATISTIKEN & HISTORIE TABELLE ---
     renderStatsAndTable() {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
@@ -406,8 +405,7 @@ class DualEngineApp {
 
         this.rawTrades.forEach(t => {
             const action = (t["Action"] || "").toLowerCase();
-            // Ein- und Auszahlungen ignorieren
-            if(action === 'buy' || action === 'sell') {
+            if (action === 'buy' || action === 'sell') {
                 activeTrades++;
                 if (parseFloat(t["Gain"] || 0) >= 0) wins++;
                 else losses++;
@@ -425,39 +423,61 @@ class DualEngineApp {
 
         if (!this.dom.tradesBody) return;
 
-        // Tabelle von neustem Datum zu ältestem
         let html = '';
         const reversedTrades = [...this.rawTrades].reverse();
 
         reversedTrades.forEach(t => {
-            const action = (t["Action"] || "").toUpperCase();
-            if(action !== 'BUY' && action !== 'SELL') return; // Deposits/Withdrawals ausblenden
+            const rawAction = (t["Action"] || "").toUpperCase();
+            if (rawAction !== 'BUY' && rawAction !== 'SELL') return; // Deposits/Withdrawals ausblenden
+
+            // Direction & Typ mapping (Long = Buy, Short = Sell)
+            const isLong = rawAction === 'BUY';
+            const typeLabel = isLong ? 'Long' : 'Short';
+            const typeColor = isLong ? 'text-emerald-400' : 'text-rose-400';
+
+            // Zeitstempel zerlegen (z.B. "10/02/2026 16:27")
+            const openParts = (t["Open Date"] || "").split(" ");
+            const closeParts = (t["Close Date"] || "").split(" ");
+            
+            // Reines Datum & Uhrzeiten formatieren
+            let dateStr = t.dt || "-";
+            let entryTime = openParts[1] || "-";
+            let exitTime = closeParts[1] || "-";
+
+            // Preise, Lots & Gain
+            const openPrice = t["Open Price"] !== undefined ? Number(t["Open Price"]).toFixed(2) : '-';
+            const closePrice = t["Close Price"] !== undefined ? Number(t["Close Price"]).toFixed(2) : '-';
+            const lots = t["Units/Lots"] !== undefined ? `${Number(t["Units/Lots"]).toFixed(2)} Lots` : '-';
 
             const gainVal = parseFloat(t["Gain"] || 0);
             const isProfit = gainVal >= 0;
             const profitClass = isProfit ? 'text-emerald-400' : 'text-rose-400';
-            
-            const badgeClass = action === 'BUY' 
-                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                : 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+            const formattedGain = `${isProfit ? '+' : ''}${gainVal.toFixed(2)}%`;
 
-            const typeBadge = `<span class="px-2 py-0.5 rounded border font-bold ${badgeClass}">${action}</span> <span class="ml-2 text-zinc-400 text-[10px]">${t["Symbol"] || 'XAUUSD'}</span>`;
-            
-            // Reale Daten aus der JSON verwenden
-            const openPrice = t["Open Price"] !== undefined ? t["Open Price"] : '-';
-            const closePrice = t["Close Price"] !== undefined ? t["Close Price"] : '-';
-            const priceFlow = `${openPrice} &rarr; ${closePrice}`;
-            const duration = t["Duration (DD:HH:MM:SS)"] || '-';
-            const pips = t["Pips"] !== undefined ? t["Pips"] : '-';
+            // SVG Sonic Logo Badge wie im Screenshot
+            const sonicLogo = `
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px]">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5v-2.1c2.1-.3 3.5-1.7 3.5-3.4 0-1.6-1.2-2.7-2.8-2.9v-2c1.9.3 2.9 1.4 3 2.8h1.8c-.2-2.4-1.9-4.2-4.8-4.5V3h-1.4v1.4c-2.3.3-4.1 1.9-4.1 4 0 2 1.6 3.3 3.7 3.7v2.3c-2-.3-3.2-1.5-3.3-3.1H6.9c.2 2.6 2.1 4.5 4.7 4.8v2.4h1.4z"/>
+                        </svg>
+                    </div>
+                    <span class="font-extrabold text-white text-xs tracking-wide">SONIC</span>
+                </div>
+            `;
 
             html += `
-                <tr class="hover:bg-cardBorder/30 transition-colors">
-                    <td class="px-6 py-3.5 text-zinc-400">${t.d}</td>
-                    <td class="px-6 py-3.5 font-semibold">${typeBadge}</td>
-                    <td class="px-6 py-3.5 text-zinc-400">${priceFlow}</td>
-                    <td class="px-6 py-3.5 text-zinc-400">${duration}</td>
-                    <td class="px-6 py-3.5 text-zinc-400">${pips}</td>
-                    <td class="px-6 py-3.5 text-right font-bold ${profitClass}">${isProfit ? '+' : ''}${gainVal.toFixed(2)}%</td>
+                <tr class="hover:bg-cardBorder/25 transition-colors border-b border-cardBorder/30">
+                    <td class="px-6 py-4 font-sans">${sonicLogo}</td>
+                    <td class="px-6 py-4 font-semibold text-zinc-300">${t["Symbol"] || 'XAUUSD'}.f</td>
+                    <td class="px-6 py-4 font-semibold ${typeColor}">${typeLabel}</td>
+                    <td class="px-6 py-4 text-zinc-400">${lots}</td>
+                    <td class="px-6 py-4 text-zinc-300 font-semibold">${dateStr}</td>
+                    <td class="px-6 py-4 text-white font-bold">${openPrice}</td>
+                    <td class="px-6 py-4 text-white font-bold">${closePrice}</td>
+                    <td class="px-6 py-4 text-zinc-400">${entryTime}</td>
+                    <td class="px-6 py-4 text-zinc-400">${exitTime}</td>
+                    <td class="px-6 py-4 text-right font-extrabold ${profitClass} text-sm">${formattedGain}</td>
                 </tr>
             `;
         });
