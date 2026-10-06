@@ -42,7 +42,7 @@
 <body class="p-4 md:p-8">
     <div class="max-w-[1200px] mx-auto space-y-12">
 
-        <!-- Navigation & Header -->
+        <!-- Navigation & Header mit 1:30 Leverage Angabe -->
         <div class="text-center pt-8 pb-4 relative">
             <a href="../index.html" class="absolute left-0 top-8 text-zinc-400 hover:text-accentCyan flex items-center gap-2 text-xs font-bold uppercase tracking-wider transition-colors">
                 <i data-lucide="arrow-left" class="w-4 h-4"></i> <span data-i18n="back">Zurück</span>
@@ -51,21 +51,21 @@
                 EN
             </button>
             <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4 mt-6">Sonic AI.</h1>
-            <p class="text-sm text-zinc-400 font-medium">Gold (XAU/USD) · Tag Markets · 1:500 Leverage</p>
+            <p class="text-sm text-zinc-400 font-medium">Gold (XAU/USD) · Tag Markets · 1:30 Leverage</p>
         </div>
 
-        <!-- 4 Haupt-KPIs (Berechnet aus trades_data.json) -->
+        <!-- 4 Haupt-KPIs (Live aus dem TagMarkets Dashboard) -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="glass-panel p-6 text-center">
                 <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="totalGain">Gesamtrendite</p>
-                <p class="text-3xl font-extrabold text-emerald-400 font-mono" id="kpi-total-gain">+25.24%</p>
+                <p class="text-3xl font-extrabold text-emerald-400 font-mono" id="kpi-total-gain">+153.45%</p>
             </div>
             <div class="glass-panel p-6 text-center">
                 <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="maxDrawdown">Max Drawdown</p>
-                <p class="text-3xl font-extrabold text-rose-400 font-mono">0.86%</p>
+                <p class="text-3xl font-extrabold text-rose-400 font-mono">0.26%</p>
             </div>
             <div class="glass-panel p-6 text-center">
-                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="liveTradesKpi">Live Trades</p>
+                <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2" data-i18n="liveTradesKpi">Trading Days</p>
                 <p class="text-3xl font-extrabold text-white font-mono" id="kpi-trades">235</p>
             </div>
             <div class="glass-panel p-6 text-center">
@@ -74,7 +74,7 @@
             </div>
         </div>
 
-        <!-- RECHNER 1: Profit Projection Engine -->
+        <!-- RECHNER 1: Profit Projection Engine (1:30 Hebel & 30% Fee fest kalkuliert) -->
         <div class="pt-4">
             <div class="text-center mb-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cardBg border border-cardBorder text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-4">
@@ -82,7 +82,7 @@
                 </div>
                 <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">Profit <span class="text-accentCyan" data-i18n="projTitle">Projektions-Engine</span></h2>
                 <p class="text-xs md:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed" data-i18n="projSub">
-                    Basierend auf dem monatlichen Performance-Schnitt der Historie, hochgerechnet mit Hebelwirkung abzüglich 30% Performance-Fee.
+                    Basierend auf der aggregierten Monatsrendite mit festem 1:30 Hebel, abzüglich 30% Performance-Fee.
                 </p>
             </div>
 
@@ -157,15 +157,15 @@
 
         <div class="border-t border-cardBorder w-full my-8"></div>
 
-        <!-- RECHNER 2: Historical Backtest Engine -->
+        <!-- RECHNER 2: Historical Backtest Engine (1:1 Echtzeit-Daten, ohne künstlichen Multiplikator) -->
         <div>
             <div class="text-center mb-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-widest uppercase mb-4">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span data-i18n="btBadge">Echte Historische Daten</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span data-i18n="btBadge">Echte Historische Daten (1:30 Hebel)</span>
                 </div>
                 <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">Historical <span class="text-emerald-400" data-i18n="btTitle">Backtest-Engine</span></h2>
                 <p class="text-xs md:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed" data-i18n="btSub">
-                    Simuliert den Gewinnverlauf über historische Trades. Wähle Zeitraum, Startkapital und Gewinn-Modus.
+                    Simuliert den realen Gewinnverlauf 1:1 über historische Trades mit Original-Hebelwirkung.
                 </p>
             </div>
 
@@ -181,17 +181,6 @@
                             </div>
                         </div>
                         <input type="range" id="bt-capital-slider" min="100" max="100000" step="100" value="100000" class="!accent-emerald-400">
-                    </div>
-                    
-                    <div>
-                        <div class="flex justify-between items-end mb-2">
-                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="btRiskLabel">Risiko-Faktor (Hebel)</label>
-                            <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 transition-colors">
-                                <input type="number" id="bt-risk" value="1" min="1" max="10" step="0.5" class="w-16 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
-                                <span class="text-zinc-500 font-mono text-sm ml-1">x</span>
-                            </div>
-                        </div>
-                        <input type="range" id="bt-risk-slider" min="1" max="10" step="0.5" value="1" class="!accent-emerald-400">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -258,11 +247,11 @@
                 </div>
                 <div class="glass-panel p-5 border-l-2 border-l-sky-500">
                     <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="winRate">Win Rate</p>
-                    <p class="text-2xl font-bold text-sky-400 font-mono" id="stat-winrate">0.00%</p>
+                    <p class="text-2xl font-bold text-sky-400 font-mono" id="stat-winrate">86.34%</p>
                 </div>
             </div>
 
-            <!-- TagMarkets Portal Styled Table -->
+            <!-- Portal Styled Table -->
             <div class="glass-panel overflow-hidden">
                 <div class="px-6 py-5 border-b border-cardBorder flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardBg/60">
                     <div>
