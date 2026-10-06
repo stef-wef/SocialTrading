@@ -23,6 +23,7 @@ const translations = {
         btTitle: "Backtest-Engine",
         btSub: "Simuliert den Gewinnverlauf über historische Trades. Wähle Zeitraum, Startkapital und Gewinn-Modus.",
         btCapital: "Startkapital",
+        btRiskLabel: "Risiko-Faktor (Hebel)",
         btStart: "Startdatum",
         btEnd: "Enddatum",
         btMode: "Gewinn-Modus",
@@ -39,7 +40,7 @@ const translations = {
         ledgerTitle1: "Die komplette Trade-Historie,",
         ledgerTitle2: "Zeile für Zeile.",
         colDate: "Datum / Zeit",
-        colType: "Art",
+        colAsset: "Asset / Typ",
         colProfit: "Profit %"
     },
     en: {
@@ -66,6 +67,7 @@ const translations = {
         btTitle: "Backtest Engine",
         btSub: "Simulates returns across historical trades. Select timeframe, capital, and mode.",
         btCapital: "Starting Capital",
+        btRiskLabel: "Risk Multiplier (Leverage)",
         btStart: "Start Date",
         btEnd: "End Date",
         btMode: "Profit Mode",
@@ -82,7 +84,7 @@ const translations = {
         ledgerTitle1: "A live trade ledger,",
         ledgerTitle2: "line by line.",
         colDate: "Date / Time",
-        colType: "Type",
+        colAsset: "Asset / Type",
         colProfit: "Profit %"
     }
 };
@@ -112,6 +114,8 @@ class DualEngineApp {
             // Rechner 2
             btDepInput: document.getElementById('bt-capital'),
             btDepSlider: document.getElementById('bt-capital-slider'),
+            btRiskInput: document.getElementById('bt-risk'),
+            btRiskSlider: document.getElementById('bt-risk-slider'),
             btStart: document.getElementById('bt-start-date'),
             btEnd: document.getElementById('bt-end-date'),
             btMode: document.getElementById('bt-mode-select'),
@@ -142,12 +146,12 @@ class DualEngineApp {
         }
         this.applyTranslations();
 
-        // Asynchrones Laden der JSON-Daten aus dem data Ordner
+        // Asynchrones Laden der JSON-Daten aus dem Data Ordner
         await this.loadTradesData();
 
         if (!this.dom.projDepInput) return;
 
-        // Datum für Rechner 2 vorbelegen (ältestes bis neuestes)
+        // Start und Enddatum für den Backtest automatisch belegen
         if (this.rawTrades.length > 0) {
             this.dom.btStart.value = this.rawTrades[0].dt;
             this.dom.btEnd.value = this.rawTrades[this.rawTrades.length - 1].dt;
@@ -162,26 +166,26 @@ class DualEngineApp {
 
     async loadTradesData() {
         try {
-            const response = await fetch('../data/trades_data.json');
+            // Lade die genaue Datei aus dem Ordner, der im Screenshot referenziert ist
+            const response = await fetch('../data/trades_data_2.json');
             const data = await response.json();
             
-            // JSON ist meistens "neueste zuerst" (index 0 = 2026), 
-            // für die Backtest Engine aufsteigend sortieren (älteste zuerst).
+            // Die Trades sind meistens aktuellste zuerst (Index 0 = z.B. 2026), 
+            // für die Backtest Kurve brauchen wir sie chronologisch aufsteigend (älteste zuerst).
             this.rawTrades = data.map(t => {
-                // Falls "Open Date" im Format "10/02/2026 16:27" ist
                 const dateString = t["Open Date"] || "";
                 let dt = "2024-01-01"; 
                 let d = "01.01.2024";
 
                 if (dateString) {
-                    const datePart = dateString.split(" ")[0]; // "10/02/2026" (MM/DD/YYYY)
+                    const datePart = dateString.split(" ")[0]; // "10/02/2026"
                     const parts = datePart.split("/");
                     if(parts.length === 3) {
                         const MM = parts[0].padStart(2, '0');
                         const DD = parts[1].padStart(2, '0');
                         const YYYY = parts[2];
-                        dt = `${YYYY}-${MM}-${DD}`; // YYYY-MM-DD für Input type=date
-                        d = `${DD}.${MM}.${YYYY}`; // Anzeige
+                        dt = `${YYYY}-${MM}-${DD}`; // Datumsformat für HTML input type=date
+                        d = `${DD}.${MM}.${YYYY} ${dateString.split(" ")[1] || ''}`; // Format für Tabelle
                     }
                 }
 
@@ -193,7 +197,7 @@ class DualEngineApp {
             }).reverse();
 
         } catch (e) {
-            console.error("Trades konnten nicht geladen werden:", e);
+            console.error("Trades konnten nicht geladen werden. Läuft das Projekt über einen lokalen Server?", e);
             this.rawTrades = [];
         }
     }
@@ -215,7 +219,7 @@ class DualEngineApp {
         const syncSliderInput = (slider, input, callback) => {
             slider.addEventListener('input', () => { input.value = slider.value; callback(); });
             input.addEventListener('input', () => {
-                let val = parseInt(input.value) || 0;
+                let val = parseFloat(input.value) || 0;
                 slider.value = val;
                 callback();
             });
@@ -228,6 +232,7 @@ class DualEngineApp {
 
         // Rechner 2
         syncSliderInput(this.dom.btDepSlider, this.dom.btDepInput, () => this.calcBacktest());
+        syncSliderInput(this.dom.btRiskSlider, this.dom.btRiskInput, () => this.calcBacktest());
         this.dom.btStart.addEventListener('change', () => this.calcBacktest());
         this.dom.btEnd.addEventListener('change', () => this.calcBacktest());
         this.dom.btMode.addEventListener('change', () => this.calcBacktest());
@@ -341,6 +346,7 @@ class DualEngineApp {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
         let capital = parseFloat(this.dom.btDepInput.value) || 10000;
+        let riskMult = parseFloat(this.dom.btRiskInput.value) || 1; // Der neue Risiko-Faktor
         let mode = this.dom.btMode.value;
 
         let startStr = this.dom.btStart.value || '2024-01-01';
@@ -356,7 +362,8 @@ class DualEngineApp {
         let dataPoints = [capital];
 
         filteredTrades.forEach((t, i) => {
-            let gainPercent = parseFloat(t["Gain"] || 0);
+            // Gain berechnen unter Berücksichtigung des gewählten Risiko-Faktors
+            let gainPercent = parseFloat(t["Gain"] || 0) * riskMult;
             let tradeProfit = currentBalance * (gainPercent / 100);
 
             if (mode === 'reinvest') {
@@ -368,7 +375,7 @@ class DualEngineApp {
             }
 
             if (i % 15 === 0 || i === filteredTrades.length - 1) {
-                labels.push(t.d);
+                labels.push(t.d.split(" ")[0]); // Nur das Datum fürs Chart
             } else {
                 labels.push('');
             }
@@ -398,8 +405,8 @@ class DualEngineApp {
         let activeTrades = 0;
 
         this.rawTrades.forEach(t => {
-            // Relevante Trades filtern (Deposit/Withdrawal ignorieren)
             const action = (t["Action"] || "").toLowerCase();
+            // Ein- und Auszahlungen ignorieren
             if(action === 'buy' || action === 'sell') {
                 activeTrades++;
                 if (parseFloat(t["Gain"] || 0) >= 0) wins++;
@@ -424,7 +431,7 @@ class DualEngineApp {
 
         reversedTrades.forEach(t => {
             const action = (t["Action"] || "").toUpperCase();
-            if(action !== 'BUY' && action !== 'SELL') return; // Deposits ausblenden
+            if(action !== 'BUY' && action !== 'SELL') return; // Deposits/Withdrawals ausblenden
 
             const gainVal = parseFloat(t["Gain"] || 0);
             const isProfit = gainVal >= 0;
@@ -434,17 +441,22 @@ class DualEngineApp {
                 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
                 : 'bg-rose-500/10 text-rose-400 border-rose-500/20';
 
-            const typeBadge = `<span class="px-2 py-0.5 rounded border font-bold ${badgeClass}">${action}</span>`;
+            const typeBadge = `<span class="px-2 py-0.5 rounded border font-bold ${badgeClass}">${action}</span> <span class="ml-2 text-zinc-400 text-[10px]">${t["Symbol"] || 'XAUUSD'}</span>`;
             
-            const priceFlow = `${t["Open Price"] || '-'} &rarr; ${t["Close Price"] || '-'}`;
+            // Reale Daten aus der JSON verwenden
+            const openPrice = t["Open Price"] !== undefined ? t["Open Price"] : '-';
+            const closePrice = t["Close Price"] !== undefined ? t["Close Price"] : '-';
+            const priceFlow = `${openPrice} &rarr; ${closePrice}`;
+            const duration = t["Duration (DD:HH:MM:SS)"] || '-';
+            const pips = t["Pips"] !== undefined ? t["Pips"] : '-';
 
             html += `
                 <tr class="hover:bg-cardBorder/30 transition-colors">
-                    <td class="px-6 py-3.5 text-zinc-400">${t["Open Date"] || '-'}</td>
+                    <td class="px-6 py-3.5 text-zinc-400">${t.d}</td>
                     <td class="px-6 py-3.5 font-semibold">${typeBadge}</td>
                     <td class="px-6 py-3.5 text-zinc-400">${priceFlow}</td>
-                    <td class="px-6 py-3.5 text-zinc-400">${t["Duration (DD:HH:MM:SS)"] || '-'}</td>
-                    <td class="px-6 py-3.5 text-zinc-400">${t["Pips"] || '-'}</td>
+                    <td class="px-6 py-3.5 text-zinc-400">${duration}</td>
+                    <td class="px-6 py-3.5 text-zinc-400">${pips}</td>
                     <td class="px-6 py-3.5 text-right font-bold ${profitClass}">${isProfit ? '+' : ''}${gainVal.toFixed(2)}%</td>
                 </tr>
             `;

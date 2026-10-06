@@ -33,8 +33,12 @@
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
-        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; opacity: 0.6; }
+        
+        /* Dark Mode Kalender Fix */
+        input[type="date"] { color-scheme: dark; }
+        input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
         input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+        
         .table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .table-scroll::-webkit-scrollbar-track { background: #0A101C; }
         .table-scroll::-webkit-scrollbar-thumb { background: #1A2436; border-radius: 4px; }
@@ -159,7 +163,7 @@
 
         <div class="border-t border-cardBorder w-full my-8"></div>
 
-        <!-- RECHNER 2: Historical Backtest Engine (Mit Datumsauswahl) -->
+        <!-- RECHNER 2: Historical Backtest Engine -->
         <div>
             <div class="text-center mb-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-widest uppercase mb-4">
@@ -179,10 +183,22 @@
                             <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="btCapital">Startkapital</label>
                             <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 transition-colors">
                                 <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
-                                <input type="number" id="bt-capital" value="10000" class="w-24 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
+                                <input type="number" id="bt-capital" value="100000" class="w-24 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
                             </div>
                         </div>
-                        <input type="range" id="bt-capital-slider" min="100" max="100000" step="100" value="10000" class="!accent-emerald-400">
+                        <input type="range" id="bt-capital-slider" min="100" max="100000" step="100" value="100000" class="!accent-emerald-400">
+                    </div>
+                    
+                    <!-- NEW: Risk Multiplier -->
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="btRiskLabel">Risiko-Faktor (Hebel)</label>
+                            <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 transition-colors">
+                                <input type="number" id="bt-risk" value="1" min="1" max="10" step="0.5" class="w-16 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
+                                <span class="text-zinc-500 font-mono text-sm ml-1">x</span>
+                            </div>
+                        </div>
+                        <input type="range" id="bt-risk-slider" min="1" max="10" step="0.5" value="1" class="!accent-emerald-400">
                     </div>
 
                     <!-- Zeitraum-Auswahl -->
@@ -269,7 +285,7 @@
                         <thead class="sticky top-0 bg-darkBg z-10 shadow-md">
                             <tr class="text-zinc-500 uppercase tracking-widest border-b border-cardBorder">
                                 <th class="px-6 py-4 font-semibold" data-i18n="colDate">Datum / Zeit</th>
-                                <th class="px-6 py-4 font-semibold" data-i18n="colType">Art</th>
+                                <th class="px-6 py-4 font-semibold" data-i18n="colAsset">Asset</th>
                                 <th class="px-6 py-4 font-semibold">Einstieg ➔ Ausstieg</th>
                                 <th class="px-6 py-4 font-semibold">Dauer</th>
                                 <th class="px-6 py-4 font-semibold">Pips</th>
