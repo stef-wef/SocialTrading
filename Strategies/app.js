@@ -167,7 +167,7 @@ class DualEngineApp {
     async loadTradesData() {
         try {
             // Lade die genaue Datei aus dem Ordner, der im Screenshot referenziert ist
-            const response = await fetch('../data/trades_data_2.json');
+            const response = await fetch('../data/trades_data.json');
             const data = await response.json();
             
             // Die Trades sind meistens aktuellste zuerst (Index 0 = z.B. 2026), 
