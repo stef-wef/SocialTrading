@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Quantum Trading | AI Portfolios</title>
     
+    <!-- Online Favicon -->
     <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/lucide:zap.svg?color=%2300E5FF">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -160,25 +161,31 @@
             }
         ];
 
-        async function fetchStats(url) {
-            try {
-                let res = await fetch(url);
-                if(!res.ok) return null;
-                let data = await res.json();
-                let trades = data.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
-                let total = trades.length;
-                let won = trades.filter(t => parseFloat(t.Profit) > 0).length;
-                let lost = trades.filter(t => parseFloat(t.Profit) < 0).length;
-                let wr = total > 0 ? ((won/total)*100).toFixed(2) + '%' : '0%';
-                return { total, won, lost, wr };
-            } catch(e) {
-                return null;
+        async function fetchStats(paths) {
+            for (let f of paths) {
+                try {
+                    let res = await fetch(f);
+                    if(res.ok) {
+                        let data = await res.json();
+                        let trades = data.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+                        let total = trades.length;
+                        let won = trades.filter(t => parseFloat(t.Profit) > 0).length;
+                        let lost = trades.filter(t => parseFloat(t.Profit) < 0).length;
+                        let wr = total > 0 ? ((won/total)*100).toFixed(2) + '%' : '0%';
+                        return { total, won, lost, wr };
+                    }
+                } catch(e) {}
             }
+            return null;
         }
 
         async function initData() {
             // Lade Sonic
-            let sonicRes = await fetchStats('data/Sonic_TradesData.json');
+            let sonicRes = await fetchStats([
+                'data/Sonic_TradesData.json',
+                'data/Sonic_tradesdata.json',
+                'data/trades_data.json'
+            ]);
             if(sonicRes) {
                 strategiesData[0].tradesMade = sonicRes.total;
                 strategiesData[0].tradesWon = sonicRes.won;
@@ -186,8 +193,13 @@
                 strategiesData[0].winRate = sonicRes.wr;
             }
             
-            // Lade Neo
-            let neoRes = await fetchStats('data/Neo_TradesData.json');
+            // Lade Neo mit allen möglichen Pfaden für Render Case-Sensitivity
+            let neoRes = await fetchStats([
+                'data/Neo_TradesData.json', 
+                'data/NEO_TradesData.json', 
+                'data/NEO_tradesdata.json',
+                'data/neo_tradesdata.json'
+            ]);
             if(neoRes) {
                 strategiesData[1].tradesMade = neoRes.total;
                 strategiesData[1].tradesWon = neoRes.won;
@@ -203,8 +215,8 @@
             grid.innerHTML = '';
             strategiesData.forEach(strat => {
                 const cardClasses = strat.active 
-                    ? 'glass-card p-8 flex flex-col justify-between group cursor-pointer' 
-                    : 'glass-card p-8 flex flex-col justify-between opacity-50 cursor-not-allowed select-none';
+                    ? 'glass-card p-8 flex flex-col justify-between group cursor-pointer h-full' 
+                    : 'glass-card p-8 flex flex-col justify-between opacity-50 cursor-not-allowed select-none h-full';
                 
                 const clickAction = strat.active ? `window.location.href='${strat.url}'` : '';
                 
