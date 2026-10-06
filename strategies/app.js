@@ -585,11 +585,7 @@ class DualEngineApp {
             }
             investedPoints.push(totalInvested);
 
-            if (i % step === 0 || i === filteredTrades.length - 1) {
-                labels.push(formatDate(t.dt));
-            } else {
-                labels.push('');
-            }
+            labels.push(formatDate(t.dt));
         });
 
         let finalBalance = mode === 'reinvest' ? dataPoints[dataPoints.length - 1] : (currentBalance + totalPayouts);
@@ -601,7 +597,11 @@ class DualEngineApp {
         let resInvestedEl = document.getElementById('bt-res-invested');
         if (resInvestedEl) resInvestedEl.innerText = '$' + totalInvested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-        if (this.dom.btResProf) this.dom.btResProf.innerText = (netProfit >= 0 ? '+' : '') + '$' + netProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (this.dom.btResProf) {
+            let formattedProfit = (netProfit >= 0 ? '+' : '-') + '$' + Math.abs(netProfit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            this.dom.btResProf.innerText = formattedProfit;
+        }
+
         if (this.dom.btResGrowth) this.dom.btResGrowth.innerText = (growth >= 0 ? '+' : '') + growth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
 
         if (this.btChart) {

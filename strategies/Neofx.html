@@ -433,24 +433,22 @@
                 </div>
 
                 <div class="lg:col-span-7 flex flex-col gap-4">
-                    <div class="glass-panel p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div class="text-left w-full">
-                            <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btSimBal">Simuliertes Endguthaben</p>
-                            <p class="text-4xl font-mono font-extrabold text-emerald-400 tracking-tight" id="bt-res-balance">$0.00</p>
+                    <div class="glass-panel p-6 grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
+                        <div class="text-left">
+                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btSimBal">Simuliertes Endguthaben</p>
+                            <p class="text-2xl md:text-3xl font-mono font-extrabold text-emerald-400 tracking-tight whitespace-nowrap" id="bt-res-balance">$0.00</p>
                         </div>
-                        <div class="flex gap-6 w-full justify-end border-t sm:border-t-0 sm:border-l border-cardBorder pt-4 sm:pt-0 sm:pl-6">
-                            <div>
-                                <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Investiertes Kapital</p>
-                                <p class="text-lg font-mono font-bold text-zinc-300" id="bt-res-invested">$0.00</p>
-                            </div>
-                            <div>
-                                <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btProfit">Reingewinn</p>
-                                <p class="text-lg font-mono font-bold text-white" id="bt-res-profit">+$0.00</p>
-                            </div>
-                            <div>
-                                <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btGrowth">Wachstum</p>
-                                <p class="text-lg font-mono font-bold text-emerald-400" id="bt-res-growth">+0.00%</p>
-                            </div>
+                        <div class="text-left border-l border-cardBorder pl-4">
+                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Investiertes Kapital</p>
+                            <p class="text-lg md:text-xl font-mono font-bold text-zinc-300 whitespace-nowrap" id="bt-res-invested">$0.00</p>
+                        </div>
+                        <div class="text-left border-l border-cardBorder pl-4">
+                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btProfit">Reingewinn</p>
+                            <p class="text-lg md:text-xl font-mono font-bold text-white whitespace-nowrap" id="bt-res-profit">+$0.00</p>
+                        </div>
+                        <div class="text-left border-l border-cardBorder pl-4">
+                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btGrowth">Wachstum</p>
+                            <p class="text-lg md:text-xl font-mono font-bold text-emerald-400 whitespace-nowrap" id="bt-res-growth">+0.00%</p>
                         </div>
                     </div>
                     <div class="glass-panel p-6 flex-1 min-h-[260px] relative h-full">
