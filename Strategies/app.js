@@ -147,11 +147,12 @@ class DualEngineApp {
         // Robuste Liste möglicher Dateipfade
         const candidateFiles = this.isNeo
             ? [
+                '../data/Neo_TradesData.json',
                 '../data/NEO_TradesData.json',
                 '../data/NEO_tradesdata.json',
                 '../data/neo_tradesdata.json',
-                '/data/NEO_TradesData.json',
-                'data/NEO_TradesData.json'
+                '/data/Neo_TradesData.json',
+                'data/Neo_TradesData.json'
             ]
             : [
                 '../data/Sonic_TradesData.json',
