@@ -69,17 +69,17 @@ class DualEngineApp {
     constructor() {
         this.rawTrades = [];
         this.btChart = null;
+        this.equityChart = null;
         this.currentLang = 'de';
 
-        // Variante B: Aggressive Hebel-Raten (19.152% netto pro Monat)
+        // Variante B: Netto-Monatswachstum (19.152% pro Monat)
         this.rates = {
             cons: 0.0588,
             avg: 0.19152,
             opt: 0.3528
         };
 
-        // Skalierungsfaktor für Variante B im Backtest:
-        // 24x Hebel abzüglich 30% Fee -> 24 * (1 - 0.30) = 16.8
+        // 24x Hebelwirkung abzüglich 30% Fee -> Netto-Multiplikator 16.8
         this.backtestLeverageMult = 24 * 0.70;
 
         this.dom = {
@@ -136,6 +136,7 @@ class DualEngineApp {
         }
 
         this.setupListeners();
+        this.initEquityGrowthChart();
         this.initBacktestChart();
         this.renderStatsAndTable();
         this.calcProjection();
@@ -351,7 +352,6 @@ class DualEngineApp {
         let dataPoints = [capital];
 
         filteredTrades.forEach((t, i) => {
-            // Monatliches Top-Up hinzufügen
             const currentMonth = t.dt.substring(0, 7);
             if (lastMonth && currentMonth !== lastMonth && topup > 0) {
                 currentBalance += topup;
@@ -359,7 +359,7 @@ class DualEngineApp {
             }
             lastMonth = currentMonth;
 
-            // Variante B: Trade-Gain wird mit der Netto-Hebelskalierung (16.8x) gerechnet
+            // Trade-Gain mit Netto-Hebelskalierung (16.8x) berechnen
             let scaledGainPercent = t.parsedGain * this.backtestLeverageMult;
             let tradeProfit = currentBalance * (scaledGainPercent / 100);
 
@@ -391,6 +391,64 @@ class DualEngineApp {
             this.btChart.data.datasets[0].data = dataPoints;
             this.btChart.update();
         }
+    }
+
+    // --- NEU: MYFXBOOK EQUITY GROWTH CHART ---
+    initEquityGrowthChart() {
+        const canvas = document.getElementById('equityGrowthChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        // Historische Referenz-Kurve analog zum Myfxbook-Screenshot
+        const labels = ['Nov 03, \'24', 'Jan 15, \'25', 'Mar 06, \'25', 'May 10, \'25', 'Jul 14, \'25', 'Sep 20, \'25', 'Nov 27, \'25', 'Jan 30, \'26', 'Mar 27, \'26', 'May 20, \'26', 'Jul 08, \'26', 'Oct 03, \'26'];
+        const growthData = [0, 2.8, 5.2, 8.4, 12.1, 15.6, 17.8, 20.2, 21.6, 23.4, 25.1, 26.63];
+
+        this.equityChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Growth',
+                    data: growthData,
+                    borderColor: '#E15241', // Rötlicher Myfxbook-Ton
+                    borderWidth: 1.8,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    fill: false,
+                    tension: 0.2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1E293B',
+                        titleColor: '#94A3B8',
+                        bodyColor: '#FFFFFF',
+                        callbacks: {
+                            label: (ctx) => `Growth: +${ctx.parsed.y}%`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { color: '#64748B', font: { size: 10 }, maxTicksLimit: 6 }
+                    },
+                    y: {
+                        position: 'left',
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: {
+                            color: '#64748B',
+                            font: { size: 10 },
+                            callback: (v) => v + '%'
+                        }
+                    }
+                }
+            }
+        });
     }
 
     // --- TABELLE RENDERN ---
