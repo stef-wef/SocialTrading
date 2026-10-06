@@ -433,46 +433,74 @@ class DualEngineApp {
             type: 'line',
             data: {
                 labels: [],
-                datasets: [{
-                    data: [],
-                    borderColor: '#34D399',
-                    backgroundColor: gradient,
-                    borderWidth: 2,
-                    pointRadius: 0,
-                    pointHoverRadius: 5,
-                    pointBackgroundColor: '#040914',
-                    pointBorderColor: '#34D399',
-                    pointBorderWidth: 2,
-                    fill: true,
-                    tension: 0.15
-                }]
+                datasets: [
+                    {
+                        label: 'Portfolio Balance',
+                        data: [],
+                        borderColor: '#34D399',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        pointBackgroundColor: '#040914',
+                        pointBorderColor: '#34D399',
+                        pointBorderWidth: 2,
+                        fill: true,
+                        tension: 0.15
+                    },
+                    {
+                        label: 'Invested Capital',
+                        data: [],
+                        borderColor: '#64748B',
+                        borderWidth: 1.5,
+                        borderDash: [4, 4],
+                        pointRadius: 0,
+                        pointHoverRadius: 3,
+                        fill: false,
+                        tension: 0
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
+                    legend: { 
+                        display: true, 
+                        position: 'top',
+                        align: 'end',
+                        labels: { boxWidth: 12, font: { size: 10 }, color: '#94A3B8' }
+                    },
                     tooltip: {
                         backgroundColor: '#0A101C',
                         titleColor: '#94959A',
                         bodyColor: '#FFFFFF',
                         borderColor: '#1A2436',
                         borderWidth: 1,
-                        padding: 10,
-                        displayColors: false,
+                        padding: 12,
+                        displayColors: true,
                         callbacks: {
-                            label: (ctx) => '$' + ctx.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                            title: (items) => items[0].label || '',
+                            label: (ctx) => {
+                                let label = ctx.dataset.label || '';
+                                let val = '$' + ctx.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                return `${label}: ${val}`;
+                            }
                         }
                     }
                 },
                 scales: {
-                    x: { grid: { color: 'rgba(255, 255, 255, 0.02)' }, ticks: { maxTicksLimit: 6 } },
+                    x: { 
+                        grid: { color: 'rgba(255, 255, 255, 0.02)' }, 
+                        ticks: { maxTicksLimit: 6, font: { size: 10 } } 
+                    },
                     y: {
                         position: 'right',
                         grid: { color: 'rgba(255, 255, 255, 0.04)' },
                         border: { dash: [4, 4] },
                         ticks: {
                             maxTicksLimit: 6,
+                            font: { size: 10 },
                             callback: (val) => val >= 1000 ? '$' + (val / 1000).toFixed(1) + 'k' : '$' + val
                         }
                     }
@@ -495,14 +523,25 @@ class DualEngineApp {
         let endStr = (this.dom.btEnd && this.dom.btEnd.value) || tradesOnly[tradesOnly.length - 1].dt;
 
         let filteredTrades = tradesOnly.filter(t => t.dt >= startStr && t.dt <= endStr);
+        if (filteredTrades.length === 0) return;
 
         let currentBalance = capital;
         let totalInvested = capital;
         let totalPayouts = 0;
         let lastMonth = '';
 
-        let labels = [startStr];
-        let dataPoints = [capital];
+        let labels = [];
+        let dataPoints = [];
+        let investedPoints = [];
+
+        const formatDate = (dateStr) => {
+            if (!dateStr) return '';
+            let parts = dateStr.split('-');
+            if (parts.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
+            return dateStr;
+        };
+
+        let step = Math.max(1, Math.floor(filteredTrades.length / 6));
 
         filteredTrades.forEach((t, i) => {
             const currentMonth = t.dt.substring(0, 7);
@@ -522,9 +561,10 @@ class DualEngineApp {
                 totalPayouts += tradeProfit;
                 dataPoints.push(currentBalance + totalPayouts);
             }
+            investedPoints.push(totalInvested);
 
-            if (i % 15 === 0 || i === filteredTrades.length - 1) {
-                labels.push(t.dt);
+            if (i % step === 0 || i === filteredTrades.length - 1) {
+                labels.push(formatDate(t.dt));
             } else {
                 labels.push('');
             }
@@ -541,6 +581,7 @@ class DualEngineApp {
         if (this.btChart) {
             this.btChart.data.labels = labels;
             this.btChart.data.datasets[0].data = dataPoints;
+            this.btChart.data.datasets[1].data = investedPoints;
             this.btChart.update();
         }
     }
