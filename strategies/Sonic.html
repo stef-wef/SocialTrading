@@ -308,32 +308,32 @@
                 <div class="lg:col-span-5 glass-panel p-8 space-y-7 flex flex-col justify-between">
                     <div class="space-y-7">
                         <div>
-                            <div class="flex justify-between items-end mb-1">
+                            <div class="flex justify-between items-end mb-2">
                                 <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="projDeposit">Startkapital</label>
-                                <div class="flex items-center">
+                                <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-accentCyan focus-within:shadow-[0_2px_10px_rgba(0,229,255,0.4)] transition-all">
                                     <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
-                                    <input type="number" id="proj-deposit" value="10000" class="w-28 bg-transparent text-white font-mono font-bold text-right text-base outline-none">
+                                    <input type="number" id="proj-deposit" value="10000" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
                                 </div>
                             </div>
                             <input type="range" id="proj-deposit-slider" min="100" max="100000" step="100" value="10000">
                         </div>
 
                         <div>
-                            <div class="flex justify-between items-end mb-1">
+                            <div class="flex justify-between items-end mb-2">
                                 <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="projTopup">Monatliches Top-Up</label>
-                                <div class="flex items-center">
+                                <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-accentCyan focus-within:shadow-[0_2px_10px_rgba(0,229,255,0.4)] transition-all">
                                     <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
-                                    <input type="number" id="proj-topup" value="0" class="w-24 bg-transparent text-white font-mono font-bold text-right text-base outline-none">
+                                    <input type="number" id="proj-topup" value="0" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
                                 </div>
                             </div>
                             <input type="range" id="proj-topup-slider" min="0" max="10000" step="50" value="0">
                         </div>
 
                         <div>
-                            <div class="flex justify-between items-end mb-1">
+                            <div class="flex justify-between items-end mb-2">
                                 <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="projMonths">Laufzeit (Monate)</label>
-                                <div class="flex items-center">
-                                    <input type="number" id="proj-months" value="12" min="1" max="24" class="w-12 bg-transparent text-white font-mono font-bold text-right text-base outline-none">
+                                <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-accentCyan focus-within:shadow-[0_2px_10px_rgba(0,229,255,0.4)] transition-all">
+                                    <input type="number" id="proj-months" value="12" min="1" max="24" class="w-16 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
                                 </div>
                             </div>
                             <input type="range" id="proj-months-slider" min="1" max="24" step="1" value="12">
@@ -341,8 +341,8 @@
 
                         <div class="pt-2 border-t border-cardBorder">
                             <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btMode">Gewinn-Modus</label>
-                            <select id="proj-mode-select" class="w-full appearance-none bg-darkBg border border-cardBorder rounded px-3 py-2.5 text-xs text-white font-mono font-semibold outline-none focus:border-accentCyan cursor-pointer">
-                                <option value="reinvest" data-i18n="projModeReinvest">Monatlich Reinvestieren (Zinseszins)</option>
+                            <select id="proj-mode-select" class="w-full appearance-none bg-darkBg border border-cardBorder rounded px-3 py-2.5 text-xs text-white font-mono font-semibold outline-none focus:border-accentCyan focus:shadow-[0_0_10px_rgba(0,229,255,0.3)] cursor-pointer transition-all">
+                                <option value="reinvest" data-i18n="projModeReinvest">Täglich Reinvestieren (Zinseszins)</option>
                                 <option value="payout" data-i18n="projModePayout">Auszahlen (Konstantes Kapital)</option>
                             </select>
                         </div>
@@ -356,7 +356,7 @@
                         <p class="text-[10px] text-accentCyan uppercase tracking-widest font-bold mb-2">
                             <span data-i18n="projAvgScen">Szenario nach</span> <span id="proj-res-month">12</span> <span data-i18n="monthsWord">Monaten</span>
                         </p>
-                        <p class="text-5xl md:text-6xl font-mono font-extrabold text-accentCyan tracking-tight mb-3" id="proj-res-balance">$81'887</p>
+                        <p class="text-5xl md:text-6xl font-mono font-extrabold text-accentCyan tracking-tight mb-3 drop-shadow-[0_0_20px_rgba(0,229,255,0.4)]" id="proj-res-balance">$81'887</p>
                         <p class="text-xs text-zinc-400 font-mono">
                             <span data-i18n="fromWord">Aus</span> <span class="text-white font-bold" id="proj-res-invested">$10'000</span> <span data-i18n="investedWord">investiert</span> · <strong class="text-emerald-400" id="proj-res-mult">8.2x</strong> your capital
                         </p>
@@ -428,7 +428,7 @@
                         <div>
                             <div class="flex justify-between items-end mb-2">
                                 <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="btCapital">Startkapital</label>
-                                <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 transition-colors">
+                                <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 focus-within:shadow-[0_2px_10px_rgba(52,211,153,0.4)] transition-all">
                                     <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
                                     <input type="number" id="bt-capital" value="10000" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
                                 </div>
@@ -439,7 +439,7 @@
                         <div>
                             <div class="flex justify-between items-end mb-2">
                                 <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Monatliches Top-Up</label>
-                                <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 transition-colors">
+                                <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 focus-within:shadow-[0_2px_10px_rgba(52,211,153,0.4)] transition-all">
                                     <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
                                     <input type="number" id="bt-topup" value="0" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
                                 </div>
@@ -450,18 +450,18 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btStart">Startdatum</label>
-                                <input type="date" id="bt-start-date" class="w-full bg-darkBg border border-cardBorder rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-emerald-400">
+                                <input type="date" id="bt-start-date" class="w-full bg-darkBg border border-cardBorder rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-emerald-400 focus:shadow-[0_0_10px_rgba(52,211,153,0.3)] transition-all">
                             </div>
                             <div>
                                 <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btEnd">Enddatum</label>
-                                <input type="date" id="bt-end-date" class="w-full bg-darkBg border border-cardBorder rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-emerald-400">
+                                <input type="date" id="bt-end-date" class="w-full bg-darkBg border border-cardBorder rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-emerald-400 focus:shadow-[0_0_10px_rgba(52,211,153,0.3)] transition-all">
                             </div>
                         </div>
                     </div>
 
                     <div class="pt-6 border-t border-cardBorder">
                         <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btMode">Gewinn-Modus</label>
-                        <select id="bt-mode-select" class="w-full appearance-none bg-darkBg border border-cardBorder rounded px-3 py-2.5 text-xs text-white font-mono font-semibold outline-none focus:border-emerald-400 cursor-pointer">
+                        <select id="bt-mode-select" class="w-full appearance-none bg-darkBg border border-cardBorder rounded px-3 py-2.5 text-xs text-white font-mono font-semibold outline-none focus:border-emerald-400 focus:shadow-[0_0_10px_rgba(52,211,153,0.3)] cursor-pointer transition-all">
                             <option value="reinvest" data-i18n="modeReinvest">Täglich Reinvestieren (Zinseszins)</option>
                             <option value="payout" data-i18n="modePayout">Auszahlen (Konstantes Kapital)</option>
                         </select>
