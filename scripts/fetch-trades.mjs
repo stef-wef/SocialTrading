@@ -22,7 +22,8 @@ async function scrapeTrades(url, name) {
       '--proxy-server=http://proxy-server.scraperapi.com:8001',
       '--no-sandbox',
       '--disable-setuid-sandbox',
-      '--disable-blink-features=AutomationControlled'
+      '--disable-blink-features=AutomationControlled',
+      '--ignore-certificate-errors' // Erlaubt die SSL-Zertifikate von ScraperAPI
     ]
   });
 
