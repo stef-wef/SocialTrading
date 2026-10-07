@@ -20,8 +20,8 @@ jobs:
         with:
           node-version: 20
 
-      - name: Puppeteer installieren
-        run: npm install puppeteer
+      - name: Puppeteer & Stealth installieren
+        run: npm install puppeteer puppeteer-extra puppeteer-extra-plugin-stealth
 
       - name: Trades scrapen
         run: node scripts/fetch-trades.mjs

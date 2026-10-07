@@ -1,6 +1,10 @@
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import fs from 'fs';
 import path from 'path';
+
+// Tarnkappe aktivieren
+puppeteer.use(StealthPlugin());
 
 const URL_SONIC = 'https://www.myfxbook.com/members/SonicExperts/sonic-ai/12076857';
 const URL_NEO = 'https://www.myfxbook.com/members/WordSmithyFx/neofx/11800152';
@@ -13,35 +17,38 @@ async function scrapeTrades(url, name) {
   });
 
   const page = await browser.newPage();
-  // Simuliere einen echten Browser, damit Myfxbook uns nicht blockiert
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
   await page.setViewport({ width: 1280, height: 800 });
 
   try {
     console.log(`Lade Webseite: ${url}`);
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 45000 });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
 
-    // Kurz warten und versuchen, auf den "History" Tab zu klicken
-    console.log('Öffne History-Tab...');
-    try {
-      await page.waitForSelector('a[href="#history"]', { timeout: 10000 });
-      await page.click('a[href="#history"]');
-    } catch (e) {
-      console.log('History-Tab war schon offen oder nicht gefunden.');
+    const pageTitle = await page.title();
+    console.log(`Webseiten-Titel: "${pageTitle}"`);
+    
+    if (pageTitle.includes('Just a moment') || pageTitle.includes('Cloudflare')) {
+      console.warn(`WARNUNG: Myfxbook blockiert den Zugriff auf ${name} (Cloudflare).`);
     }
 
-    // 4 Sekunden warten, damit die Trade-Tabelle sicher geladen ist
-    await new Promise(r => setTimeout(r, 4000));
+    // 5 Sekunden warten, damit Scripte auf der Seite nachladen können
+    await new Promise(r => setTimeout(r, 5000));
+
+    console.log('Versuche History-Tab zu öffnen...');
+    try {
+      await page.waitForSelector('a[href="#history"]', { timeout: 5000 });
+      await page.click('a[href="#history"]');
+      await new Promise(r => setTimeout(r, 3000)); // Warten, bis Tabelle gerendert ist
+    } catch (e) {
+      console.log('History-Tab nicht klickbar (vielleicht schon aktiv oder durch Layout-Änderung blockiert).');
+    }
 
     console.log('Lese Trades aus der Tabelle aus...');
     const trades = await page.evaluate(() => {
       const data = [];
-      // Wir holen uns alle Tabellenzeilen auf der ganzen Seite
       const allRows = document.querySelectorAll('tr');
       
       allRows.forEach(row => {
         const cols = row.querySelectorAll('td');
-        // Ein typischer Myfxbook-Trade hat viele Spalten, und die 5. Spalte (Index 4) ist "Buy" oder "Sell"
         if (cols.length >= 10) {
           const action = cols[4]?.innerText?.trim();
           if (action === 'Buy' || action === 'Sell') {
@@ -75,13 +82,11 @@ async function run() {
   const sonicTrades = await scrapeTrades(URL_SONIC, 'Sonic AI');
   const neoTrades = await scrapeTrades(URL_NEO, 'NeoFX');
 
-  // Zielordner sicherstellen
   const targetDir = path.resolve(process.cwd(), 'data');
   if (!fs.existsSync(targetDir)) {
     fs.mkdirSync(targetDir, { recursive: true });
   }
 
-  // Dateien abspeichern
   fs.writeFileSync(path.join(targetDir, 'Sonic_TradesData.json'), JSON.stringify(sonicTrades, null, 2), 'utf-8');
   console.log('Sonic_TradesData.json aktualisiert.');
 
