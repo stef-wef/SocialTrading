@@ -23,6 +23,15 @@ jobs:
       - name: Puppeteer & Stealth installieren
         run: npm install puppeteer puppeteer-extra puppeteer-extra-plugin-stealth
 
+      - name: Verify scraper source
+        run: |
+          echo "=== COMMIT ==="
+          git rev-parse HEAD
+          echo "=== FILE PREVIEW ==="
+          sed -n '1,80p' scripts/fetch-trades.mjs
+          echo "=== SEARCH ==="
+          grep -n "NETZWERK\|Suche History\|bodyLength\|^(buy|sell)" scripts/fetch-trades.mjs || true
+
       - name: Trades scrapen
         env:
           SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
