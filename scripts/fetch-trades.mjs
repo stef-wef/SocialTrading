@@ -12,9 +12,12 @@ const EMAIL = process.env.MYFXBOOK_EMAIL;
 const PASSWORD = process.env.MYFXBOOK_PASSWORD;
 
 if (!SCRAPERAPI_KEY || !EMAIL || !PASSWORD) {
-  console.error('FEHLER: SCRAPERAPI_KEY, MYFXBOOK_EMAIL oder MYFXBOOK_PASSWORD fehlt.');
+  console.error('FEHLER: SCRAPERAPI_KEY, MYFXBOOK_EMAIL oder MYFXBOOK_PASSWORD fehlt in den Secrets.');
   process.exit(1);
 }
+
+// Generiere eine feste Session-ID für diesen Durchlauf, damit die IP nicht wechselt!
+const PROXY_SESSION = Math.floor(Math.random() * 1000000);
 
 async function run() {
   console.log('Starte Browser...');
@@ -33,43 +36,59 @@ async function run() {
   try {
     const page = await browser.newPage();
     await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
-    await page.authenticate({ username: 'scraperapi', password: SCRAPERAPI_KEY });
+    
+    // WICHTIG: session_number erzwingt eine durchgehende IP-Adresse!
+    await page.authenticate({ 
+      username: `scraperapi.session_number=${PROXY_SESSION}`, 
+      password: SCRAPERAPI_KEY 
+    });
     await page.setViewport({ width: 1280, height: 800 });
 
+    // === 1. LOGIN PHASE ===
     console.log('\n--- LOGIN PHASE ---');
-    await page.goto('https://www.myfxbook.com/login', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    console.log(`Verwende Proxy Session-ID: ${PROXY_SESSION}`);
+    console.log('Lade Login-Seite...');
     
+    await page.goto('https://www.myfxbook.com/login', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await new Promise(r => setTimeout(r, 12000)); // Warten auf Cloudflare
+
+    const loginTitle = await page.title();
+    console.log(`Titel der Login-Seite: "${loginTitle}"`);
+
+    // Diagnose-Check: Was genau steht auf dem Bildschirm?
+    const pageText = await page.evaluate(() => document.body.innerText.substring(0, 800).replace(/\n/g, ' '));
+    console.log(`Seiteninhalt Vorschau: ${pageText}`);
+
     try {
-      console.log('Warte auf Login-Felder...');
-      await page.waitForSelector('input[name="email"], #email', { timeout: 15000 });
+      const emailFound = await page.evaluate(() => !!document.querySelector('input[name="email"], #email, input[type="email"]'));
+      if (!emailFound) throw new Error('Email-Feld im DOM nicht vorhanden. Wahrscheinlich von Cloudflare blockiert.');
+
+      console.log('Login-Felder gefunden. Gebe Daten ein...');
       
+      // Cookie-Banner wegklicken (falls vorhanden)
       await page.evaluate(() => {
         const cookieBtn = document.querySelector('.cky-btn-accept');
         if (cookieBtn) cookieBtn.click();
       });
 
-      await page.type('input[name="email"], #email', EMAIL);
-      await page.type('input[name="password"], #password', PASSWORD);
+      await page.type('input[name="email"], #email, input[type="email"]', EMAIL);
+      await page.type('input[name="password"], #password, input[type="password"]', PASSWORD);
+      
+      console.log('Klicke Login-Button...');
       await Promise.all([
         page.keyboard.press('Enter'),
         page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {})
       ]);
-      console.log('Login erfolgreich gesendet.');
+      
+      console.log('Warte auf Login-Verarbeitung...');
+      await new Promise(r => setTimeout(r, 8000));
+      console.log(`Titel nach Login: "${await page.title()}"`);
     } catch (e) {
-      console.log(`Login fehlgeschlagen: ${e.message}`);
-      await page.screenshot({ path: 'debug-login.png', fullPage: true });
+      console.log(`\n❌ LOGIN FEHLGESCHLAGEN: ${e.message}`);
+      console.log('Versuche ohne Login fortzufahren (wird bei privaten Konten fehlschlagen)...\n');
     }
 
-    page.on('response', async response => {
-      const req = response.request();
-      if (req.resourceType() === 'xhr' || req.resourceType() === 'fetch') {
-        const url = response.url().toLowerCase();
-        if (url.includes('history') || url.includes('portfolio') || url.includes('data')) {
-          console.log(`[NETZWERK] ${req.method()} ${response.url()} - Status: ${response.status()}`);
-        }
-      }
-    });
-
+    // === 2. SCRAPING FUNKTION ===
     async function fetchStrategy(url, name) {
       console.log(`\n--- Lade ${name} ---`);
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
@@ -111,15 +130,27 @@ async function run() {
       });
 
       console.log(`${trades.length} Trades gefunden.`);
-      if (trades.length === 0) {
-        const cleanName = name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-        await page.screenshot({ path: `debug-${cleanName}.png`, fullPage: true });
-      }
       return trades;
     }
 
-    const sonicTrades = await fetchStrategy(URL_SONIC, 'Sonic AI');
-    const neoTrades = await fetchStrategy(URL_NEO, 'NeoFX');
+    // === 3. DURCHLAUF MIT RETRY ===
+    async function getTradesWithRetry(url, name) {
+      for (let i = 1; i <= 3; i++) {
+        console.log(`\n>> ${name} (Versuch ${i}/3) <<`);
+        try {
+          const trades = await fetchStrategy(url, name);
+          if (trades.length > 0) return trades;
+        } catch (e) {
+          console.log(`Fehler in Versuch ${i}: ${e.message}`);
+        }
+        console.log('Keine Trades gefunden. Kurze Pause...');
+        await new Promise(r => setTimeout(r, 5000));
+      }
+      return [];
+    }
+
+    const sonicTrades = await getTradesWithRetry(URL_SONIC, 'Sonic AI');
+    const neoTrades = await getTradesWithRetry(URL_NEO, 'NeoFX');
 
     await browser.close();
 
@@ -128,20 +159,20 @@ async function run() {
 
     if (sonicTrades.length > 0) {
       fs.writeFileSync(path.join(targetDir, 'Sonic_TradesData.json'), JSON.stringify(sonicTrades, null, 2), 'utf-8');
-      console.log('Sonic_TradesData.json gespeichert.');
+      console.log('\n✅ Sonic_TradesData.json gespeichert.');
     } else {
-      console.log('Sonic_TradesData.json NICHT überschrieben.');
+      console.log('\n❌ Sonic_TradesData.json NICHT überschrieben.');
     }
 
     if (neoTrades.length > 0) {
       fs.writeFileSync(path.join(targetDir, 'NEO_TradesData.json'), JSON.stringify(neoTrades, null, 2), 'utf-8');
-      console.log('NEO_TradesData.json gespeichert.');
+      console.log('✅ NEO_TradesData.json gespeichert.');
     } else {
-      console.log('NEO_TradesData.json NICHT überschrieben.');
+      console.log('❌ NEO_TradesData.json NICHT überschrieben.');
     }
 
   } catch (err) {
-    console.error('Kritischer Fehler:', err.message);
+    console.error('Kritischer Fehler im Browser-Ablauf:', err.message);
     await browser.close();
   }
 }
