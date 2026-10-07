@@ -20,17 +20,15 @@ jobs:
         with:
           node-version: 20
 
-      - name: Trades von Myfxbook abholen
-        env:
-          MYFXBOOK_EMAIL: ${{ secrets.MYFXBOOK_EMAIL }}
-          MYFXBOOK_PASSWORD: ${{ secrets.MYFXBOOK_PASSWORD }}
-          MYFXBOOK_ACCOUNT_ID_1: ${{ secrets.MYFXBOOK_ACCOUNT_ID_1 }}
-          MYFXBOOK_ACCOUNT_ID_2: ${{ secrets.MYFXBOOK_ACCOUNT_ID_2 }}
+      - name: Puppeteer installieren
+        run: npm install puppeteer
+
+      - name: Trades scrapen
         run: node scripts/fetch-trades.mjs
 
       - name: Änderungen committen und pushen
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
+          git add data/
           git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update live trades [skip ci]" && git push)
