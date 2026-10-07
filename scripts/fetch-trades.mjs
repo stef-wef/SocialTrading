@@ -37,17 +37,26 @@ async function scrapeTrades(url, name) {
     const pageTitle = await page.title();
     console.log(`Titel: "${pageTitle}"`);
     
-    // 8 Sekunden warten, damit alles geladen ist
-    await new Promise(r => setTimeout(r, 8000));
+    // 10 Sekunden warten, damit Scripte und Cloudflare sicher durch sind
+    await new Promise(r => setTimeout(r, 10000));
 
-    console.log('Erzwinge Klick auf History-Tab...');
+    console.log('Suche und klicke auf den History-Tab...');
     await page.evaluate(() => {
-      const tab = document.querySelector('a[href="#history"]');
-      if (tab) tab.click();
+      // Sucht alle Links und klickt auf den, der "History (" enthält
+      const links = Array.from(document.querySelectorAll('a, li, span, div'));
+      const historyTab = links.find(el => el.textContent && el.textContent.includes('History ('));
+      
+      if (historyTab) {
+        historyTab.click();
+      } else {
+        const fallback = document.querySelector('a[href="#history"]');
+        if (fallback) fallback.click();
+      }
     });
     
-    // 5 Sekunden warten, bis die Ajax-Tabelle da ist
-    await new Promise(r => setTimeout(r, 5000));
+    // 10 Sekunden warten, bis Myfxbook die Tabellen-Daten vom Server nachgeladen hat
+    console.log('Warte auf das Laden der Tabellendaten...');
+    await new Promise(r => setTimeout(r, 10000));
 
     console.log('Lese Tabelle aus...');
     const trades = await page.evaluate(() => {
@@ -55,12 +64,11 @@ async function scrapeTrades(url, name) {
       const allRows = document.querySelectorAll('tr');
       
       allRows.forEach(row => {
-        const cols = Array.from(row.querySelectorAll('td')).map(td => td.innerText.trim());
+        // textContent liest auch versteckte/halb geladene Elemente sauber aus
+        const cols = Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim());
         
-        // Finde die Spalte, in der "Buy" oder "Sell" steht
         const actionIdx = cols.findIndex(c => c === 'Buy' || c === 'Sell');
         
-        // Wenn es eine Trade-Zeile ist und genug Spalten danach kommen
         if (actionIdx >= 3 && cols.length > actionIdx + 5) {
           data.push({
             openDate: cols[actionIdx - 3] || '',
@@ -86,7 +94,6 @@ async function scrapeTrades(url, name) {
   }
 }
 
-// Hilfsfunktion: Versucht das Scrapen bis zu 3 Mal pro Strategie
 async function getTradesWithRetry(url, name) {
   for (let i = 1; i <= 3; i++) {
     console.log(`\n--- ${name} (Versuch ${i}/3) ---`);
@@ -97,7 +104,7 @@ async function getTradesWithRetry(url, name) {
       return trades;
     }
     console.log('Keine Trades gefunden oder Fehler. Kurze Pause vor Neustart...');
-    await new Promise(r => setTimeout(r, 5000)); // 5 Sekunden Pause vor neuem Versuch
+    await new Promise(r => setTimeout(r, 6000));
   }
   return [];
 }
