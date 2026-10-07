@@ -14,7 +14,7 @@ if (!SCRAPERAPI_KEY) {
   process.exit(1);
 }
 
-async function scrapeTrades(url, name) {
+async function analyzeAndScrape(url, name) {
   const browser = await puppeteer.launch({
     headless: "new",
     args: [
@@ -23,63 +23,98 @@ async function scrapeTrades(url, name) {
       '--disable-setuid-sandbox',
       '--disable-blink-features=AutomationControlled',
       '--ignore-certificate-errors',
-      '--lang=en-US,en' // Zwingt den Browser auf Englisch
+      '--lang=en-US,en'
     ]
   });
 
   try {
     const page = await browser.newPage();
-    
-    // Zwingt Myfxbook dazu, die Seite auf Englisch auszuliefern, egal wo der Proxy steht
-    await page.setExtraHTTPHeaders({
-      'Accept-Language': 'en-US,en;q=0.9'
-    });
-    
+    await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
     await page.authenticate({ username: 'scraperapi', password: SCRAPERAPI_KEY });
     await page.setViewport({ width: 1280, height: 800 });
 
-    console.log(`Lade Webseite: ${url}`);
+    // === 1. NETZWERK-SNIFFER: Alle versteckten Myfxbook-Abfragen protokollieren ===
+    page.on('response', async response => {
+      const request = response.request();
+      const type = request.resourceType();
+      const resUrl = response.url();
+
+      if (type === 'xhr' || type === 'fetch') {
+        console.log(`[NETZWERK] ${response.status()} ${request.method()} ${resUrl}`);
+        if (resUrl.includes('history') || resUrl.includes('portfolio')) {
+          try {
+            const text = await response.text();
+            console.log(`[NETZWERK-DATEN] Potenzielle History-Daten geladen! (${text.length} Zeichen)`);
+          } catch (e) {
+            // Ignoriere Fehler beim Lesen des Streams
+          }
+        }
+      }
+    });
+
+    console.log(`\nLade Webseite: ${url}`);
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    console.log(`Titel: "${await page.title()}"`);
 
-    const pageTitle = await page.title();
-    console.log(`Titel: "${pageTitle}"`);
-    
-    await new Promise(r => setTimeout(r, 10000));
+    // Kurz warten, bis Cloudflare durch ist
+    await new Promise(r => setTimeout(r, 8000));
 
-    console.log('Suche und klicke auf den History-Tab...');
-    await page.evaluate(() => {
-      // 1. Versuch: Direkter HTML-Link
-      const exactLink = document.querySelector('a[href="#history"]');
-      if (exactLink) {
-        exactLink.click();
-        return;
+    // === 2. ROBUSTER HISTORY-KLICK ===
+    console.log('Suche History-Tab...');
+    const clicked = await page.evaluate(() => {
+      const candidates = Array.from(document.querySelectorAll('a, button, [role="tab"], li'));
+      const historyTab = candidates.find(el => {
+        const text = (el.innerText || el.textContent || '').trim().toLowerCase();
+        return text.includes('history ('); // Myfxbook schreibt meist "History (123)"
+      });
+
+      if (historyTab) {
+        historyTab.click();
+        return true;
       }
       
-      // 2. Versuch: Multilinguale Textsuche
-      const links = Array.from(document.querySelectorAll('a, li, span, div'));
-      const historyTab = links.find(el => {
-        const text = el.textContent ? el.textContent.toLowerCase() : '';
-        return text.includes('history') || text.includes('historie') || text.includes('historique') || text.includes('historial');
-      });
-      
-      if (historyTab) historyTab.click();
+      const fallback = document.querySelector('a[href="#history"]');
+      if (fallback) {
+        fallback.click();
+        return true;
+      }
+      return false;
     });
-    
-    console.log('Warte auf das Laden der Tabellendaten...');
-    await new Promise(r => setTimeout(r, 10000));
+    console.log(`History Tab geklickt: ${clicked}`);
 
-    console.log('Lese Tabelle aus...');
+    // === 3. INTELLIGENTES WARTEN AUF TRADES ===
+    console.log('Warte darauf, dass Trade-Daten im DOM auftauchen...');
+    try {
+      await page.waitForFunction(() => {
+        const text = document.body.innerText.toLowerCase();
+        return text.includes('buy') || text.includes('sell');
+      }, { timeout: 25000 });
+      console.log('Erfolg: Trades sind jetzt sichtbar!');
+    } catch (e) {
+      console.log('Timeout: Keine Trades im DOM erschienen. (Möglicherweise leere Historie oder geblockt)');
+    }
+
+    // === 4. DOM DIAGNOSE & EXTRAKTION ===
+    const debugInfo = await page.evaluate(() => {
+      return Array.from(document.querySelectorAll('table')).map((t, i) => ({
+        index: i,
+        id: t.id,
+        rows: t.querySelectorAll('tr').length
+      }));
+    });
+    console.log(`Gefundene Tabellen: ${debugInfo.filter(t => t.rows > 2).length} (mit mehr als 2 Zeilen)`);
+
     const trades = await page.evaluate(() => {
       const data = [];
       const allRows = document.querySelectorAll('tr');
-      
+
       allRows.forEach(row => {
-        const cols = Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim());
+        const cols = Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim().replace(/\s+/g, ' '));
         
-        // Multilinguale Suche nach der "Buy" oder "Sell" Spalte
-        const actionIdx = cols.findIndex(c => /^(buy|sell|kauf|verkauf|achat|vente|comprar|vender)$/i.test(c));
-        
-        if (actionIdx >= 3 && cols.length > actionIdx + 5) {
+        // Finde die Spalte, die exakt "Buy" oder "Sell" (case-insensitive) enthält
+        const actionIdx = cols.findIndex(c => /^buy$\vert{}^sell$/i.test(c));
+
+        if (actionIdx >= 3 && cols.length >= actionIdx + 5) {
           data.push({
             openDate: cols[actionIdx - 3] || '',
             closeDate: cols[actionIdx - 2] || '',
@@ -94,6 +129,7 @@ async function scrapeTrades(url, name) {
       return data;
     });
 
+    console.log(`${trades.length} Trades geparst.`);
     await browser.close();
     return trades;
 
@@ -107,14 +143,12 @@ async function scrapeTrades(url, name) {
 async function getTradesWithRetry(url, name) {
   for (let i = 1; i <= 3; i++) {
     console.log(`\n--- ${name} (Versuch ${i}/3) ---`);
-    const trades = await scrapeTrades(url, name);
-    
+    const trades = await analyzeAndScrape(url, name);
     if (trades.length > 0) {
-      console.log(`Erfolg! ${trades.length} Trades gefunden.`);
       return trades;
     }
-    console.log('Keine Trades gefunden oder Fehler. Kurze Pause vor Neustart...');
-    await new Promise(r => setTimeout(r, 6000));
+    console.log('Neustart in 5 Sekunden...');
+    await new Promise(r => setTimeout(r, 5000));
   }
   return [];
 }
@@ -130,16 +164,12 @@ async function run() {
 
   if (sonicTrades.length > 0) {
     fs.writeFileSync(path.join(targetDir, 'Sonic_TradesData.json'), JSON.stringify(sonicTrades, null, 2), 'utf-8');
-    console.log('Sonic_TradesData.json aktualisiert.');
-  } else {
-    console.log('Sonic_TradesData.json wurde nicht überschrieben (keine Daten).');
+    console.log('Sonic_TradesData.json gespeichert.');
   }
 
   if (neoTrades.length > 0) {
     fs.writeFileSync(path.join(targetDir, 'NEO_TradesData.json'), JSON.stringify(neoTrades, null, 2), 'utf-8');
-    console.log('NEO_TradesData.json aktualisiert.');
-  } else {
-    console.log('NEO_TradesData.json wurde nicht überschrieben (keine Daten).');
+    console.log('NEO_TradesData.json gespeichert.');
   }
 }
 
