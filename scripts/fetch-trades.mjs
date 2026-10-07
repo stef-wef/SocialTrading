@@ -15,7 +15,6 @@ if (!SCRAPERAPI_KEY) {
 }
 
 async function scrapeTrades(url, name) {
-  console.log(`\nStarte Scraping für ${name} über Proxy...`);
   const browser = await puppeteer.launch({
     headless: "new",
     args: [
@@ -23,89 +22,108 @@ async function scrapeTrades(url, name) {
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-blink-features=AutomationControlled',
-      '--ignore-certificate-errors' // Erlaubt die SSL-Zertifikate von ScraperAPI
+      '--ignore-certificate-errors'
     ]
   });
 
-  const page = await browser.newPage();
-  
-  // ScraperAPI Authentifizierung für den Proxy
-  await page.authenticate({ username: 'scraperapi', password: SCRAPERAPI_KEY });
-  await page.setViewport({ width: 1280, height: 800 });
-
   try {
+    const page = await browser.newPage();
+    await page.authenticate({ username: 'scraperapi', password: SCRAPERAPI_KEY });
+    await page.setViewport({ width: 1280, height: 800 });
+
     console.log(`Lade Webseite: ${url}`);
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
     const pageTitle = await page.title();
-    console.log(`Webseiten-Titel: "${pageTitle}"`);
+    console.log(`Titel: "${pageTitle}"`);
     
-    if (pageTitle.includes('Just a moment') || pageTitle.includes('Cloudflare')) {
-      console.warn(`WARNUNG: Myfxbook blockiert den Zugriff trotz Proxy.`);
-    }
-
-    // 8 Sekunden warten, damit der Proxy alle Skripte durchlässt
+    // 8 Sekunden warten, damit alles geladen ist
     await new Promise(r => setTimeout(r, 8000));
 
-    console.log('Versuche History-Tab zu öffnen...');
-    try {
-      await page.waitForSelector('a[href="#history"]', { timeout: 10000 });
-      await page.click('a[href="#history"]');
-      await new Promise(r => setTimeout(r, 5000)); // Warten, bis Tabelle gerendert ist
-    } catch (e) {
-      console.log('History-Tab nicht klickbar (vielleicht schon aktiv).');
-    }
+    console.log('Erzwinge Klick auf History-Tab...');
+    await page.evaluate(() => {
+      const tab = document.querySelector('a[href="#history"]');
+      if (tab) tab.click();
+    });
+    
+    // 5 Sekunden warten, bis die Ajax-Tabelle da ist
+    await new Promise(r => setTimeout(r, 5000));
 
-    console.log('Lese Trades aus der Tabelle aus...');
+    console.log('Lese Tabelle aus...');
     const trades = await page.evaluate(() => {
       const data = [];
       const allRows = document.querySelectorAll('tr');
       
       allRows.forEach(row => {
-        const cols = row.querySelectorAll('td');
-        if (cols.length >= 10) {
-          const action = cols[4]?.innerText?.trim();
-          if (action === 'Buy' || action === 'Sell') {
-            data.push({
-              openDate: cols[1]?.innerText?.trim() || '',
-              closeDate: cols[2]?.innerText?.trim() || '',
-              symbol: cols[3]?.innerText?.trim() || '',
-              action: action,
-              pips: cols[7]?.innerText?.trim() || '',
-              profit: cols[8]?.innerText?.trim() || '',
-              gain: cols[9]?.innerText?.trim() || ''
-            });
-          }
+        const cols = Array.from(row.querySelectorAll('td')).map(td => td.innerText.trim());
+        
+        // Finde die Spalte, in der "Buy" oder "Sell" steht
+        const actionIdx = cols.findIndex(c => c === 'Buy' || c === 'Sell');
+        
+        // Wenn es eine Trade-Zeile ist und genug Spalten danach kommen
+        if (actionIdx >= 3 && cols.length > actionIdx + 5) {
+          data.push({
+            openDate: cols[actionIdx - 3] || '',
+            closeDate: cols[actionIdx - 2] || '',
+            symbol: cols[actionIdx - 1] || '',
+            action: cols[actionIdx],
+            pips: cols[actionIdx + 6] || '',
+            profit: cols[actionIdx + 7] || '',
+            gain: cols[actionIdx + 9] || ''
+          });
         }
       });
       return data;
     });
 
-    console.log(`${trades.length} Trades erfolgreich gefunden.`);
     await browser.close();
     return trades;
 
   } catch (err) {
-    console.error(`Fehler beim Scrapen von ${name}:`, err.message);
+    console.error(`Scraping-Fehler bei ${name}:`, err.message);
     await browser.close();
     return [];
   }
 }
 
+// Hilfsfunktion: Versucht das Scrapen bis zu 3 Mal pro Strategie
+async function getTradesWithRetry(url, name) {
+  for (let i = 1; i <= 3; i++) {
+    console.log(`\n--- ${name} (Versuch ${i}/3) ---`);
+    const trades = await scrapeTrades(url, name);
+    
+    if (trades.length > 0) {
+      console.log(`Erfolg! ${trades.length} Trades gefunden.`);
+      return trades;
+    }
+    console.log('Keine Trades gefunden oder Fehler. Kurze Pause vor Neustart...');
+    await new Promise(r => setTimeout(r, 5000)); // 5 Sekunden Pause vor neuem Versuch
+  }
+  return [];
+}
+
 async function run() {
-  const sonicTrades = await scrapeTrades(URL_SONIC, 'Sonic AI');
-  const neoTrades = await scrapeTrades(URL_NEO, 'NeoFX');
+  const sonicTrades = await getTradesWithRetry(URL_SONIC, 'Sonic AI');
+  const neoTrades = await getTradesWithRetry(URL_NEO, 'NeoFX');
 
   const targetDir = path.resolve(process.cwd(), 'data');
   if (!fs.existsSync(targetDir)) {
     fs.mkdirSync(targetDir, { recursive: true });
   }
 
-  fs.writeFileSync(path.join(targetDir, 'Sonic_TradesData.json'), JSON.stringify(sonicTrades, null, 2), 'utf-8');
-  console.log('Sonic_TradesData.json aktualisiert.');
+  if (sonicTrades.length > 0) {
+    fs.writeFileSync(path.join(targetDir, 'Sonic_TradesData.json'), JSON.stringify(sonicTrades, null, 2), 'utf-8');
+    console.log('Sonic_TradesData.json aktualisiert.');
+  } else {
+    console.log('Sonic_TradesData.json wurde nicht überschrieben (keine Daten).');
+  }
 
-  fs.writeFileSync(path.join(targetDir, 'NEO_TradesData.json'), JSON.stringify(neoTrades, null, 2), 'utf-8');
-  console.log('NEO_TradesData.json aktualisiert.');
+  if (neoTrades.length > 0) {
+    fs.writeFileSync(path.join(targetDir, 'NEO_TradesData.json'), JSON.stringify(neoTrades, null, 2), 'utf-8');
+    console.log('NEO_TradesData.json aktualisiert.');
+  } else {
+    console.log('NEO_TradesData.json wurde nicht überschrieben (keine Daten).');
+  }
 }
 
 run();
