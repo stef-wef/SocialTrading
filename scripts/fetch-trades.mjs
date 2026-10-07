@@ -22,12 +22,19 @@ async function scrapeTrades(url, name) {
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-blink-features=AutomationControlled',
-      '--ignore-certificate-errors'
+      '--ignore-certificate-errors',
+      '--lang=en-US,en' // Zwingt den Browser auf Englisch
     ]
   });
 
   try {
     const page = await browser.newPage();
+    
+    // Zwingt Myfxbook dazu, die Seite auf Englisch auszuliefern, egal wo der Proxy steht
+    await page.setExtraHTTPHeaders({
+      'Accept-Language': 'en-US,en;q=0.9'
+    });
+    
     await page.authenticate({ username: 'scraperapi', password: SCRAPERAPI_KEY });
     await page.setViewport({ width: 1280, height: 800 });
 
@@ -37,24 +44,27 @@ async function scrapeTrades(url, name) {
     const pageTitle = await page.title();
     console.log(`Titel: "${pageTitle}"`);
     
-    // 10 Sekunden warten, damit Scripte und Cloudflare sicher durch sind
     await new Promise(r => setTimeout(r, 10000));
 
     console.log('Suche und klicke auf den History-Tab...');
     await page.evaluate(() => {
-      // Sucht alle Links und klickt auf den, der "History (" enthält
-      const links = Array.from(document.querySelectorAll('a, li, span, div'));
-      const historyTab = links.find(el => el.textContent && el.textContent.includes('History ('));
-      
-      if (historyTab) {
-        historyTab.click();
-      } else {
-        const fallback = document.querySelector('a[href="#history"]');
-        if (fallback) fallback.click();
+      // 1. Versuch: Direkter HTML-Link
+      const exactLink = document.querySelector('a[href="#history"]');
+      if (exactLink) {
+        exactLink.click();
+        return;
       }
+      
+      // 2. Versuch: Multilinguale Textsuche
+      const links = Array.from(document.querySelectorAll('a, li, span, div'));
+      const historyTab = links.find(el => {
+        const text = el.textContent ? el.textContent.toLowerCase() : '';
+        return text.includes('history') || text.includes('historie') || text.includes('historique') || text.includes('historial');
+      });
+      
+      if (historyTab) historyTab.click();
     });
     
-    // 10 Sekunden warten, bis Myfxbook die Tabellen-Daten vom Server nachgeladen hat
     console.log('Warte auf das Laden der Tabellendaten...');
     await new Promise(r => setTimeout(r, 10000));
 
@@ -64,10 +74,10 @@ async function scrapeTrades(url, name) {
       const allRows = document.querySelectorAll('tr');
       
       allRows.forEach(row => {
-        // textContent liest auch versteckte/halb geladene Elemente sauber aus
         const cols = Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim());
         
-        const actionIdx = cols.findIndex(c => c === 'Buy' || c === 'Sell');
+        // Multilinguale Suche nach der "Buy" oder "Sell" Spalte
+        const actionIdx = cols.findIndex(c => /^(buy|sell|kauf|verkauf|achat|vente|comprar|vender)$/i.test(c));
         
         if (actionIdx >= 3 && cols.length > actionIdx + 5) {
           data.push({
