@@ -2,7 +2,7 @@ name: Sync Myfxbook Trades
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '0 */2 * * *'
   workflow_dispatch:
 
 permissions:
@@ -24,6 +24,8 @@ jobs:
         run: npm install puppeteer puppeteer-extra puppeteer-extra-plugin-stealth
 
       - name: Trades scrapen
+        env:
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
         run: node scripts/fetch-trades.mjs
 
       - name: Änderungen committen und pushen

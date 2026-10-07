@@ -3,43 +3,56 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import fs from 'fs';
 import path from 'path';
 
-// Tarnkappe aktivieren
 puppeteer.use(StealthPlugin());
 
 const URL_SONIC = 'https://www.myfxbook.com/members/SonicExperts/sonic-ai/12076857';
 const URL_NEO = 'https://www.myfxbook.com/members/WordSmithyFx/neofx/11800152';
+const SCRAPERAPI_KEY = process.env.SCRAPERAPI_KEY;
+
+if (!SCRAPERAPI_KEY) {
+  console.error('Fehlender SCRAPERAPI_KEY in den GitHub Secrets.');
+  process.exit(1);
+}
 
 async function scrapeTrades(url, name) {
-  console.log(`\nStarte Scraping für ${name}...`);
+  console.log(`\nStarte Scraping für ${name} über Proxy...`);
   const browser = await puppeteer.launch({
     headless: "new",
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+    args: [
+      '--proxy-server=http://proxy-server.scraperapi.com:8001',
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-blink-features=AutomationControlled'
+    ]
   });
 
   const page = await browser.newPage();
+  
+  // ScraperAPI Authentifizierung für den Proxy
+  await page.authenticate({ username: 'scraperapi', password: SCRAPERAPI_KEY });
   await page.setViewport({ width: 1280, height: 800 });
 
   try {
     console.log(`Lade Webseite: ${url}`);
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
     const pageTitle = await page.title();
     console.log(`Webseiten-Titel: "${pageTitle}"`);
     
     if (pageTitle.includes('Just a moment') || pageTitle.includes('Cloudflare')) {
-      console.warn(`WARNUNG: Myfxbook blockiert den Zugriff auf ${name} (Cloudflare).`);
+      console.warn(`WARNUNG: Myfxbook blockiert den Zugriff trotz Proxy.`);
     }
 
-    // 5 Sekunden warten, damit Scripte auf der Seite nachladen können
-    await new Promise(r => setTimeout(r, 5000));
+    // 8 Sekunden warten, damit der Proxy alle Skripte durchlässt
+    await new Promise(r => setTimeout(r, 8000));
 
     console.log('Versuche History-Tab zu öffnen...');
     try {
-      await page.waitForSelector('a[href="#history"]', { timeout: 5000 });
+      await page.waitForSelector('a[href="#history"]', { timeout: 10000 });
       await page.click('a[href="#history"]');
-      await new Promise(r => setTimeout(r, 3000)); // Warten, bis Tabelle gerendert ist
+      await new Promise(r => setTimeout(r, 5000)); // Warten, bis Tabelle gerendert ist
     } catch (e) {
-      console.log('History-Tab nicht klickbar (vielleicht schon aktiv oder durch Layout-Änderung blockiert).');
+      console.log('History-Tab nicht klickbar (vielleicht schon aktiv).');
     }
 
     console.log('Lese Trades aus der Tabelle aus...');
