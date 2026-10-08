@@ -60,6 +60,13 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
         }
         .tt-wrapper:hover .tt-text { visibility: visible; opacity: 1; }
+        
+        /* Modifikator für Tooltips am rechten Rand, damit sie nicht abgeschnitten werden */
+        .tt-wrapper.tt-right .tt-text {
+            left: auto;
+            right: 0;
+            transform: none;
+        }
 
         input[type=range] { 
             -webkit-appearance: none; 
@@ -238,8 +245,8 @@
             <!-- Drawdown Chart -->
             <div class="lg:col-span-2 glass-panel p-6 flex flex-col">
                 <h3 class="text-xs font-bold uppercase tracking-widest text-zinc-300 mb-4 flex justify-between items-center">
-                    DRAWDOWN & PNL ANALYSE
-                    <div class="tt-wrapper text-zinc-500"><i data-lucide="help-circle" class="w-4 h-4"></i><span class="tt-text">Visualisiert die "Underwater Curve" – also den momentanen prozentualen Rückgang vom letzten Höchststand.</span></div>
+                    Drawdown & PNL Analyse 
+                    <div class="tt-wrapper tt-right text-zinc-500"><i data-lucide="help-circle" class="w-4 h-4"></i><span class="tt-text">Visualisiert die "Underwater Curve" (Rot) sowie die Einzelgewinne und -verluste jedes Trades (Balken).</span></div>
                 </h3>
                 <div class="w-full h-full min-h-[200px] relative flex-1">
                     <canvas id="drawdownChart"></canvas>
@@ -249,23 +256,23 @@
             <div class="glass-panel p-6 flex flex-col">
                 <h3 class="text-xs font-bold uppercase tracking-widest text-zinc-300 mb-4 flex justify-between items-center">
                     Risk / Reward 
-                    <div class="tt-wrapper text-zinc-500"><i data-lucide="help-circle" class="w-4 h-4"></i><span class="tt-text">Zeigt das Verhältnis zwischen dem durchschnittlichen Gewinn-Trade und dem durchschnittlichen Verlust-Trade in $.</span></div>
+                    <div class="tt-wrapper tt-right text-zinc-500"><i data-lucide="help-circle" class="w-4 h-4"></i><span class="tt-text">Zeigt das Verhältnis zwischen dem typischen (Median) Gewinn-Trade und Verlust-Trade in $.</span></div>
                 </h3>
                 <div class="w-full h-full min-h-[160px] relative flex-1 flex justify-center items-center mb-4">
                     <canvas id="rrChart"></canvas>
                 </div>
                 <div class="flex justify-between text-xs font-mono bg-darkBg/50 p-3 rounded-lg border border-cardBorder/50">
-                    <div class="flex flex-col"><span class="text-zinc-500 text-[10px] uppercase">Ø Win</span><span id="avg-win-text" class="text-emerald-400 font-bold">--</span></div>
-                    <div class="flex flex-col text-right"><span class="text-zinc-500 text-[10px] uppercase">Ø Loss</span><span id="avg-loss-text" class="text-rose-400 font-bold">--</span></div>
+                    <div class="flex flex-col"><span class="text-zinc-500 text-[10px] uppercase">Typischer Win</span><span id="avg-win-text" class="text-emerald-400 font-bold">--</span></div>
+                    <div class="flex flex-col text-right"><span class="text-zinc-500 text-[10px] uppercase">Typischer Loss</span><span id="avg-loss-text" class="text-rose-400 font-bold">--</span></div>
                 </div>
             </div>
         </div>
 
         <!-- Heatmap -->
-        <div class="glass-panel p-6 overflow-hidden">
+        <div class="glass-panel p-6">
             <h3 class="text-xs font-bold uppercase tracking-widest text-zinc-300 mb-4 flex justify-between items-center">
                 Monatliche Performance Heatmap 
-                <div class="tt-wrapper text-zinc-500"><i data-lucide="help-circle" class="w-4 h-4"></i><span class="tt-text">Monatliche Netto-Renditen im chronologischen Überblick.</span></div>
+                <div class="tt-wrapper tt-right text-zinc-500"><i data-lucide="help-circle" class="w-4 h-4"></i><span class="tt-text">Monatliche Netto-Renditen im chronologischen Überblick.</span></div>
             </h3>
             <div class="overflow-x-auto table-scroll pb-2">
                 <table class="w-full text-center text-xs font-mono min-w-[600px]">
