@@ -116,6 +116,7 @@ class DualEngineApp {
             ? { cons: 0.050, avg: 0.145, opt: 0.220 }
             : { cons: 0.0588, avg: 0.19152, opt: 0.3528 };
 
+        // Die 30% Erfolgsbeteiligung werden hier exakt abgezogen (24x Hebel * 0.70 verbleibend = 16.8 Netto).
         this.backtestLeverageMult = 24 * 0.70;
 
         this.dom = {
@@ -250,40 +251,18 @@ class DualEngineApp {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
         let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
-        let chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
-        let totalTrades = chronologicalTrades.length;
+        let totalTrades = tradesOnly.length;
         
         let wins = 0, losses = 0;
         let grossProfit = 0, grossLoss = 0;
         let tradeProfitUSD = 0;
         let durations = [];
 
-        // Feste 1000$ für die Live Metrics Ansicht simulieren
-        let baseCapital = 1000;
-        let currentBal = baseCapital;
-        let deposits = baseCapital;
-        let withdrawals = 0;
-        let highestBal = baseCapital;
-        let currentGain = 0, peakGain = 0, maxDrawdown = 0;
-
-        chronologicalTrades.forEach(t => {
-            let g = parseFloat(t.Gain) || 0;
-            
-            // Simulierter Dollar-Gewinn basierend auf dem %-Gain für das saubere 1000$ Portfolio
-            let simulatedProfit = currentBal * (g / 100);
-            
-            tradeProfitUSD += simulatedProfit;
-            currentBal += simulatedProfit;
-
-            if (simulatedProfit > 0) { wins++; grossProfit += simulatedProfit; }
-            else if (simulatedProfit < 0) { losses++; grossLoss += Math.abs(simulatedProfit); }
-
-            currentGain += g;
-            if (currentGain > peakGain) peakGain = currentGain;
-            let dd = peakGain - currentGain;
-            if (dd > maxDrawdown) maxDrawdown = dd;
-
-            if (currentBal > highestBal) highestBal = currentBal;
+        tradesOnly.forEach(t => {
+            let p = parseFloat(t.Profit) || 0;
+            tradeProfitUSD += p;
+            if (p > 0) { wins++; grossProfit += p; }
+            else if (p < 0) { losses++; grossLoss += Math.abs(p); }
 
             if (t["Duration (DD:HH:MM:SS)"]) {
                 let parts = t["Duration (DD:HH:MM:SS)"].split(':');
@@ -301,6 +280,32 @@ class DualEngineApp {
             medianDurationMs = durations.length % 2 !== 0 ? durations[mid] : (durations[mid - 1] + durations[mid]) / 2;
         }
 
+        let deposits = 0, withdrawals = 0, currentBal = 0, highestBal = 0;
+        let currentGain = 0, peakGain = 0, maxDrawdown = 0;
+
+        this.rawTrades.forEach(t => {
+            let action = (t.Action || "").toUpperCase();
+            let p = parseFloat(t.Profit) || 0;
+            let g = parseFloat(t.Gain) || 0;
+
+            if (action === 'DEPOSIT') {
+                deposits += p;
+                currentBal += p;
+            } else if (action === 'WITHDRAWAL') {
+                withdrawals += Math.abs(p);
+                currentBal += p;
+            } else if (action === 'BUY' || action === 'SELL') {
+                currentBal += p;
+                currentGain += g;
+                if (currentGain > peakGain) peakGain = currentGain;
+                let dd = peakGain - currentGain;
+                if (dd > maxDrawdown) maxDrawdown = dd;
+            }
+            if (currentBal > highestBal) highestBal = currentBal;
+        });
+
+        if (deposits === 0) { deposits = 10000; currentBal += 10000; highestBal += 10000; }
+
         let winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(2) : 0;
         let profitFactor = grossLoss > 0 ? (grossProfit / grossLoss).toFixed(2) : (grossProfit > 0 ? grossProfit.toFixed(2) : "0.00");
 
@@ -316,6 +321,7 @@ class DualEngineApp {
         const formatMoney = (val) => '$' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
 
+        let chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
         let firstDate = new Date(chronologicalTrades[0].dt);
         let lastDate = new Date(chronologicalTrades[chronologicalTrades.length - 1].dt);
         let daysDiff = (lastDate - firstDate) / (1000 * 60 * 60 * 24);
