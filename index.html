@@ -241,8 +241,9 @@
                 
                 const clickAction = strat.active ? `window.location.href='${strat.url}'` : '';
                 
+                // Hier wurde " · Live Feed" entfernt
                 const badgeOrStatus = strat.active 
-                    ? '<div class="w-2 h-2 rounded-full bg-emerald-400"></div><span class="text-[10px] text-zinc-400 font-mono uppercase tracking-widest">' + strat.asset + ' · Live Feed</span>'
+                    ? '<div class="w-2 h-2 rounded-full bg-emerald-400"></div><span class="text-[10px] text-zinc-400 font-mono uppercase tracking-widest">' + strat.asset + '</span>'
                     : '<div class="w-2 h-2 rounded-full bg-amber-400"></div><span class="text-[10px] text-amber-400 font-mono uppercase tracking-widest">' + i18n[currentLang].comingSoon + '</span>';
 
                 let wonNum = parseInt(strat.tradesWon) || 0;
