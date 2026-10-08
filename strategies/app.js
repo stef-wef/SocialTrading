@@ -314,12 +314,14 @@ class DualEngineApp {
                     scales: {
                         x: { 
                             display: true, 
-                            grid: { color: 'rgba(255, 255, 255, 0.02)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false },
+                            border: { display: false },
                             ticks: { 
                                 maxTicksLimit: 6, 
                                 font: { size: 10 }, 
                                 color: '#94A3B8',
                                 align: 'inner', // Zieht den Text nach innen und entfernt das Padding am Rand
+                                padding: 5,
                                 callback: function(val, index) {
                                     let label = this.getLabelForValue(val);
                                     if(!label) return '';
@@ -329,7 +331,17 @@ class DualEngineApp {
                                 }
                             }
                         },
-                        y: { position: 'right', grid: { color: 'rgba(255, 255, 255, 0.05)' }, border: { dash: [4, 4] }, ticks: { callback: (v) => v + '%' } }
+                        y: { 
+                            position: 'right', 
+                            grid: { color: 'rgba(255, 255, 255, 0.05)', drawTicks: false }, 
+                            border: { dash: [4, 4], display: false }, 
+                            ticks: { 
+                                callback: (v) => v + '%',
+                                mirror: true, // Zieht die Beschriftung INSIDE das Chart
+                                z: 10,
+                                padding: 0 
+                            } 
+                        }
                     }
                 }
             });
@@ -723,7 +735,7 @@ class DualEngineApp {
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                layout: { padding: { left: 0, right: 0, top: 15, bottom: 5 } },
+                layout: { padding: { left: 0, right: 0, top: 10, bottom: 0 } },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -761,17 +773,25 @@ class DualEngineApp {
                 interaction: { mode: 'index', intersect: false, axis: 'x' },
                 scales: {
                     x: { 
-                        grid: { color: 'rgba(255, 255, 255, 0.02)' }, 
+                        grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false }, 
+                        border: { display: false },
                         ticks: { 
                             maxTicksLimit: 6, 
                             font: { size: 10 }, 
                             color: '#94A3B8',
-                            align: 'inner' // Zieht den Text nach innen und entfernt das Padding am Rand
+                            align: 'inner', // Zieht den Text nach innen und entfernt das Padding am Rand
+                            padding: 5
                         } 
                     },
                     y: {
-                        position: 'right', grid: { color: 'rgba(255, 255, 255, 0.04)' }, border: { dash: [4, 4] },
-                        ticks: { maxTicksLimit: 6, font: { size: 10 }, color: '#94A3B8', callback: (val) => val >= 1000 ? '$' + (val / 1000).toFixed(1) + 'k' : '$' + val }
+                        position: 'right', 
+                        grid: { color: 'rgba(255, 255, 255, 0.04)', drawTicks: false }, 
+                        border: { dash: [4, 4], display: false },
+                        ticks: { 
+                            maxTicksLimit: 6, font: { size: 10 }, color: '#94A3B8', 
+                            mirror: true, z: 10, padding: 0, 
+                            callback: (val) => val >= 1000 ? '$' + (val / 1000).toFixed(1) + 'k' : '$' + val 
+                        }
                     }
                 }
             }
@@ -906,7 +926,7 @@ class DualEngineApp {
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                layout: { padding: { left: 0, right: 0, top: 5, bottom: 0 } },
+                layout: { padding: { left: 0, right: 0, top: 10, bottom: 0 } },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -920,15 +940,26 @@ class DualEngineApp {
                 interaction: { mode: 'index', intersect: false },
                 scales: {
                     x: { 
-                        grid: { color: 'rgba(255, 255, 255, 0.02)' }, 
+                        grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false }, 
+                        border: { display: false },
                         ticks: { 
                             color: '#94A3B8', 
                             font: { size: 10 }, 
                             maxTicksLimit: 6,
-                            align: 'inner' // Zieht den Text nach innen und entfernt das Padding am Rand
+                            align: 'inner', // Zieht den Text nach innen und entfernt das Padding am Rand
+                            padding: 5
                         } 
                     },
-                    y: { position: 'left', grid: { color: 'rgba(255, 255, 255, 0.04)' }, border: { dash: [4, 4] }, ticks: { color: '#94A3B8', font: { size: 10 }, callback: (v) => v + '%' } }
+                    y: { 
+                        position: 'right', 
+                        grid: { color: 'rgba(255, 255, 255, 0.04)', drawTicks: false }, 
+                        border: { dash: [4, 4], display: false }, 
+                        ticks: { 
+                            color: '#94A3B8', font: { size: 10 }, 
+                            mirror: true, z: 10, padding: 0, 
+                            callback: (v) => v + '%' 
+                        } 
+                    }
                 }
             }
         });
