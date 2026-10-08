@@ -116,6 +116,8 @@ class DualEngineApp {
             ? { cons: 0.050, avg: 0.145, opt: 0.220 }
             : { cons: 0.0588, avg: 0.19152, opt: 0.3528 };
 
+        // Die 30% Erfolgsbeteiligung werden hier exakt abgezogen (24x Hebel * 0.70 verbleibend = 16.8 Netto).
+        // Das entspricht genau den Vorgaben der Strategie.
         this.backtestLeverageMult = 24 * 0.70;
 
         this.dom = {
@@ -621,9 +623,11 @@ class DualEngineApp {
         if (filteredTrades.length === 0) return;
 
         let currentBalance = capital;
+        let startOfDayBalance = capital; // Neu: Um echten täglichen Zinseszins abzubilden
         let totalInvested = capital;
         let totalPayouts = 0;
         let lastMonth = '';
+        let lastDay = ''; // Neu: Speichert den letzten Handelstag
 
         let labels = [];
         let dataPoints = [];
@@ -638,14 +642,27 @@ class DualEngineApp {
 
         filteredTrades.forEach((t) => {
             const currentMonth = t.dt.substring(0, 7);
+            const currentDay = t.dt;
+
             if (lastMonth && currentMonth !== lastMonth && topup > 0) {
                 currentBalance += topup;
                 totalInvested += topup;
             }
             lastMonth = currentMonth;
 
+            // Zinseszins wird nach echten Tagen angesetzt
+            // Sobald ein neuer Handelstag ansteht, aktualisieren wir das Tages-Startkapital
+            if (lastDay !== currentDay) {
+                startOfDayBalance = currentBalance;
+            }
+            lastDay = currentDay;
+
+            // Die 30% Erfolgsbeteiligung ist in this.backtestLeverageMult (24 * 0.70) bereits korrekt abgezogen
             let scaledGainPercent = t.parsedGain * this.backtestLeverageMult;
-            let tradeProfit = currentBalance * (scaledGainPercent / 100);
+            
+            // Berechnung der Gewinn-/Verlust-Summe des Trades basierend auf dem Tages-Startkapital
+            // und nicht mehr auf dem intra-day schwankenden currentBalance
+            let tradeProfit = startOfDayBalance * (scaledGainPercent / 100);
 
             if (mode === 'reinvest') {
                 currentBalance += tradeProfit;
