@@ -290,6 +290,7 @@ class DualEngineApp {
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
+                    layout: { padding: { left: 0, right: 0, top: 10, bottom: 0 } },
                     plugins: { 
                         legend: { display: false }, 
                         tooltip: { 
@@ -318,6 +319,7 @@ class DualEngineApp {
                                 maxTicksLimit: 6, 
                                 font: { size: 10 }, 
                                 color: '#94A3B8',
+                                align: 'inner', // Zieht den Text nach innen und entfernt das Padding am Rand
                                 callback: function(val, index) {
                                     let label = this.getLabelForValue(val);
                                     if(!label) return '';
@@ -364,9 +366,8 @@ class DualEngineApp {
         
         let drawdownLabels = [];
         let drawdownDataPoints = [];
-        let tradeGainDataPoints = []; // Für das Combo-Chart
+        let tradeGainDataPoints = []; 
 
-        // Feste 1000$ für die Live Metrics Ansicht simulieren, damit die Risk/Reward Zahlen Sinn machen
         let baseCapital = 1000;
         let simCurrentBal = baseCapital;
 
@@ -393,12 +394,12 @@ class DualEngineApp {
                 currentGain += g;
                 if (currentGain > peakGain) peakGain = currentGain;
                 
-                let dd = currentGain - peakGain; // negativ oder 0
+                let dd = currentGain - peakGain; 
                 if (Math.abs(dd) > maxDrawdown) maxDrawdown = Math.abs(dd);
 
                 drawdownLabels.push(t.dt);
-                drawdownDataPoints.push(dd); // Die Rote Linie (Drawdown)
-                tradeGainDataPoints.push(g); // Die Striche (Einzelner Trade %)
+                drawdownDataPoints.push(dd); 
+                tradeGainDataPoints.push(g); 
 
                 if (t["Duration (DD:HH:MM:SS)"]) {
                     let parts = t["Duration (DD:HH:MM:SS)"].split(':');
@@ -410,7 +411,6 @@ class DualEngineApp {
             }
         });
 
-        // Median Funktion zur Ignorierung von extremen Ausreißern
         const getMedian = (arr) => {
             if (arr.length === 0) return 0;
             arr.sort((a, b) => a - b);
@@ -480,11 +480,9 @@ class DualEngineApp {
         setEl('myfx-monthly', monthlyGain.toFixed(2) + '%');
         setEl('myfx-drawdown', maxDrawdown.toFixed(2) + '%');
         
-        // Advanced Charts UI Updates (Median verwenden)
         setEl('avg-win-text', '+$' + typWin.toFixed(2));
         setEl('avg-loss-text', '-$' + typLoss.toFixed(2));
         
-        // Label Text im HTML anpassen
         const avgWinLabel = document.getElementById('avg-win-text')?.previousElementSibling;
         const avgLossLabel = document.getElementById('avg-loss-text')?.previousElementSibling;
         if(avgWinLabel) avgWinLabel.innerText = "Typischer Win";
@@ -496,14 +494,13 @@ class DualEngineApp {
         }
         if (this.drawdownChart) {
             this.drawdownChart.data.labels = drawdownLabels;
-            this.drawdownChart.data.datasets[0].data = drawdownDataPoints; // Drawdown
+            this.drawdownChart.data.datasets[0].data = drawdownDataPoints; 
             if(this.drawdownChart.data.datasets[1]) {
-                this.drawdownChart.data.datasets[1].data = tradeGainDataPoints; // Trade % PnL (Grün/Rot)
+                this.drawdownChart.data.datasets[1].data = tradeGainDataPoints; 
             }
             this.drawdownChart.update();
         }
 
-        // Native Broker Account Details Data berechnen wie gehabt
         this.rawTrades.forEach(t => {
             let action = (t.Action || "").toUpperCase();
             let p = parseFloat(t.Profit) || 0;
@@ -726,7 +723,7 @@ class DualEngineApp {
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                layout: { padding: { left: 20, right: 20, top: 15, bottom: 5 } },
+                layout: { padding: { left: 0, right: 0, top: 15, bottom: 5 } },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -763,7 +760,15 @@ class DualEngineApp {
                 },
                 interaction: { mode: 'index', intersect: false, axis: 'x' },
                 scales: {
-                    x: { grid: { color: 'rgba(255, 255, 255, 0.02)' }, ticks: { maxTicksLimit: 6, font: { size: 10 }, color: '#94A3B8' } },
+                    x: { 
+                        grid: { color: 'rgba(255, 255, 255, 0.02)' }, 
+                        ticks: { 
+                            maxTicksLimit: 6, 
+                            font: { size: 10 }, 
+                            color: '#94A3B8',
+                            align: 'inner' // Zieht den Text nach innen und entfernt das Padding am Rand
+                        } 
+                    },
                     y: {
                         position: 'right', grid: { color: 'rgba(255, 255, 255, 0.04)' }, border: { dash: [4, 4] },
                         ticks: { maxTicksLimit: 6, font: { size: 10 }, color: '#94A3B8', callback: (val) => val >= 1000 ? '$' + (val / 1000).toFixed(1) + 'k' : '$' + val }
@@ -901,6 +906,7 @@ class DualEngineApp {
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
+                layout: { padding: { left: 0, right: 0, top: 5, bottom: 0 } },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -913,7 +919,15 @@ class DualEngineApp {
                 },
                 interaction: { mode: 'index', intersect: false },
                 scales: {
-                    x: { grid: { color: 'rgba(255, 255, 255, 0.02)' }, ticks: { color: '#94A3B8', font: { size: 10 }, maxTicksLimit: 6 } },
+                    x: { 
+                        grid: { color: 'rgba(255, 255, 255, 0.02)' }, 
+                        ticks: { 
+                            color: '#94A3B8', 
+                            font: { size: 10 }, 
+                            maxTicksLimit: 6,
+                            align: 'inner' // Zieht den Text nach innen und entfernt das Padding am Rand
+                        } 
+                    },
                     y: { position: 'left', grid: { color: 'rgba(255, 255, 255, 0.04)' }, border: { dash: [4, 4] }, ticks: { color: '#94A3B8', font: { size: 10 }, callback: (v) => v + '%' } }
                 }
             }
