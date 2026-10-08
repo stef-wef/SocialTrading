@@ -711,6 +711,10 @@ class DualEngineApp {
             growthData = [0, 5, 10, 15];
         }
 
+        let gradient = ctx.createLinearGradient(0, 0, 0, 280);
+        gradient.addColorStop(0, 'rgba(0, 229, 255, 0.15)');
+        gradient.addColorStop(1, 'rgba(0, 229, 255, 0.0)');
+
         this.equityChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -718,11 +722,15 @@ class DualEngineApp {
                 datasets: [{
                     label: 'Growth',
                     data: growthData,
-                    borderColor: '#E15241',
-                    borderWidth: 1.8,
+                    borderColor: '#00E5FF',
+                    backgroundColor: gradient,
+                    borderWidth: 2,
                     pointRadius: 0,
-                    pointHoverRadius: 4,
-                    fill: false,
+                    pointHoverRadius: 5,
+                    pointBackgroundColor: '#040914',
+                    pointBorderColor: '#00E5FF',
+                    pointBorderWidth: 2,
+                    fill: true,
                     tension: 0.2
                 }]
             },
@@ -730,18 +738,39 @@ class DualEngineApp {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0A101C',
+                        titleColor: '#00E5FF',
+                        titleFont: { size: 13, family: "'JetBrains Mono', monospace", weight: 'bold' },
+                        bodyColor: '#E2E8F0',
+                        bodyFont: { size: 12, family: "'JetBrains Mono', monospace" },
+                        borderColor: '#1A2436',
+                        borderWidth: 1,
+                        padding: 14,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return 'Growth: ' + context.parsed.y + '%';
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false
                 },
                 scales: {
                     x: {
-                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
-                        ticks: { color: '#64748B', font: { size: 10 }, maxTicksLimit: 6 }
+                        grid: { color: 'rgba(255, 255, 255, 0.02)' },
+                        ticks: { color: '#94A3B8', font: { size: 10 }, maxTicksLimit: 6 }
                     },
                     y: {
                         position: 'left',
-                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        grid: { color: 'rgba(255, 255, 255, 0.04)' },
+                        border: { dash: [4, 4] },
                         ticks: {
-                            color: '#64748B',
+                            color: '#94A3B8',
                             font: { size: 10 },
                             callback: (v) => v + '%'
                         }
