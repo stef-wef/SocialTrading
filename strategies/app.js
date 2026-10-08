@@ -259,8 +259,35 @@ class DualEngineApp {
         if (ddCanvas) {
             const ctx = ddCanvas.getContext('2d');
             this.drawdownChart = new Chart(ctx, {
-                type: 'line',
-                data: { labels: [], datasets: [{ data: [], borderColor: '#F43F5E', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 1.5, fill: true, pointRadius: 0, tension: 0.2 }] },
+                data: { 
+                    labels: [], 
+                    datasets: [
+                        { 
+                            type: 'line',
+                            label: 'Drawdown',
+                            data: [], 
+                            borderColor: '#F43F5E', 
+                            backgroundColor: 'rgba(244, 63, 94, 0.15)', 
+                            borderWidth: 1.5, 
+                            fill: true, 
+                            pointRadius: 0, 
+                            tension: 0.2,
+                            order: 2 // Drawdown in background
+                        },
+                        {
+                            type: 'bar',
+                            label: 'Trade PnL',
+                            data: [],
+                            backgroundColor: (context) => {
+                                const val = context.raw || 0;
+                                return val > 0 ? '#34D399' : '#F43F5E';
+                            },
+                            borderRadius: 2,
+                            barPercentage: 0.6,
+                            order: 1 // Bars in foreground
+                        }
+                    ] 
+                },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { 
@@ -272,7 +299,10 @@ class DualEngineApp {
                                     if(isNaN(d.getTime())) return `Datum: ${items[0].label}`;
                                     return `Datum: ${d.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
                                 },
-                                label: (c) => 'Drawdown: ' + c.parsed.y.toFixed(2) + '%' 
+                                label: (c) => {
+                                    if (c.datasetIndex === 0) return 'Drawdown: ' + c.parsed.y.toFixed(2) + '%';
+                                    return 'Trade PnL: ' + (c.parsed.y > 0 ? '+' : '') + c.parsed.y.toFixed(2) + '%';
+                                } 
                             } 
                         } 
                     },
@@ -334,14 +364,14 @@ class DualEngineApp {
         
         let drawdownLabels = [];
         let drawdownDataPoints = [];
+        let tradeGainDataPoints = []; // Für das Combo-Chart
 
-        // Feste 1000$ für die Live Metrics Ansicht simulieren, damit die Zahlen Sinn machen
+        // Feste 1000$ für die Live Metrics Ansicht simulieren, damit die Risk/Reward Zahlen Sinn machen
         let baseCapital = 1000;
         let simCurrentBal = baseCapital;
 
         chronologicalTrades.forEach(t => {
             let action = (t.Action || "").toUpperCase();
-            let p = parseFloat(t.Profit) || 0;
             let g = parseFloat(t.Gain) || 0;
 
             if (action === 'BUY' || action === 'SELL') {
@@ -367,7 +397,8 @@ class DualEngineApp {
                 if (Math.abs(dd) > maxDrawdown) maxDrawdown = Math.abs(dd);
 
                 drawdownLabels.push(t.dt);
-                drawdownDataPoints.push(dd);
+                drawdownDataPoints.push(dd); // Die Rote Linie (Drawdown)
+                tradeGainDataPoints.push(g); // Die Striche (Einzelner Trade %)
 
                 if (t["Duration (DD:HH:MM:SS)"]) {
                     let parts = t["Duration (DD:HH:MM:SS)"].split(':');
@@ -379,7 +410,7 @@ class DualEngineApp {
             }
         });
 
-        // Median Funktion zur Ignorierung von Ausreißern
+        // Median Funktion zur Ignorierung von extremen Ausreißern
         const getMedian = (arr) => {
             if (arr.length === 0) return 0;
             arr.sort((a, b) => a - b);
@@ -453,7 +484,7 @@ class DualEngineApp {
         setEl('avg-win-text', '+$' + typWin.toFixed(2));
         setEl('avg-loss-text', '-$' + typLoss.toFixed(2));
         
-        // Label Text im HTML sicherheitshalber anpassen, falls vorhanden
+        // Label Text im HTML anpassen
         const avgWinLabel = document.getElementById('avg-win-text')?.previousElementSibling;
         const avgLossLabel = document.getElementById('avg-loss-text')?.previousElementSibling;
         if(avgWinLabel) avgWinLabel.innerText = "Typischer Win";
@@ -465,11 +496,14 @@ class DualEngineApp {
         }
         if (this.drawdownChart) {
             this.drawdownChart.data.labels = drawdownLabels;
-            this.drawdownChart.data.datasets[0].data = drawdownDataPoints;
+            this.drawdownChart.data.datasets[0].data = drawdownDataPoints; // Drawdown
+            if(this.drawdownChart.data.datasets[1]) {
+                this.drawdownChart.data.datasets[1].data = tradeGainDataPoints; // Trade % PnL (Grün/Rot)
+            }
             this.drawdownChart.update();
         }
 
-        // Native Broker Account Details Data berechnen wie gehabt, falls Original Einzahlungen gewünscht:
+        // Native Broker Account Details Data berechnen wie gehabt
         this.rawTrades.forEach(t => {
             let action = (t.Action || "").toUpperCase();
             let p = parseFloat(t.Profit) || 0;
