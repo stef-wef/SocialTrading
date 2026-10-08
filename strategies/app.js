@@ -108,6 +108,8 @@ class DualEngineApp {
         this.rawTrades = [];
         this.btChart = null;
         this.equityChart = null;
+        this.drawdownChart = null;
+        this.rrChart = null;
         this.currentLang = 'de';
 
         this.isNeo = window.location.pathname.toLowerCase().includes('neofx');
@@ -116,7 +118,6 @@ class DualEngineApp {
             ? { cons: 0.050, avg: 0.145, opt: 0.220 }
             : { cons: 0.0588, avg: 0.19152, opt: 0.3528 };
 
-        // Die 30% Erfolgsbeteiligung werden hier exakt abgezogen (24x Hebel * 0.70 verbleibend = 16.8 Netto).
         this.backtestLeverageMult = 24 * 0.70;
 
         this.dom = {
@@ -147,7 +148,8 @@ class DualEngineApp {
 
             statTotal: document.getElementById('stat-total'),
             tradesBody: document.getElementById('trades-table-body'),
-            langToggle: document.getElementById('langToggle')
+            langToggle: document.getElementById('langToggle'),
+            exportBtn: document.getElementById('export-csv-btn')
         };
 
         this.init();
@@ -175,11 +177,13 @@ class DualEngineApp {
             this.dom.btEnd.value = chronologicalTrades[chronologicalTrades.length - 1].dt;
         }
 
+        this.initAdvancedCharts();
         this.setupListeners();
         this.updateKPIs();
         this.initEquityGrowthChart();
         this.initBacktestChart();
         this.renderStatsAndTable();
+        this.renderHeatmap();
         this.calcProjection();
         this.calcBacktest();
     }
@@ -247,41 +251,55 @@ class DualEngineApp {
         });
     }
 
+    initAdvancedCharts() {
+        Chart.defaults.font.family = "'JetBrains Mono', monospace";
+        Chart.defaults.color = '#94A3B8';
+
+        const ddCanvas = document.getElementById('drawdownChart');
+        if (ddCanvas) {
+            const ctx = ddCanvas.getContext('2d');
+            this.drawdownChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [{ data: [], borderColor: '#F43F5E', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 1.5, fill: true, pointRadius: 0, tension: 0.2 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => 'Drawdown: ' + c.parsed.y.toFixed(2) + '%' } } },
+                    scales: {
+                        x: { display: false },
+                        y: { position: 'right', grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { callback: (v) => v + '%' } }
+                    }
+                }
+            });
+        }
+
+        const rrCanvas = document.getElementById('rrChart');
+        if (rrCanvas) {
+            const ctx = rrCanvas.getContext('2d');
+            this.rrChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: ['Ø Win', 'Ø Loss'], datasets: [{ data: [1, 1], backgroundColor: ['#34D399', '#FB7185'], borderWidth: 0, hoverOffset: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => c.label + ': $' + c.raw.toFixed(2) } } } }
+            });
+        }
+    }
+
     updateKPIs() {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
         let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
-        let totalTrades = tradesOnly.length;
+        let chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
+        let totalTrades = chronologicalTrades.length;
         
         let wins = 0, losses = 0;
         let grossProfit = 0, grossLoss = 0;
         let tradeProfitUSD = 0;
         let durations = [];
 
-        tradesOnly.forEach(t => {
-            let p = parseFloat(t.Profit) || 0;
-            tradeProfitUSD += p;
-            if (p > 0) { wins++; grossProfit += p; }
-            else if (p < 0) { losses++; grossLoss += Math.abs(p); }
-
-            if (t["Duration (DD:HH:MM:SS)"]) {
-                let parts = t["Duration (DD:HH:MM:SS)"].split(':');
-                if(parts.length === 4) {
-                    let ms = (parseInt(parts[0])*86400 + parseInt(parts[1])*3600 + parseInt(parts[2])*60 + parseInt(parts[3])) * 1000;
-                    durations.push(ms);
-                }
-            }
-        });
-
-        durations.sort((a, b) => a - b);
-        let medianDurationMs = 0;
-        if (durations.length > 0) {
-            let mid = Math.floor(durations.length / 2);
-            medianDurationMs = durations.length % 2 !== 0 ? durations[mid] : (durations[mid - 1] + durations[mid]) / 2;
-        }
-
         let deposits = 0, withdrawals = 0, currentBal = 0, highestBal = 0;
         let currentGain = 0, peakGain = 0, maxDrawdown = 0;
+        
+        let drawdownLabels = [];
+        let drawdownDataPoints = [];
 
         this.rawTrades.forEach(t => {
             let action = (t.Action || "").toUpperCase();
@@ -295,11 +313,28 @@ class DualEngineApp {
                 withdrawals += Math.abs(p);
                 currentBal += p;
             } else if (action === 'BUY' || action === 'SELL') {
+                tradeProfitUSD += p;
                 currentBal += p;
+                
+                if (p > 0) { wins++; grossProfit += p; }
+                else if (p < 0) { losses++; grossLoss += Math.abs(p); }
+
                 currentGain += g;
                 if (currentGain > peakGain) peakGain = currentGain;
-                let dd = peakGain - currentGain;
-                if (dd > maxDrawdown) maxDrawdown = dd;
+                
+                let dd = currentGain - peakGain; // negativ oder 0
+                if (Math.abs(dd) > maxDrawdown) maxDrawdown = Math.abs(dd);
+
+                drawdownLabels.push(t.dt);
+                drawdownDataPoints.push(dd);
+
+                if (t["Duration (DD:HH:MM:SS)"]) {
+                    let parts = t["Duration (DD:HH:MM:SS)"].split(':');
+                    if(parts.length === 4) {
+                        let ms = (parseInt(parts[0])*86400 + parseInt(parts[1])*3600 + parseInt(parts[2])*60 + parseInt(parts[3])) * 1000;
+                        durations.push(ms);
+                    }
+                }
             }
             if (currentBal > highestBal) highestBal = currentBal;
         });
@@ -309,6 +344,15 @@ class DualEngineApp {
         let winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(2) : 0;
         let profitFactor = grossLoss > 0 ? (grossProfit / grossLoss).toFixed(2) : (grossProfit > 0 ? grossProfit.toFixed(2) : "0.00");
 
+        let avgWin = wins > 0 ? grossProfit / wins : 0;
+        let avgLoss = losses > 0 ? grossLoss / losses : 0;
+
+        durations.sort((a, b) => a - b);
+        let medianDurationMs = 0;
+        if (durations.length > 0) {
+            let mid = Math.floor(durations.length / 2);
+            medianDurationMs = durations.length % 2 !== 0 ? durations[mid] : (durations[mid - 1] + durations[mid]) / 2;
+        }
         let avgDurationStr = "~12 min";
         let validDurations = durations.length;
         if (validDurations > 0) {
@@ -321,7 +365,6 @@ class DualEngineApp {
         const formatMoney = (val) => '$' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
 
-        let chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
         let firstDate = new Date(chronologicalTrades[0].dt);
         let lastDate = new Date(chronologicalTrades[chronologicalTrades.length - 1].dt);
         let daysDiff = (lastDate - firstDate) / (1000 * 60 * 60 * 24);
@@ -335,16 +378,25 @@ class DualEngineApp {
         setEl('kpi-max-drawdown', maxDrawdown.toFixed(2) + '%');
         setEl('kpi-trades', totalTrades);
         setEl('kpi-monthly-gain', '+' + monthlyGain.toFixed(2) + '%');
-        setEl('kpi-winrate-main', winRate + '%'); 
 
         setEl('kpi-daily-avg', '+' + dailyGain.toFixed(2) + '%');
         setEl('kpi-profit-factor', profitFactor);
         setEl('kpi-avg-duration', avgDurationStr);
-        setEl('kpi-loss-months', '0');
-
-        setEl('kpi-winrate', winRate + '%');
-        setEl('kpi-win-loss-text', `${wins} Win / ${losses} Lose`);
-        setEl('kpi-trades-text', `${totalTrades} Closed Trades`);
+        
+        let lossMonths = 0;
+        let prevM = null;
+        let mGain = 0;
+        chronologicalTrades.forEach(t => {
+            let m = t.dt.substring(0,7);
+            if(m !== prevM && prevM !== null) {
+                if(mGain < 0) lossMonths++;
+                mGain = 0;
+            }
+            mGain += parseFloat(t.Gain) || 0;
+            prevM = m;
+        });
+        if(mGain < 0) lossMonths++;
+        setEl('kpi-loss-months', lossMonths);
 
         setEl('myfx-gain', '+' + currentGain.toFixed(2) + '%');
         setEl('myfx-abs-gain', '+' + currentGain.toFixed(2) + '%');
@@ -359,6 +411,83 @@ class DualEngineApp {
         setEl('myfx-deposits', formatMoney(deposits));
         setEl('myfx-withdrawals', formatMoney(withdrawals));
         setEl('stat-total', totalTrades);
+
+        // Update Advanced Charts
+        setEl('avg-win-text', '+$' + avgWin.toFixed(2));
+        setEl('avg-loss-text', '-$' + avgLoss.toFixed(2));
+
+        if (this.rrChart) {
+            this.rrChart.data.datasets[0].data = [avgWin, avgLoss];
+            this.rrChart.update();
+        }
+        if (this.drawdownChart) {
+            this.drawdownChart.data.labels = drawdownLabels;
+            this.drawdownChart.data.datasets[0].data = drawdownDataPoints;
+            this.drawdownChart.update();
+        }
+    }
+
+    renderHeatmap() {
+        const body = document.getElementById('heatmap-body');
+        if (!body || this.rawTrades.length === 0) return;
+
+        let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+        let dataByYear = {};
+
+        tradesOnly.forEach(t => {
+            let y = t.dt.substring(0, 4);
+            let m = t.dt.substring(5, 7);
+            if (!dataByYear[y]) Object.assign(dataByYear, { [y]: { sum: 0 } });
+            if (!dataByYear[y][m]) dataByYear[y][m] = 0;
+            let g = parseFloat(t.Gain) || 0;
+            dataByYear[y][m] += g;
+            dataByYear[y].sum += g;
+        });
+
+        let html = '';
+        Object.keys(dataByYear).sort((a,b) => b - a).forEach(y => {
+            html += `<tr class="hover:bg-cardBorder/10 transition-colors"><td class="p-3 font-bold text-white bg-darkBg/50 border-r border-cardBorder/40">${y}</td>`;
+            for (let i = 1; i <= 12; i++) {
+                let mStr = i.toString().padStart(2, '0');
+                let val = dataByYear[y][mStr];
+                if (val !== undefined) {
+                    let colorClass = val > 0 ? 'bg-emerald-500/20 text-emerald-400 font-semibold' : (val < 0 ? 'bg-rose-500/20 text-rose-400 font-semibold' : 'text-zinc-500');
+                    html += `<td class="p-3 ${colorClass}">${val > 0 ? '+' : ''}${val.toFixed(2)}%</td>`;
+                } else {
+                    html += `<td class="p-3 text-zinc-600">-</td>`;
+                }
+            }
+            let ytd = dataByYear[y].sum;
+            let ytdColor = ytd > 0 ? 'text-emerald-400 font-bold' : (ytd < 0 ? 'text-rose-400 font-bold' : 'text-zinc-500');
+            html += `<td class="p-3 bg-darkBg/50 border-l border-cardBorder/40 ${ytdColor}">${ytd > 0 ? '+' : ''}${ytd.toFixed(2)}%</td></tr>`;
+        });
+        body.innerHTML = html;
+    }
+
+    exportCSV() {
+        let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+        if(tradesOnly.length === 0) return;
+        
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Symbol,Action,Lots,Open Date,Open Price,Close Date,Close Price,Profit USD,Gain %\n";
+        
+        tradesOnly.forEach(t => {
+            let row = [
+                t.Symbol || '', t.Action || '', t["Units/Lots"] || '',
+                t["Open Date"] || '', t["Open Price"] || '',
+                t["Close Date"] || '', t["Close Price"] || '',
+                t.Profit || '', t.Gain || ''
+            ].map(v => `"${v}"`).join(",");
+            csvContent += row + "\r\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `${this.isNeo ? 'NEO_FX' : 'SONIC'}_Historical_Trades.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     applyTranslations() {
@@ -396,6 +525,8 @@ class DualEngineApp {
         if (this.dom.btStart) this.dom.btStart.addEventListener('change', () => this.calcBacktest());
         if (this.dom.btEnd) this.dom.btEnd.addEventListener('change', () => this.calcBacktest());
         if (this.dom.btMode) this.dom.btMode.addEventListener('change', () => this.calcBacktest());
+
+        if (this.dom.exportBtn) this.dom.exportBtn.addEventListener('click', () => this.exportCSV());
     }
 
     simulateProj(deposit, topup, months, rate, mode) {
@@ -478,10 +609,7 @@ class DualEngineApp {
             Chart.Tooltip.positioners.followGreenLine = function(elements, eventPosition) {
                 if (!elements || elements.length === 0) return false;
                 const greenElement = elements.find(el => el.datasetIndex === 0) || elements[0];
-                return {
-                    x: greenElement.element.x,
-                    y: greenElement.element.y
-                };
+                return { x: greenElement.element.x, y: greenElement.element.y };
             };
         }
 
@@ -491,84 +619,43 @@ class DualEngineApp {
                 labels: [],
                 datasets: [
                     {
-                        label: 'Portfolio Balance',
-                        data: [],
-                        borderColor: '#34D399',
-                        backgroundColor: gradient,
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        pointHoverRadius: 5,
-                        pointBackgroundColor: '#040914',
-                        pointBorderColor: '#34D399',
-                        pointBorderWidth: 2,
-                        fill: true,
-                        tension: 0.15
+                        label: 'Portfolio Balance', data: [], borderColor: '#34D399', backgroundColor: gradient,
+                        borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointBackgroundColor: '#040914',
+                        pointBorderColor: '#34D399', pointBorderWidth: 2, fill: true, tension: 0.15
                     },
                     {
-                        label: 'Invested Capital',
-                        data: [],
-                        borderColor: 'transparent',
-                        backgroundColor: 'transparent',
-                        borderWidth: 0,
-                        pointRadius: 0,
-                        pointHoverRadius: 0,
-                        pointHitRadius: 0,
-                        fill: false,
-                        tension: 0,
-                        hidden: true
+                        label: 'Invested Capital', data: [], borderColor: 'transparent', backgroundColor: 'transparent',
+                        borderWidth: 0, pointRadius: 0, pointHoverRadius: 0, pointHitRadius: 0, fill: false, tension: 0, hidden: true
                     }
                 ]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: {
-                    padding: {
-                        left: 20,
-                        right: 20,
-                        top: 15,
-                        bottom: 5
-                    }
-                },
+                responsive: true, maintainAspectRatio: false,
+                layout: { padding: { left: 20, right: 20, top: 15, bottom: 5 } },
                 plugins: {
-                    legend: { 
-                        display: false
-                    },
+                    legend: { display: false },
                     tooltip: {
-                        position: 'followGreenLine',
-                        backgroundColor: '#0A101C',
-                        titleColor: '#00E5FF',
+                        position: 'followGreenLine', backgroundColor: '#0A101C', titleColor: '#00E5FF',
                         titleFont: { size: 13, family: "'JetBrains Mono', monospace", weight: 'bold' },
-                        bodyColor: '#E2E8F0',
-                        bodyFont: { size: 12, family: "'JetBrains Mono', monospace" },
-                        bodySpacing: 6,
-                        borderColor: '#1A2436',
-                        borderWidth: 1,
-                        padding: 14,
-                        displayColors: false,
-                        filter: function(tooltipItem) {
-                            return tooltipItem.datasetIndex === 0;
-                        },
+                        bodyColor: '#E2E8F0', bodyFont: { size: 12, family: "'JetBrains Mono', monospace" },
+                        bodySpacing: 6, borderColor: '#1A2436', borderWidth: 1, padding: 14, displayColors: false,
+                        filter: function(tooltipItem) { return tooltipItem.datasetIndex === 0; },
                         callbacks: {
                             title: (items) => `Datum: ${items[0].label}`,
                             label: (ctx) => {
                                 let balance = ctx.parsed.y;
                                 let index = ctx.dataIndex;
                                 let investedData = ctx.chart.data.datasets[1] ? ctx.chart.data.datasets[1].data : [];
-                                let invested = (investedData && investedData[index] !== undefined)
-                                    ? investedData[index]
-                                    : 0;
+                                let invested = (investedData && investedData[index] !== undefined) ? investedData[index] : 0;
                                 let profit = balance - invested;
                                 let growth = invested > 0 ? (profit / invested) * 100 : 0;
                                 let signProfit = profit >= 0 ? '+' : '-';
                                 let signGrowth = growth >= 0 ? '+' : '-';
-
                                 let isDe = this.currentLang === 'de';
                                 let lblBalance = isDe ? 'Endguthaben' : 'Portfolio Balance';
                                 let lblInvested = isDe ? 'Investiert' : 'Invested Capital';
                                 let lblProfit = isDe ? 'Reingewinn' : 'Net Profit';
                                 let lblGrowth = isDe ? 'Wachstum' : 'Growth';
-
                                 return [
                                     `${lblBalance}: $${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
                                     `${lblInvested}:  $${invested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
@@ -579,26 +666,12 @@ class DualEngineApp {
                         }
                     }
                 },
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                    axis: 'x'
-                },
+                interaction: { mode: 'index', intersect: false, axis: 'x' },
                 scales: {
-                    x: { 
-                        grid: { color: 'rgba(255, 255, 255, 0.02)' }, 
-                        ticks: { maxTicksLimit: 6, font: { size: 10 }, color: '#94A3B8' } 
-                    },
+                    x: { grid: { color: 'rgba(255, 255, 255, 0.02)' }, ticks: { maxTicksLimit: 6, font: { size: 10 }, color: '#94A3B8' } },
                     y: {
-                        position: 'right',
-                        grid: { color: 'rgba(255, 255, 255, 0.04)' },
-                        border: { dash: [4, 4] },
-                        ticks: {
-                            maxTicksLimit: 6,
-                            font: { size: 10 },
-                            color: '#94A3B8',
-                            callback: (val) => val >= 1000 ? '$' + (val / 1000).toFixed(1) + 'k' : '$' + val
-                        }
+                        position: 'right', grid: { color: 'rgba(255, 255, 255, 0.04)' }, border: { dash: [4, 4] },
+                        ticks: { maxTicksLimit: 6, font: { size: 10 }, color: '#94A3B8', callback: (val) => val >= 1000 ? '$' + (val / 1000).toFixed(1) + 'k' : '$' + val }
                     }
                 }
             }
@@ -655,7 +728,6 @@ class DualEngineApp {
             lastDay = currentDay;
 
             let scaledGainPercent = t.parsedGain * this.backtestLeverageMult;
-            
             let tradeProfit = startOfDayBalance * (scaledGainPercent / 100);
 
             if (mode === 'reinvest') {
@@ -666,7 +738,6 @@ class DualEngineApp {
                 dataPoints.push(currentBalance + totalPayouts);
             }
             investedPoints.push(totalInvested);
-
             labels.push(formatDate(t.dt));
         });
 
@@ -675,15 +746,12 @@ class DualEngineApp {
         let growth = totalInvested > 0 ? (netProfit / totalInvested) * 100 : 0;
 
         if (this.dom.btResBal) this.dom.btResBal.innerText = '$' + finalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        
         let resInvestedEl = document.getElementById('bt-res-invested');
         if (resInvestedEl) resInvestedEl.innerText = '$' + totalInvested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
         if (this.dom.btResProf) {
             let formattedProfit = (netProfit >= 0 ? '+' : '-') + '$' + Math.abs(netProfit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             this.dom.btResProf.innerText = formattedProfit;
         }
-
         if (this.dom.btResGrowth) this.dom.btResGrowth.innerText = (growth >= 0 ? '+' : '') + growth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
 
         if (this.btChart) {
@@ -731,61 +799,27 @@ class DualEngineApp {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Growth',
-                    data: growthData,
-                    borderColor: '#00E5FF',
-                    backgroundColor: gradient,
-                    borderWidth: 2,
-                    pointRadius: 0,
-                    pointHoverRadius: 5,
-                    pointBackgroundColor: '#040914',
-                    pointBorderColor: '#00E5FF',
-                    pointBorderWidth: 2,
-                    fill: true,
-                    tension: 0.2
+                    label: 'Growth', data: growthData, borderColor: '#00E5FF', backgroundColor: gradient,
+                    borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointBackgroundColor: '#040914',
+                    pointBorderColor: '#00E5FF', pointBorderWidth: 2, fill: true, tension: 0.2
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#0A101C',
-                        titleColor: '#00E5FF',
+                        backgroundColor: '#0A101C', titleColor: '#00E5FF',
                         titleFont: { size: 13, family: "'JetBrains Mono', monospace", weight: 'bold' },
-                        bodyColor: '#E2E8F0',
-                        bodyFont: { size: 12, family: "'JetBrains Mono', monospace" },
-                        borderColor: '#1A2436',
-                        borderWidth: 1,
-                        padding: 14,
-                        displayColors: false,
-                        callbacks: {
-                            label: function(context) {
-                                return 'Growth: ' + context.parsed.y + '%';
-                            }
-                        }
+                        bodyColor: '#E2E8F0', bodyFont: { size: 12, family: "'JetBrains Mono', monospace" },
+                        borderColor: '#1A2436', borderWidth: 1, padding: 14, displayColors: false,
+                        callbacks: { label: function(context) { return 'Growth: ' + context.parsed.y + '%'; } }
                     }
                 },
-                interaction: {
-                    mode: 'index',
-                    intersect: false
-                },
+                interaction: { mode: 'index', intersect: false },
                 scales: {
-                    x: {
-                        grid: { color: 'rgba(255, 255, 255, 0.02)' },
-                        ticks: { color: '#94A3B8', font: { size: 10 }, maxTicksLimit: 6 }
-                    },
-                    y: {
-                        position: 'left',
-                        grid: { color: 'rgba(255, 255, 255, 0.04)' },
-                        border: { dash: [4, 4] },
-                        ticks: {
-                            color: '#94A3B8',
-                            font: { size: 10 },
-                            callback: (v) => v + '%'
-                        }
-                    }
+                    x: { grid: { color: 'rgba(255, 255, 255, 0.02)' }, ticks: { color: '#94A3B8', font: { size: 10 }, maxTicksLimit: 6 } },
+                    y: { position: 'left', grid: { color: 'rgba(255, 255, 255, 0.04)' }, border: { dash: [4, 4] }, ticks: { color: '#94A3B8', font: { size: 10 }, callback: (v) => v + '%' } }
                 }
             }
         });
@@ -798,13 +832,7 @@ class DualEngineApp {
         let tableTrades = [...tradesOnly].sort((a, b) => new Date(b.dt) - new Date(a.dt));
 
         if (!tableTrades || tableTrades.length === 0) {
-            this.dom.tradesBody.innerHTML = `
-                <tr>
-                    <td colspan="10" class="px-6 py-8 text-center text-zinc-500 font-sans">
-                        Warte auf Trade-Daten. Bitte prüfe, ob die JSON-Datei im Ordner <code>data/</code> liegt.
-                    </td>
-                </tr>
-            `;
+            this.dom.tradesBody.innerHTML = `<tr><td colspan="10" class="px-6 py-8 text-center text-zinc-500 font-sans">Warte auf Trade-Daten. Bitte prüfe, ob die JSON-Datei im Ordner <code>data/</code> liegt.</td></tr>`;
             return;
         }
 
@@ -814,10 +842,8 @@ class DualEngineApp {
             const isLong = rawAction === 'BUY';
             const typeLabel = isLong ? 'Long' : 'Short';
             const typeColor = isLong ? 'text-emerald-400' : 'text-rose-400';
-
             const openParts = (t["Open Date"] || "").split(" ");
             const closeParts = (t["Close Date"] || "").split(" ");
-
             let dateStr = t.dt || "-";
             let entryTime = openParts[1] || "-";
             let exitTime = closeParts[1] || "-";
@@ -833,36 +859,12 @@ class DualEngineApp {
             const isProfit = t.parsedGain >= 0;
             const profitClass = isProfit ? 'text-emerald-400' : 'text-rose-400';
             const formattedGain = `${isProfit ? '+' : ''}${t.parsedGain.toFixed(2)}%`;
-
             const stratName = this.isNeo ? 'NEO.FX' : 'SONIC';
 
-            const logo = `
-                <div class="flex items-center gap-2">
-                    <div class="w-5 h-5 rounded-full ${this.isNeo ? 'bg-emerald-500/20 text-emerald-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center text-[10px]">
-                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5v-2.1c2.1-.3 3.5-1.7 3.5-3.4 0-1.6-1.2-2.7-2.8-2.9v-2c1.9.3 2.9 1.4 3 2.8h1.8c-.2-2.4-1.9-4.2-4.8-4.5V3h-1.4v1.4c-2.3.3-4.1 1.9-4.1 4 0 2 1.6 3.3 3.7 3.7v2.3c-2-.3-3.2-1.5-3.3-3.1H6.9c.2 2.6 2.1 4.5 4.7 4.8v2.4h1.4z"/>
-                        </svg>
-                    </div>
-                    <span class="font-extrabold text-white text-xs tracking-wide">${stratName}</span>
-                </div>
-            `;
+            const logo = `<div class="flex items-center gap-2"><div class="w-5 h-5 rounded-full ${this.isNeo ? 'bg-emerald-500/20 text-emerald-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center text-[10px]"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5v-2.1c2.1-.3 3.5-1.7 3.5-3.4 0-1.6-1.2-2.7-2.8-2.9v-2c1.9.3 2.9 1.4 3 2.8h1.8c-.2-2.4-1.9-4.2-4.8-4.5V3h-1.4v1.4c-2.3.3-4.1 1.9-4.1 4 0 2 1.6 3.3 3.7 3.7v2.3c-2-.3-3.2-1.5-3.3-3.1H6.9c.2 2.6 2.1 4.5 4.7 4.8v2.4h1.4z"/></svg></div><span class="font-extrabold text-white text-xs tracking-wide">${stratName}</span></div>`;
 
-            html += `
-                <tr class="hover:bg-cardBorder/25 transition-colors border-b border-cardBorder/30">
-                    <td class="px-6 py-4 font-sans">${logo}</td>
-                    <td class="px-6 py-4 font-semibold text-zinc-300">${symbol}.f</td>
-                    <td class="px-6 py-4 font-semibold ${typeColor}">${typeLabel}</td>
-                    <td class="px-6 py-4 text-zinc-400">${lots}</td>
-                    <td class="px-6 py-4 text-zinc-300 font-semibold">${dateStr}</td>
-                    <td class="px-6 py-4 text-white font-bold">${openPrice}</td>
-                    <td class="px-6 py-4 text-white font-bold">${closePrice}</td>
-                    <td class="px-6 py-4 text-zinc-400">${entryTime}</td>
-                    <td class="px-6 py-4 text-zinc-400">${exitTime}</td>
-                    <td class="px-6 py-4 text-right font-extrabold ${profitClass} text-sm">${formattedGain}</td>
-                </tr>
-            `;
+            html += `<tr class="hover:bg-cardBorder/25 transition-colors border-b border-cardBorder/30"><td class="px-6 py-4 font-sans">${logo}</td><td class="px-6 py-4 font-semibold text-zinc-300">${symbol}.f</td><td class="px-6 py-4 font-semibold ${typeColor}">${typeLabel}</td><td class="px-6 py-4 text-zinc-400">${lots}</td><td class="px-6 py-4 text-zinc-300 font-semibold">${dateStr}</td><td class="px-6 py-4 text-white font-bold">${openPrice}</td><td class="px-6 py-4 text-white font-bold">${closePrice}</td><td class="px-6 py-4 text-zinc-400">${entryTime}</td><td class="px-6 py-4 text-zinc-400">${exitTime}</td><td class="px-6 py-4 text-right font-extrabold ${profitClass} text-sm">${formattedGain}</td></tr>`;
         });
-
         this.dom.tradesBody.innerHTML = html;
     }
 }
