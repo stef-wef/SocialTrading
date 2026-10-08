@@ -263,10 +263,41 @@ class DualEngineApp {
                 data: { labels: [], datasets: [{ data: [], borderColor: '#F43F5E', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 1.5, fill: true, pointRadius: 0, tension: 0.2 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => 'Drawdown: ' + c.parsed.y.toFixed(2) + '%' } } },
+                    plugins: { 
+                        legend: { display: false }, 
+                        tooltip: { 
+                            callbacks: { 
+                                title: (items) => {
+                                    let d = new Date(items[0].label);
+                                    if(isNaN(d.getTime())) return `Datum: ${items[0].label}`;
+                                    return `Datum: ${d.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+                                },
+                                label: (c) => 'Drawdown: ' + c.parsed.y.toFixed(2) + '%' 
+                            } 
+                        } 
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
                     scales: {
-                        x: { display: false },
-                        y: { position: 'right', grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { callback: (v) => v + '%' } }
+                        x: { 
+                            display: true, 
+                            grid: { color: 'rgba(255, 255, 255, 0.02)' },
+                            ticks: { 
+                                maxTicksLimit: 6, 
+                                font: { size: 10 }, 
+                                color: '#94A3B8',
+                                callback: function(val, index) {
+                                    let label = this.getLabelForValue(val);
+                                    if(!label) return '';
+                                    let d = new Date(label);
+                                    if(isNaN(d.getTime())) return label;
+                                    return d.toLocaleString('en-US', { month: 'short', day: '2-digit', year: '2-digit' });
+                                }
+                            }
+                        },
+                        y: { position: 'right', grid: { color: 'rgba(255, 255, 255, 0.05)' }, border: { dash: [4, 4] }, ticks: { callback: (v) => v + '%' } }
                     }
                 }
             });
@@ -277,7 +308,7 @@ class DualEngineApp {
             const ctx = rrCanvas.getContext('2d');
             this.rrChart = new Chart(ctx, {
                 type: 'doughnut',
-                data: { labels: ['Ø Win', 'Ø Loss'], datasets: [{ data: [1, 1], backgroundColor: ['#34D399', '#FB7185'], borderWidth: 0, hoverOffset: 4 }] },
+                data: { labels: ['Typischer Win', 'Typischer Loss'], datasets: [{ data: [1, 1], backgroundColor: ['#34D399', '#FB7185'], borderWidth: 0, hoverOffset: 4 }] },
                 options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => c.label + ': $' + c.raw.toFixed(2) } } } }
             });
         }
@@ -295,29 +326,39 @@ class DualEngineApp {
         let tradeProfitUSD = 0;
         let durations = [];
 
+        let winArray = [];
+        let lossArray = [];
+
         let deposits = 0, withdrawals = 0, currentBal = 0, highestBal = 0;
         let currentGain = 0, peakGain = 0, maxDrawdown = 0;
         
         let drawdownLabels = [];
         let drawdownDataPoints = [];
 
-        this.rawTrades.forEach(t => {
+        // Feste 1000$ für die Live Metrics Ansicht simulieren, damit die Zahlen Sinn machen
+        let baseCapital = 1000;
+        let simCurrentBal = baseCapital;
+
+        chronologicalTrades.forEach(t => {
             let action = (t.Action || "").toUpperCase();
             let p = parseFloat(t.Profit) || 0;
             let g = parseFloat(t.Gain) || 0;
 
-            if (action === 'DEPOSIT') {
-                deposits += p;
-                currentBal += p;
-            } else if (action === 'WITHDRAWAL') {
-                withdrawals += Math.abs(p);
-                currentBal += p;
-            } else if (action === 'BUY' || action === 'SELL') {
-                tradeProfitUSD += p;
-                currentBal += p;
+            if (action === 'BUY' || action === 'SELL') {
+                let simulatedProfit = simCurrentBal * (g / 100);
+                simCurrentBal += simulatedProfit;
+                tradeProfitUSD += simulatedProfit;
                 
-                if (p > 0) { wins++; grossProfit += p; }
-                else if (p < 0) { losses++; grossLoss += Math.abs(p); }
+                if (simulatedProfit > 0) { 
+                    wins++; 
+                    grossProfit += simulatedProfit; 
+                    winArray.push(simulatedProfit);
+                }
+                else if (simulatedProfit < 0) { 
+                    losses++; 
+                    grossLoss += Math.abs(simulatedProfit); 
+                    lossArray.push(Math.abs(simulatedProfit));
+                }
 
                 currentGain += g;
                 if (currentGain > peakGain) peakGain = currentGain;
@@ -336,16 +377,21 @@ class DualEngineApp {
                     }
                 }
             }
-            if (currentBal > highestBal) highestBal = currentBal;
         });
 
-        if (deposits === 0) { deposits = 10000; currentBal += 10000; highestBal += 10000; }
+        // Median Funktion zur Ignorierung von Ausreißern
+        const getMedian = (arr) => {
+            if (arr.length === 0) return 0;
+            arr.sort((a, b) => a - b);
+            let mid = Math.floor(arr.length / 2);
+            return arr.length % 2 !== 0 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2;
+        };
+
+        let typWin = getMedian(winArray);
+        let typLoss = getMedian(lossArray);
 
         let winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(2) : 0;
         let profitFactor = grossLoss > 0 ? (grossProfit / grossLoss).toFixed(2) : (grossProfit > 0 ? grossProfit.toFixed(2) : "0.00");
-
-        let avgWin = wins > 0 ? grossProfit / wins : 0;
-        let avgLoss = losses > 0 ? grossLoss / losses : 0;
 
         durations.sort((a, b) => a - b);
         let medianDurationMs = 0;
@@ -362,7 +408,6 @@ class DualEngineApp {
             else avgDurationStr = "~" + (mins < 1 ? 1 : mins) + " min";
         }
 
-        const formatMoney = (val) => '$' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
 
         let firstDate = new Date(chronologicalTrades[0].dt);
@@ -404,20 +449,18 @@ class DualEngineApp {
         setEl('myfx-monthly', monthlyGain.toFixed(2) + '%');
         setEl('myfx-drawdown', maxDrawdown.toFixed(2) + '%');
         
-        setEl('myfx-balance', formatMoney(currentBal));
-        setEl('myfx-equity', `(100.00%) ${formatMoney(currentBal)}`);
-        setEl('myfx-highest', formatMoney(highestBal));
-        setEl('myfx-profit', formatMoney(tradeProfitUSD));
-        setEl('myfx-deposits', formatMoney(deposits));
-        setEl('myfx-withdrawals', formatMoney(withdrawals));
-        setEl('stat-total', totalTrades);
-
-        // Update Advanced Charts
-        setEl('avg-win-text', '+$' + avgWin.toFixed(2));
-        setEl('avg-loss-text', '-$' + avgLoss.toFixed(2));
+        // Advanced Charts UI Updates (Median verwenden)
+        setEl('avg-win-text', '+$' + typWin.toFixed(2));
+        setEl('avg-loss-text', '-$' + typLoss.toFixed(2));
+        
+        // Label Text im HTML sicherheitshalber anpassen, falls vorhanden
+        const avgWinLabel = document.getElementById('avg-win-text')?.previousElementSibling;
+        const avgLossLabel = document.getElementById('avg-loss-text')?.previousElementSibling;
+        if(avgWinLabel) avgWinLabel.innerText = "Typischer Win";
+        if(avgLossLabel) avgLossLabel.innerText = "Typischer Loss";
 
         if (this.rrChart) {
-            this.rrChart.data.datasets[0].data = [avgWin, avgLoss];
+            this.rrChart.data.datasets[0].data = [typWin, typLoss];
             this.rrChart.update();
         }
         if (this.drawdownChart) {
@@ -425,6 +468,26 @@ class DualEngineApp {
             this.drawdownChart.data.datasets[0].data = drawdownDataPoints;
             this.drawdownChart.update();
         }
+
+        // Native Broker Account Details Data berechnen wie gehabt, falls Original Einzahlungen gewünscht:
+        this.rawTrades.forEach(t => {
+            let action = (t.Action || "").toUpperCase();
+            let p = parseFloat(t.Profit) || 0;
+            if (action === 'DEPOSIT') { deposits += p; currentBal += p; } 
+            else if (action === 'WITHDRAWAL') { withdrawals += Math.abs(p); currentBal += p; } 
+            else if (action === 'BUY' || action === 'SELL') { currentBal += p; }
+            if (currentBal > highestBal) highestBal = currentBal;
+        });
+        if (deposits === 0) { deposits = 10000; currentBal += 10000; highestBal += 10000; }
+        
+        const formatMoney = (val) => '$' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        setEl('myfx-balance', formatMoney(currentBal));
+        setEl('myfx-equity', `(100.00%) ${formatMoney(currentBal)}`);
+        setEl('myfx-highest', formatMoney(highestBal));
+        setEl('myfx-profit', formatMoney(currentBal - deposits + withdrawals));
+        setEl('myfx-deposits', formatMoney(deposits));
+        setEl('myfx-withdrawals', formatMoney(withdrawals));
+        setEl('stat-total', totalTrades);
     }
 
     renderHeatmap() {
@@ -499,10 +562,6 @@ class DualEngineApp {
         });
     }
 
-    formatMoney(amount) {
-        return '$' + Math.round(amount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
-    }
-
     setupListeners() {
         const sync = (slider, input, cb) => {
             if (!slider || !input) return;
@@ -566,12 +625,14 @@ class DualEngineApp {
 
         let multiplier = resAvg.invested > 0 ? (resAvg.balance / resAvg.invested).toFixed(1) : '0.0';
 
-        if (this.dom.projResBal) this.dom.projResBal.innerText = this.formatMoney(resAvg.balance);
-        if (this.dom.projResInv) this.dom.projResInv.innerText = this.formatMoney(resAvg.invested);
+        const formatMoney = (val) => '$' + Math.round(val).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+
+        if (this.dom.projResBal) this.dom.projResBal.innerText = formatMoney(resAvg.balance);
+        if (this.dom.projResInv) this.dom.projResInv.innerText = formatMoney(resAvg.invested);
         if (this.dom.projResMult) this.dom.projResMult.innerText = multiplier + 'x';
 
-        if (this.dom.projConsBal) this.dom.projConsBal.innerText = this.formatMoney(resCons.balance);
-        if (this.dom.projOptBal) this.dom.projOptBal.innerText = this.formatMoney(resOpt.balance);
+        if (this.dom.projConsBal) this.dom.projConsBal.innerText = formatMoney(resCons.balance);
+        if (this.dom.projOptBal) this.dom.projOptBal.innerText = formatMoney(resOpt.balance);
 
         const projScenTitle = document.getElementById('proj-scen-title');
         if (projScenTitle) {
@@ -589,7 +650,7 @@ class DualEngineApp {
         [1, 3, 6, 12].forEach(m => {
             let avgM = this.simulateProj(deposit, topup, m, this.rates.avg, mode).balance;
             const elAvg = document.getElementById(`ms${m}-avg`);
-            if (elAvg) elAvg.innerText = this.formatMoney(avgM);
+            if (elAvg) elAvg.innerText = formatMoney(avgM);
         });
     }
 
