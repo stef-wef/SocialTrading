@@ -296,7 +296,48 @@
             </div>
         </div>
 
-        <div class="border-t border-cardBorder w-full my-6"></div>
+        <!-- Trade Historie Tabelle (Unter der Grafik platziert) -->
+        <div class="glass-panel overflow-hidden mt-8">
+            <div class="px-6 py-5 border-b border-cardBorder flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardBg/60">
+                <div>
+                    <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                        <span data-i18n="tradesHeader">Trades</span>
+                    </h2>
+                    <p class="text-xs text-zinc-400 mt-0.5" data-i18n="tradesSub">Historische Ausführungen direkt aus dem Broker-Feed</p>
+                </div>
+                <div class="flex items-center gap-3 mt-3 sm:mt-0">
+                    <a href="https://www.myfxbook.com/members/SonicExperts/sonic-ai/12076857" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accentCyan/10 border border-accentCyan/20 text-accentCyan text-xs font-semibold font-mono hover:bg-accentCyan/20 transition-colors">
+                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i> MyFXBook
+                    </a>
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold font-mono">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Geschlossene Trades (<span id="stat-total">0</span>)
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto max-h-[600px] table-scroll">
+                <table class="w-full text-left text-xs whitespace-nowrap">
+                    <thead class="sticky top-0 bg-[#060B16] z-10 shadow-md">
+                        <tr class="text-zinc-400 uppercase tracking-wider text-[11px] border-b border-cardBorder">
+                            <th class="px-6 py-3.5 font-semibold">Strategie</th>
+                            <th class="px-6 py-3.5 font-semibold">Instrument</th>
+                            <th class="px-6 py-3.5 font-semibold">Typ</th>
+                            <th class="px-6 py-3.5 font-semibold">Größe</th>
+                            <th class="px-6 py-3.5 font-semibold">Datum</th>
+                            <th class="px-6 py-3.5 font-semibold">Einstiegspreis</th>
+                            <th class="px-6 py-3.5 font-semibold">Ausstiegspreis</th>
+                            <th class="px-6 py-3.5 font-semibold">Einstiegszeit</th>
+                            <th class="px-6 py-3.5 font-semibold">Ausstiegszeit</th>
+                            <th class="px-6 py-3.5 font-semibold text-right">PnL (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trades-table-body" class="divide-y border-cardBorder/40 text-zinc-300 font-mono">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="border-t border-cardBorder w-full my-8"></div>
 
         <!-- RECHNER 1: Profit Projektions-Engine (Sauberes 2-Spalten-Layout) -->
         <div class="pt-2">
@@ -365,7 +406,7 @@
                         </p>
                         <p class="text-5xl md:text-6xl font-mono font-extrabold text-accentCyan tracking-tight mb-3 drop-shadow-[0_0_20px_rgba(0,229,255,0.4)]" id="proj-res-balance">$81'887</p>
                         <p class="text-xs text-zinc-400 font-mono">
-                            <span data-i18n="fromWord">Aus</span> <span class="text-white font-bold" id="proj-res-invested">$10'000</span> <span data-i18n="investedWord">investiert</span> · <strong class="text-emerald-400" id="proj-res-mult">8.2x</strong>
+                            <span data-i18n="fromWord">Aus</span> <span class="text-white font-bold" id="proj-res-invested">$10'000</span> <span data-i18n="investedWord">investiert</span> · <strong class="text-emerald-400" id="proj-res-mult">8.2x</strong> your capital
                         </p>
                     </div>
 
@@ -493,47 +534,6 @@
                 <strong class="text-white font-semibold" data-i18n="disclaimerTitle">Nur zur Veranschaulichung — keine Erfolgsgarantie.</strong>
                 <span data-i18n="disclaimerText">Dies ist eine mathematische Veranschaulichung basierend auf der historischen Durchschnitts-Performance und keine verbindliche Prognose. Einzelne Monate schwankten ungehebelt zwischen +0.35% und +2.10%. Die 24× Hebelannahme ist eine rechnerische Näherung — realer gehebelter Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist keine Garantie für zukünftige Ergebnisse. Sie können Ihr investiertes Kapital teilweise oder ganz verlieren. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie verkraften können.</span>
             </p>
-        </div>
-
-        <!-- Trade Historie Tabelle -->
-        <div class="glass-panel overflow-hidden mt-6">
-            <div class="px-6 py-5 border-b border-cardBorder flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardBg/60">
-                <div>
-                    <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
-                        <span data-i18n="tradesHeader">Trades</span>
-                    </h2>
-                    <p class="text-xs text-zinc-400 mt-0.5" data-i18n="tradesSub">Historische Ausführungen direkt aus dem Broker-Feed</p>
-                </div>
-                <div class="flex items-center gap-3 mt-3 sm:mt-0">
-                    <a href="https://www.myfxbook.com/members/SonicExperts/sonic-ai/12076857" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accentCyan/10 border border-accentCyan/20 text-accentCyan text-xs font-semibold font-mono hover:bg-accentCyan/20 transition-colors">
-                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i> MyFXBook
-                    </a>
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold font-mono">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Geschlossene Trades (<span id="stat-total">0</span>)
-                    </div>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto max-h-[600px] table-scroll">
-                <table class="w-full text-left text-xs whitespace-nowrap">
-                    <thead class="sticky top-0 bg-[#060B16] z-10 shadow-md">
-                        <tr class="text-zinc-400 uppercase tracking-wider text-[11px] border-b border-cardBorder">
-                            <th class="px-6 py-3.5 font-semibold">Strategie</th>
-                            <th class="px-6 py-3.5 font-semibold">Instrument</th>
-                            <th class="px-6 py-3.5 font-semibold">Typ</th>
-                            <th class="px-6 py-3.5 font-semibold">Größe</th>
-                            <th class="px-6 py-3.5 font-semibold">Datum</th>
-                            <th class="px-6 py-3.5 font-semibold">Einstiegspreis</th>
-                            <th class="px-6 py-3.5 font-semibold">Ausstiegspreis</th>
-                            <th class="px-6 py-3.5 font-semibold">Einstiegszeit</th>
-                            <th class="px-6 py-3.5 font-semibold">Ausstiegszeit</th>
-                            <th class="px-6 py-3.5 font-semibold text-right">PnL (%)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="trades-table-body" class="divide-y border-cardBorder/40 text-zinc-300 font-mono">
-                    </tbody>
-                </table>
-            </div>
         </div>
 
     </div>
