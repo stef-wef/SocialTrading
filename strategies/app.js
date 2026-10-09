@@ -48,7 +48,26 @@ const translations = {
         btProfit: "Reingewinn",
         btGrowth: "Wachstum",
         disclaimerTitle: "Nur zur Veranschaulichung — keine Erfolgsgarantie.",
-        disclaimerText: "Dies ist eine mathematische Veranschaulichung basierend auf der historischen Durchschnitts-Performance und keine verbindliche Prognose. Einzelne Monate schwankten ungehebelt zwischen +0.35% und +2.10%. Die 24× Hebelannahme ist eine rechnerische Näherung — realer gehebelter Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist keine Garantie für zukünftige Ergebnisse. Sie können Ihr investiertes Kapital teilweise oder ganz verlieren. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie verkraften können."
+        disclaimerText: "Dies ist eine mathematische Veranschaulichung basierend auf der historischen Durchschnitts-Performance und keine verbindliche Prognose. Einzelne Monate schwankten ungehebelt zwischen +0.35% und +2.10%. Die 24× Hebelannahme ist eine rechnerische Näherung — realer gehebelter Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist keine Garantie für zukünftige Ergebnisse. Sie können Ihr investiertes Kapital teilweise oder ganz verlieren. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie verkraften können.",
+        
+        // FAQ Übersetzungen
+        faqBadge1: "Über Sonic AI",
+        faqTitle1: "Über Sonic AI",
+        faqBadge2: "Risiko & Performance",
+        faqQ1: "Was ist Sonic AI?",
+        faqA1: "Sonic AI ist eine diskretionäre Goldstrategie (XAU/USD), die manuell von drei professionellen Tradern gehandelt wird. Sie treffen jede Einstiegs-, Stopp- und Ausstiegsentscheidung während der 24/5 Handelswoche selbst, und ihre Trades werden automatisch auf Ihr Konto kopiert – ohne dass Sie manuell eingreifen müssen.",
+        faqQ2: "Wie werden Handelsentscheidungen getroffen?",
+        faqA2: "Die drei Trader kombinieren Trendanalyse, Volatilitätsfilter und Multi-Timeframe-Bestätigungen. Ein Trade wird nur eröffnet, wenn alle drei bezüglich Richtung, Risiko und erwartetem Ertrag übereinstimmen – weshalb die Trefferquote auf dem verifizierten MyFXBook-Konto derzeit bei etwa 83 % und der Profit Factor bei 3,31 liegt.",
+        faqQ3: "Für wen ist Sonic AI geeignet?",
+        faqA3: "Sonic AI wurde für Investoren entwickelt, die ein automatisiertes Exposure in einer professionellen Gold-Trading-Strategie suchen – typischerweise Unternehmer, Freiberufler und langfristige Investoren, die durch eine passive Einkommensquelle diversifizieren möchten.",
+        faqQ4: "Ist es für Anfänger geeignet?",
+        faqA4: "Ja. Es ist keine Trading-Erfahrung erforderlich. Unser 7-Schritte-Onboarding führt Sie an einem Nachmittag durch die Kontoerstellung, KYC, Einzahlung und Aktivierung.",
+        faqQ5: "Welche Märkte werden gehandelt?",
+        faqA5: "Sonic AI handelt ausschließlich XAU/USD (Gold vs. US-Dollar) – das liquideste Rohstoffpaar der Welt.",
+        faqQ6: "Wie hoch ist der maximale Drawdown?",
+        faqA6: "Historischer Drawdown der Strategie: 0,86 % auf dem zugrunde liegenden MyFXBook-Konto. Der Drawdown auf individuellen Konten kann bei einer 24-fachen Hebelung wesentlich höher ausfallen – der Wert von 0,86 % bezieht sich auf die ungehebelte Strategie, nicht auf ein gehebeltes Investorenkonto. Mechanisch auf ein 24-fach gehebeltes Konto angewendet, entspräche diese Bewegung etwa 20,6 % der Equity, und zukünftige Drawdowns können historische Werte übersteigen.",
+        faqQ7: "Wie war die historische Performance von Sonic AI?",
+        faqA7: "Seit dem Start auf dem verifizierten MyFXBook-Konto hat Sonic AI jeden Monat im Plus geschlossen, mit einer durchschnittlichen Nettorendite von ca. +1,14 % pro Monat (bei 1x Hebel) – was etwa +27,4 % pro Monat auf dem 24-fach gehebelten Konto entspricht. Der Gesamtgewinn bis heute beträgt +29,23 % (bei 1x). Jeder Trade ist auf MyFXBook öffentlich verifizierbar."
     },
     en: {
         back: "Back",
@@ -99,7 +118,26 @@ const translations = {
         btProfit: "Net Profit",
         btGrowth: "Growth",
         disclaimerTitle: "Illustrative only — not a guarantee.",
-        disclaimerText: "This is a mathematical illustration based on historical average performance, not a forecast. Individual months have ranged from +0.35% to +2.10% unleveraged. The 24× leverage assumption is an approximation — real leveraged trading involves margin requirements and liquidation risk that do not scale in a perfectly linear way. Past performance does not guarantee future results, and you can lose part or all of your capital. Trade only with funds you can afford to lose."
+        disclaimerText: "This is a mathematical illustration based on historical average performance, not a forecast. Individual months have ranged from +0.35% to +2.10% unleveraged. The 24× leverage assumption is an approximation — real leveraged trading involves margin requirements and liquidation risk that do not scale in a perfectly linear way. Past performance does not guarantee future results, and you can lose part or all of your capital. Trade only with funds you can afford to lose.",
+        
+        // FAQ Translations
+        faqBadge1: "About Sonic AI",
+        faqTitle1: "About Sonic AI",
+        faqBadge2: "Risk & Performance",
+        faqQ1: "What is Sonic AI?",
+        faqA1: "Sonic AI is a discretionary gold (XAU/USD) strategy traded manually by three professional traders. They take every entry, stop and exit decision themselves during the 24/5 market week, and their trades are copied automatically into your account — with no manual input from you.",
+        faqQ2: "How are trading decisions made?",
+        faqA2: "The three traders combine trend analysis, volatility filters and multi-timeframe confirmation. A trade is only opened when all three agree on direction, risk and expected reward — which is why the win rate on the verified MyFXBook account currently sits around 83% with a profit factor of 3.31.",
+        faqQ3: "Who is Sonic AI suitable for?",
+        faqA3: "Sonic AI is designed for investors who want hands-free exposure to a professional gold trading strategy — typically business owners, professionals and long-term investors looking to diversify with a residual income stream.",
+        faqQ4: "Can beginners use it?",
+        faqA4: "Yes. No trading experience is required. Our 7-step onboarding walks you through account creation, KYC, funding and activation in one afternoon.",
+        faqQ5: "What markets are traded?",
+        faqA5: "Sonic AI trades exclusively XAU/USD (gold vs US dollar) — the most liquid commodity pair in the world.",
+        faqQ6: "What is the maximum drawdown?",
+        faqA6: "Historical strategy drawdown: 0.86% on the underlying MyFXBook account. Individual account drawdown may be materially higher when using 24× amplification — the 0.86% figure is measured on the unleveraged strategy, not on an amplified investor account. Applied mechanically to a 24× amplified account, an equivalent move would be roughly 20.6% of equity, and future drawdowns may exceed any historical figure.",
+        faqQ7: "What has Sonic AI's historical performance been?",
+        faqA7: "Since going live on the verified MyFXBook account, Sonic AI has closed every month in profit with an average net return of approximately +1.14% per month at 1× leverage — which is roughly +27.4% per month on the 24× amplified account. Total gain to date is +29.23% at 1×. Every trade is publicly verifiable on MyFXBook."
     }
 };
 
@@ -179,6 +217,7 @@ class DualEngineApp {
 
         this.initAdvancedCharts();
         this.setupListeners();
+        this.setupAccordions();
         this.updateKPIs();
         this.initEquityGrowthChart();
         this.initBacktestChart();
@@ -272,7 +311,7 @@ class DualEngineApp {
                             fill: true, 
                             pointRadius: 0, 
                             tension: 0.2,
-                            order: 2 // Drawdown in background
+                            order: 2
                         },
                         {
                             type: 'bar',
@@ -284,7 +323,7 @@ class DualEngineApp {
                             },
                             borderRadius: 2,
                             barPercentage: 0.6,
-                            order: 1 // Bars in foreground
+                            order: 1
                         }
                     ] 
                 },
@@ -320,7 +359,7 @@ class DualEngineApp {
                                 maxTicksLimit: 6, 
                                 font: { size: 10 }, 
                                 color: '#94A3B8',
-                                align: 'inner', // Zieht den Text nach innen und entfernt das Padding am Rand
+                                align: 'inner',
                                 padding: 5,
                                 callback: function(val, index) {
                                     let label = this.getLabelForValue(val);
@@ -337,7 +376,7 @@ class DualEngineApp {
                             border: { dash: [4, 4], display: false }, 
                             ticks: { 
                                 callback: (v) => v + '%',
-                                mirror: true, // Zieht die Beschriftung INSIDE das Chart
+                                mirror: true,
                                 z: 10,
                                 padding: 0 
                             } 
@@ -631,6 +670,25 @@ class DualEngineApp {
         if (this.dom.exportBtn) this.dom.exportBtn.addEventListener('click', () => this.exportCSV());
     }
 
+    setupAccordions() {
+        const buttons = document.querySelectorAll('.faq-button');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const answer = btn.nextElementSibling;
+                const icon = btn.querySelector('i');
+                const isHidden = answer.classList.contains('hidden');
+
+                if (isHidden) {
+                    answer.classList.remove('hidden');
+                    icon.classList.add('rotate-180');
+                } else {
+                    answer.classList.add('hidden');
+                    icon.classList.remove('rotate-180');
+                }
+            });
+        });
+    }
+
     simulateProj(deposit, topup, months, rate, mode) {
         let balance = deposit;
         let invested = deposit;
@@ -779,7 +837,7 @@ class DualEngineApp {
                             maxTicksLimit: 6, 
                             font: { size: 10 }, 
                             color: '#94A3B8',
-                            align: 'inner', // Zieht den Text nach innen und entfernt das Padding am Rand
+                            align: 'inner',
                             padding: 5
                         } 
                     },
@@ -926,7 +984,7 @@ class DualEngineApp {
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                layout: { padding: { left: 0, right: 0, top: 10, bottom: 0 } },
+                layout: { padding: { left: 0, right: 0, top: 5, bottom: 0 } },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -946,7 +1004,7 @@ class DualEngineApp {
                             color: '#94A3B8', 
                             font: { size: 10 }, 
                             maxTicksLimit: 6,
-                            align: 'inner', // Zieht den Text nach innen und entfernt das Padding am Rand
+                            align: 'inner',
                             padding: 5
                         } 
                     },
