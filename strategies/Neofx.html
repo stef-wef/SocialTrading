@@ -159,7 +159,7 @@
             <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-2">NEO.FX</h1>
             <p class="text-sm text-zinc-400 font-medium mb-4">Forex (EUR/USD) · Social Trading · 1:30 Hebel</p>
 
-            <!-- Instrument & Gewinn/Verlust Trades Header Badges -->
+            <!-- Instrument & Gewinn/Verlust Trades Header Badges + CSV Button -->
             <div class="flex flex-wrap justify-center items-center gap-3">
                 <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-cardBg border border-cardBorder font-mono text-xs shadow-sm">
                     <span class="text-[10px] text-zinc-500 uppercase font-bold tracking-wider" data-i18n="lblInstrument">Instrument</span>
@@ -171,6 +171,15 @@
                     <span class="text-zinc-600">·</span>
                     <span id="kpi-win-loss-text" class="font-bold text-zinc-300">--- Win / --- Lose</span>
                 </div>
+                
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 font-mono text-xs shadow-sm">
+                    <div class="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
+                    <span class="text-rose-400 font-semibold" data-i18n="dataStatusStatic">Historische Daten (CSV)</span>
+                </div>
+                
+                <button id="export-csv-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold font-mono hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer shadow-sm">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i> CSV Export
+                </button>
             </div>
 
             <!-- Page Jump Navigation Menu -->
@@ -569,11 +578,11 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="glass-panel p-5 text-center">
-                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="projCons">Konservativ (~5.00% / Mo)</p>
+                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Konservativ (~5.00% / Mo)</p>
                             <p class="text-xl font-mono font-bold text-white mb-0.5" id="proj-cons-balance">$17'959</p>
                         </div>
                         <div class="glass-panel p-5 text-center">
-                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="projOpt">Optimistisch (~22.00% / Mo)</p>
+                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Optimistisch (~22.00% / Mo)</p>
                             <p class="text-xl font-mono font-bold text-white mb-0.5" id="proj-opt-balance">$108'722</p>
                         </div>
                     </div>
@@ -699,13 +708,11 @@
                 <div>
                     <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
                         <span data-i18n="tradesHeader">Trades</span>
+                        <span class="text-[9px] bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded font-mono uppercase tracking-widest ml-1" data-i18n="staticBadge">Statisch</span>
                     </h2>
-                    <p class="text-xs text-zinc-400 mt-0.5" data-i18n="tradesSub">Historische Ausführungen direkt aus dem Broker-Feed</p>
+                    <p class="text-xs text-zinc-400 mt-0.5" data-i18n="tradesSubStatic">Historische Transaktionen aus lokalem CSV-Datenexport</p>
                 </div>
                 <div class="flex items-center flex-wrap gap-3 mt-3 sm:mt-0">
-                    <button id="export-csv-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold font-mono hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer">
-                        <i data-lucide="download" class="w-3.5 h-3.5"></i> CSV Export
-                    </button>
                     <a href="https://www.myfxbook.com/members/WordSmithyFx/neofx/11800152" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accentCyan/10 border border-accentCyan/20 text-accentCyan text-xs font-semibold font-mono hover:bg-accentCyan/20 transition-colors">
                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i> MyFXBook
                     </a>
