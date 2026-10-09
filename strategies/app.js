@@ -229,7 +229,7 @@ class DualEngineApp {
                         },
                         y: { 
                             position: 'right', 
-                            grid: { color: 'rgba(255, 255, 255, 0.05)', drawTicks: false }, 
+                            grid: { color: 'rgba(255, 255, 255, 0.04)', drawTicks: false }, 
                             border: { dash: [4, 4], display: false }, 
                             ticks: { 
                                 callback: (v) => v + '%',
@@ -396,6 +396,12 @@ class DualEngineApp {
         if(avgWinLabel) avgWinLabel.innerText = "Typischer Win";
         if(avgLossLabel) avgLossLabel.innerText = "Typischer Loss";
 
+        // Dynamisches Update des Gewinn/Verlust Trades Zählers im Header
+        const winLossHeaderEl = document.getElementById('kpi-win-loss-text');
+        if (winLossHeaderEl) {
+            winLossHeaderEl.innerHTML = `<span class="text-emerald-400 font-bold">${wins} Win</span> <span class="text-zinc-500 font-normal">/</span> <span class="text-rose-400 font-bold">${losses} Lose</span>`;
+        }
+
         if (this.rrChart) {
             this.rrChart.data.datasets[0].data = [typWin, typLoss];
             this.rrChart.update();
@@ -493,7 +499,6 @@ class DualEngineApp {
     }
 
     applyTranslations() {
-        // Fallback for global translations variable
         if (typeof translations === 'undefined') {
             console.error("translations.js wurde nicht geladen.");
             return;
@@ -600,7 +605,6 @@ class DualEngineApp {
 
         const projScenTitle = document.getElementById('proj-scen-title');
         if (projScenTitle) {
-            // Check if translation is loaded
             if (typeof translations !== 'undefined' && translations[this.currentLang]) {
                 if (mode === 'payout') {
                     projScenTitle.innerHTML = (this.currentLang === 'de')
@@ -710,7 +714,7 @@ class DualEngineApp {
                     y: {
                         position: 'right', 
                         grid: { color: 'rgba(255, 255, 255, 0.04)', drawTicks: false }, 
-                        border: { dash: [4, 4], display: false },
+                        border: { dash: [4, 4], display: false }, 
                         ticks: { 
                             maxTicksLimit: 6, font: { size: 10 }, color: '#94A3B8', 
                             mirror: true, z: 10, padding: 0, 

@@ -61,7 +61,6 @@
         }
         .tt-wrapper:hover .tt-text { visibility: visible; opacity: 1; }
         
-        /* Modifikator für Tooltips am rechten Rand, damit sie nicht abgeschnitten werden */
         .tt-wrapper.tt-right .tt-text {
             left: auto;
             right: 0;
@@ -157,7 +156,21 @@
                 EN
             </button>
             <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-2">NEO.FX</h1>
-            <p class="text-sm text-zinc-400 font-medium">Forex (EUR/USD) · Social Trading · 1:30 Hebel</p>
+            <p class="text-sm text-zinc-400 font-medium mb-4">Forex (EUR/USD) · Social Trading · 1:30 Hebel</p>
+
+            <!-- Instrument & Gewinn/Verlust Trades Header Badges -->
+            <div class="flex flex-wrap justify-center items-center gap-3">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-cardBg border border-cardBorder font-mono text-xs shadow-sm">
+                    <span class="text-[10px] text-zinc-500 uppercase font-bold tracking-wider" data-i18n="lblInstrument">Instrument</span>
+                    <span class="text-zinc-600">·</span>
+                    <span class="text-white font-semibold" data-i18n="instrumentNeo">EURUSD · Euro vs. US Dollar</span>
+                </div>
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-cardBg border border-cardBorder font-mono text-xs shadow-sm">
+                    <span class="text-[10px] text-zinc-500 uppercase font-bold tracking-wider" data-i18n="lblWinLoss">Gewinn / Verlust Trades</span>
+                    <span class="text-zinc-600">·</span>
+                    <span id="kpi-win-loss-text" class="font-bold text-zinc-300">--- Win / --- Lose</span>
+                </div>
+            </div>
         </div>
 
         <!-- 4 Haupt-KPIs -->
@@ -196,22 +209,6 @@
             </div>
         </div>
 
-        <!-- Strategie Profil -->
-        <div class="glass-panel p-6 flex flex-col md:flex-row gap-6 items-center justify-between">
-            <div class="flex-1">
-                <h2 class="text-lg font-extrabold text-white mb-2 flex items-center gap-2">
-                    <i data-lucide="shield-check" class="w-5 h-5 text-accentCyan"></i> Strategie-Profil
-                </h2>
-                <p class="text-sm text-zinc-400 leading-relaxed">
-                    Professioneller algorithmischer Ansatz mit strengem Risikomanagement. Die Strategie handelt Ausbrüche und Mean-Reversion in liquiden Währungspaaren. Jeder Trade ist durch einen harten Stop-Loss abgesichert. Es wird konsequent auf riskante Methoden wie Martingale oder Grid-Trading verzichtet.
-                </p>
-            </div>
-            <div class="shrink-0 flex gap-2">
-                <span class="px-3 py-1 bg-darkBg border border-cardBorder rounded text-[10px] font-mono text-zinc-300 uppercase tracking-wide">Kein Martingale</span>
-                <span class="px-3 py-1 bg-darkBg border border-cardBorder rounded text-[10px] font-mono text-zinc-300 uppercase tracking-wide">Hard Stop-Loss</span>
-            </div>
-        </div>
-
         <!-- Performance Metrics -->
         <div class="glass-panel p-6">
             <div class="flex items-center justify-between pb-4 mb-4 border-b border-cardBorder">
@@ -242,7 +239,6 @@
 
         <!-- Advanced Analytics: Drawdown & Risk/Reward -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Drawdown Chart -->
             <div class="lg:col-span-2 glass-panel p-6 flex flex-col">
                 <h3 class="text-xs font-bold uppercase tracking-widest text-zinc-300 mb-4 flex justify-between items-center">
                     Drawdown & PNL Analyse 
@@ -252,7 +248,6 @@
                     <canvas id="drawdownChart"></canvas>
                 </div>
             </div>
-            <!-- Risk/Reward Donut -->
             <div class="glass-panel p-6 flex flex-col">
                 <h3 class="text-xs font-bold uppercase tracking-widest text-zinc-300 mb-4 flex justify-between items-center">
                     Risk / Reward 
@@ -367,7 +362,6 @@
                         </div>
                     </div>
 
-                    <!-- GEÄNDERTE STRUKTUR FÜR DEN CHART CONTAINER -->
                     <div class="lg:col-span-8 p-5 flex flex-col bg-cardBg h-full">
                         <div class="flex justify-between items-center border-b border-cardBorder pb-2 mb-3 shrink-0">
                             <span class="text-[11px] font-semibold text-accentCyan uppercase tracking-widest">Equity Growth Chart</span>
@@ -627,8 +621,8 @@
 
     </div>
 
-    <script src="app.js"></script>
     <script src="translations.js"></script>
+    <script src="app.js"></script>
     <script>if (typeof lucide !== 'undefined') lucide.createIcons();</script>
 </body>
 </html>
