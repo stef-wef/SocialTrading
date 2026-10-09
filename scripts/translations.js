@@ -62,6 +62,11 @@ const translations = {
         navBacktest: "Backtest",
         navTrades: "Trades",
 
+        // Strategie Profil Text
+        stratProfileTitle: "Strategie-Profil",
+        stratProfileTextSonic: "Professioneller diskretionärer Ansatz mit strengem Risikomanagement. Die Strategie handelt Ausbrüche und Mean-Reversion in liquiden Marktphasen. Jeder Trade ist durch einen harten Stop-Loss abgesichert. Es wird konsequent auf riskante Methoden wie Martingale oder Grid-Trading verzichtet.",
+        stratProfileTextNeo: "Systematische, regelbasierte Forex-Strategie. Im Gegensatz zu vielen Ansätzen nutzt NEO.FX striktes Risikomanagement und sichert jeden Trade sofort mit einem Stop-Loss ab. Die Strategie verzichtet komplett auf Martingale- oder Grid-Systeme.",
+
         // FAQ Sonic AI
         faqBadge1: "Über Sonic AI",
         faqTitle1: "Über Sonic AI",
@@ -79,7 +84,25 @@ const translations = {
         faqQ6: "Wie hoch ist der maximale Drawdown?",
         faqA6: "Historischer Drawdown der Strategie: 0,86 % auf dem zugrunde liegenden MyFXBook-Konto. Auf individuellen Konten kann der Drawdown bei Hebelnutzung (z.B. 24-fach) wesentlich höher ausfallen. Zukünftige Drawdowns können die historischen Maximalwerte übersteigen.",
         faqQ7: "Wie war die historische Performance von Sonic AI?",
-        faqA7: "Die historische Auswertung zeigt auf dem verifizierten MyFXBook-Konto einen durchschnittlichen Nettogewinn von ca. +1,14 % pro Monat (bei 1x Hebel). Gehebelte Resultate schwanken entsprechend stärker. Jeder dokumentierte Trade kann auf MyFXBook eingesehen werden."
+        faqA7: "Die historische Auswertung zeigt auf dem verifizierten MyFXBook-Konto einen durchschnittlichen Nettogewinn von ca. +1,14 % pro Monat (bei 1x Hebel). Gehebelte Resultate schwanken entsprechend stärker. Jeder dokumentierte Trade kann auf MyFXBook eingesehen werden.",
+
+        // FAQ NEO.FX
+        faqNeoBadge1: "Über NEO.FX",
+        faqNeoTitle1: "Über NEO.FX",
+        faqNeoQ1: "Was ist NEO.FX?",
+        faqNeoA1: "NEO.FX ist eine systematische Forex-Strategie. Der Fokus liegt auf vorab definierten Regeln des Risikomanagements, wobei bewusst auf Ansätze wie Martingale- oder Grid-Systeme verzichtet wird.",
+        faqNeoQ2: "Wie werden Handelsentscheidungen getroffen?",
+        faqNeoA2: "Das System analysiert Preisausbrüche und Mean-Reversion-Muster in liquiden Marktphasen. Jeder Trade wird beim Einstieg mit einem festen Stop-Loss versehen, um das Risiko im Voraus zu definieren.",
+        faqNeoQ3: "Für wen ist NEO.FX geeignet?",
+        faqNeoA3: "Für Nutzer, die eine systematische Strategie im Devisenmarkt kopieren möchten, um ein bestehendes Portfolio zu diversifizieren.",
+        faqNeoQ4: "Ist es für Anfänger geeignet?",
+        faqNeoA4: "Das Onboarding hilft bei der technischen Einrichtung des Copy-Trading-Systems, wofür keine aktive Trading-Erfahrung im Alltag notwendig ist.",
+        faqNeoQ5: "Welche Märkte werden gehandelt?",
+        faqNeoA5: "NEO.FX handelt EUR/USD (Euro vs. US-Dollar).",
+        faqNeoQ6: "Wie hoch ist der maximale Drawdown?",
+        faqNeoA6: "Der historische Drawdown auf dem Master-Account (ungehebelt) lag bei etwa 0,90 %. Auf gehebelten Accounts erhöht sich dieser Wert basierend auf den angewendeten Multiplikatoren.",
+        faqNeoQ7: "Wie war die historische Performance von NEO.FX?",
+        faqNeoA7: "Die historische Auswertung der Strategie zeigt ein durchschnittliches monatliches Wachstum (ungehebelt) von ca. +0,57 % auf dem Master-Account. Vergangene Ergebnisse sind kein Indikator für zukünftige Performance."
     },
     en: {
         back: "Back",
@@ -143,6 +166,11 @@ const translations = {
         navProjection: "Projection",
         navBacktest: "Backtest",
         navTrades: "Trades",
+
+        // Strategie Profil Text
+        stratProfileTitle: "Strategy Profile",
+        stratProfileTextSonic: "Professional discretionary approach with strict risk management. The strategy trades breakouts and mean-reversion in liquid market phases. Every trade is secured by a hard stop-loss. Risky methods like martingale or grid-trading are strictly avoided.",
+        stratProfileTextNeo: "Systematic, rule-based Forex strategy. Unlike many approaches, NEO.FX utilizes strict risk management and immediately secures every trade with a stop-loss. The strategy completely avoids martingale or grid systems.",
 
         // FAQ Sonic Translations
         faqBadge1: "About Sonic AI",
