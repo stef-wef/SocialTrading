@@ -85,36 +85,43 @@ class DualEngineApp {
     }
 
     async loadTradesData() {
-        const candidateFiles = this.isNeo
-            ? [
-                '../data/Neo_TradesData.json',
-                '../data/NEO_TradesData.json',
-                '../data/NEO_tradesdata.json',
-                '../data/neo_tradesdata.json',
-                '/data/Neo_TradesData.json',
-                'data/Neo_TradesData.json'
-            ]
-            : [
-                '../data/Sonic_TradesData.json',
-                '../data/Sonic_tradesdata.json',
-                '../data/trades_data.json',
-                '/data/Sonic_TradesData.json',
-                'data/Sonic_TradesData.json'
-            ];
-
         let data = null;
-        for (const file of candidateFiles) {
-            try {
-                let response = await fetch(file);
+
+        // 1. API Fetch Versuch (Ersetze diese URLs mit deinem Backend-Endpoint für die MyFXBook API)
+        const apiUrl = this.isNeo ? 'DEINE_NEO_API_URL_HIER' : 'DEINE_SONIC_API_URL_HIER';
+        
+        try {
+            if (apiUrl && !apiUrl.includes('DEINE_')) {
+                let response = await fetch(apiUrl);
                 if (response.ok) {
-                    data = await response.json();
-                    break;
+                    let apiResult = await response.json();
+                    // Wenn die MyFXBook API Struktur anders verschachtelt ist (z.B. { history: [...] }), hier anpassen:
+                    data = apiResult.history ? apiResult.history : apiResult;
                 }
-            } catch (e) {}
+            }
+        } catch (e) {
+            console.warn("API Fetch fehlgeschlagen. Lade lokale JSON-Fallbacks.", e);
+        }
+
+        // 2. Lokaler Fallback
+        if (!data || !Array.isArray(data)) {
+            const candidateFiles = this.isNeo
+                ? ['../data/Neo_TradesData.json', '../data/NEO_TradesData.json', '../data/NEO_tradesdata.json', '../data/neo_tradesdata.json', '/data/Neo_TradesData.json', 'data/Neo_TradesData.json']
+                : ['../data/Sonic_TradesData.json', '../data/Sonic_tradesdata.json', '../data/trades_data.json', '/data/Sonic_TradesData.json', 'data/Sonic_TradesData.json'];
+
+            for (const file of candidateFiles) {
+                try {
+                    let response = await fetch(file);
+                    if (response.ok) {
+                        data = await response.json();
+                        break;
+                    }
+                } catch (e) {}
+            }
         }
 
         if (!data || !Array.isArray(data)) {
-            console.warn("Konnte Daten nicht laden. Bitte prüfe das Vorhandensein im data/ Verzeichnis.");
+            console.warn("Konnte Daten nicht laden. Weder über API noch über JSON.");
             this.rawTrades = [];
             return;
         }
@@ -211,7 +218,7 @@ class DualEngineApp {
                     scales: {
                         x: { 
                             display: true, 
-                            offset: true, // Lässt den ersten/letzten Balken sauber stehen
+                            offset: true, 
                             grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false },
                             border: { display: false },
                             ticks: { 
@@ -236,7 +243,7 @@ class DualEngineApp {
                                 callback: (v) => v + '%',
                                 color: '#94A3B8',
                                 font: { size: 10 },
-                                padding: 8 // Zieht den Text sauber vom Diagramm weg
+                                padding: 8
                             } 
                         }
                     }
@@ -694,6 +701,7 @@ class DualEngineApp {
                             color: '#94A3B8', 
                             font: { size: 10 }, 
                             maxTicksLimit: 6,
+                            align: 'inner',
                             padding: 5
                         } 
                     },
@@ -703,7 +711,7 @@ class DualEngineApp {
                         border: { dash: [4, 4], display: false }, 
                         ticks: { 
                             color: '#94A3B8', font: { size: 10 }, 
-                            padding: 8, 
+                            mirror: true, z: 10, padding: 0, 
                             callback: (v) => v + '%' 
                         } 
                     }
@@ -888,6 +896,7 @@ class DualEngineApp {
                             maxTicksLimit: 6, 
                             font: { size: 10 }, 
                             color: '#94A3B8',
+                            align: 'inner',
                             padding: 5
                         } 
                     },
@@ -897,7 +906,7 @@ class DualEngineApp {
                         border: { dash: [4, 4], display: false },
                         ticks: { 
                             maxTicksLimit: 6, font: { size: 10 }, color: '#94A3B8', 
-                            padding: 8, 
+                            mirror: true, z: 10, padding: 0, 
                             callback: (val) => val >= 1000 ? '$' + (val / 1000).toFixed(1) + 'k' : '$' + val 
                         }
                     }
