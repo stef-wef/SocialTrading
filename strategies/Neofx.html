@@ -51,7 +51,6 @@
             border-radius: 14px; 
         }
 
-        /* Tooltip CSS */
         .tt-wrapper { position: relative; display: inline-flex; align-items: center; cursor: help; }
         .tt-wrapper .tt-text {
             visibility: hidden; width: max-content; max-width: 200px; background-color: #1A2436; color: #fff;
@@ -60,7 +59,7 @@
             opacity: 0; transition: opacity 0.2s; font-size: 10px; font-family: 'Plus Jakarta Sans', sans-serif;
             border: 1px solid #334155; text-transform: none; font-weight: 500; letter-spacing: normal;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-            white-space: normal; /* Erlaubt Zeilenumbrüche, verhindert Überlauf */
+            white-space: normal; 
         }
         .tt-wrapper:hover .tt-text { visibility: visible; opacity: 1; }
         
@@ -102,7 +101,6 @@
         input[type=number] { -moz-appearance: textfield; appearance: textfield; }
         input[type="date"] { color-scheme: dark; }
 
-        /* Optimiertes Touch-Scrolling für Tabellen auf Smartphones */
         .table-scroll {
             scrollbar-width: thin;
             scrollbar-color: #1A2436 #0A101C;
@@ -701,15 +699,14 @@
                     <thead class="sticky top-0 bg-darkBg/95 backdrop-blur z-10 shadow-md">
                         <tr class="text-zinc-400 uppercase tracking-wider text-[9px] md:text-[11px] border-b border-cardBorder">
                             <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Strategie</th>
-                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Instrument</th>
-                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Typ</th>
-                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Größe</th>
                             <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Datum</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">PnL (%)</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Größe</th>
                             <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Einstiegspreis</th>
                             <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Ausstiegspreis</th>
                             <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Einstiegszeit</th>
                             <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Ausstiegszeit</th>
-                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold text-right">PnL (%)</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold text-right">Typ</th>
                         </tr>
                     </thead>
                     <tbody id="trades-table-body" class="divide-y divide-cardBorder/40 text-zinc-300 font-mono">
