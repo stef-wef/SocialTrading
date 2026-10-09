@@ -1,7 +1,6 @@
 class DualEngineApp {
     constructor() {
         this.rawTrades = [];
-        this.liveTableTrades = null; 
         this.btChart = null;
         this.equityChart = null;
         this.drawdownChart = null;
@@ -63,7 +62,7 @@ class DualEngineApp {
         }
         this.applyTranslations();
 
-        // Lädt statische JSON Daten für Charts und Berechnungen SOFORT
+        // Lädt die Trades (Sonic über API, Neo über lokale JSON)
         await this.loadTradesData();
 
         const tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
@@ -84,15 +83,6 @@ class DualEngineApp {
         this.renderHeatmap();
         this.calcProjection();
         this.calcBacktest();
-
-        // Lade Live-Daten vom Backend NUR für die Sonic-Tabelle
-        if (!this.isNeo) {
-            this.loadLiveTableData().then(() => {
-                if (this.liveTableTrades && this.liveTableTrades.length > 0) {
-                    this.renderStatsAndTable(); 
-                }
-            });
-        }
     }
 
     parseDate(dateStr) {
@@ -103,19 +93,19 @@ class DualEngineApp {
         const timePart = dateStr.split(" ")[1] || "";
         const datePart = dateStr.split(" ")[0];
 
-        if (datePart.includes("/")) { // MM/DD/YYYY Format
+        if (datePart.includes("/")) { 
             const p = datePart.split("/");
             if(p.length === 3) {
                 dt = `${p[2]}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
                 d = `${p[1].padStart(2,'0')}.${p[0].padStart(2,'0')}.${p[2]} ${timePart}`;
             }
-        } else if (datePart.includes(".")) { // DD.MM.YYYY Format
+        } else if (datePart.includes(".")) { 
             const p = datePart.split(".");
             if(p.length === 3) {
                 dt = `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
                 d = `${p[0].padStart(2,'0')}.${p[1].padStart(2,'0')}.${p[2]} ${timePart}`;
             }
-        } else if (datePart.includes("-")) { // YYYY-MM-DD Format
+        } else if (datePart.includes("-")) { 
             const p = datePart.split("-");
             if(p.length === 3) {
                 dt = datePart;
@@ -127,36 +117,33 @@ class DualEngineApp {
 
     async loadTradesData() {
         let data = null;
-        
-        const candidateFiles = this.isNeo
-            ? ['../data/Neo_TradesData.json', '../data/NEO_TradesData.json', '../data/NEO_tradesdata.json', '../data/neo_tradesdata.json', '/data/Neo_TradesData.json', 'data/Neo_TradesData.json']
-            : ['../data/Sonic_TradesData.json', '../data/Sonic_tradesdata.json', '../data/trades_data.json', '/data/Sonic_TradesData.json', 'data/Sonic_TradesData.json'];
 
-        for (const file of candidateFiles) {
-            try {
-                let response = await fetch(file);
-                if (response.ok) {
-                    data = await response.json();
-                    break;
-                }
-            } catch (e) {}
-        }
-
-        // NOTFALL-FALLBACK: Wenn die lokale Datei fehlt, lade über die API (damit die Seite nicht kaputt ist!)
-        if ((!data || !Array.isArray(data) || data.length === 0) && !this.isNeo) {
-            console.warn("Lokale JSON fehlt! Lade Notfall-Daten über die API...");
+        if (!this.isNeo) {
+            // SONIC: Ausschließlich Live-Daten vom Backend erzwingen! Keine lokale JSON mehr.
             try {
                 const response = await fetch('https://tagmarkets-backend.onrender.com/api/live-trades?id=12249114');
                 if (response.ok) {
                     data = await response.json();
                 }
             } catch (e) {
-                console.error("API Fallback fehlgeschlagen.");
+                console.error("Backend nicht erreichbar:", e);
+            }
+        } else {
+            // NEO.FX: Nutzt weiterhin die lokale JSON
+            const candidateFiles = ['../data/Neo_TradesData.json', '../data/NEO_TradesData.json', '../data/NEO_tradesdata.json', '../data/neo_tradesdata.json', '/data/Neo_TradesData.json', 'data/Neo_TradesData.json'];
+            for (const file of candidateFiles) {
+                try {
+                    let response = await fetch(file);
+                    if (response.ok) {
+                        data = await response.json();
+                        break;
+                    }
+                } catch (e) {}
             }
         }
 
         if (!data || !Array.isArray(data)) {
-            console.warn("Konnte überhaupt keine Daten laden.");
+            console.warn("Konnte Daten nicht laden.");
             this.rawTrades = [];
             return;
         }
@@ -171,28 +158,6 @@ class DualEngineApp {
                 parsedGain: isNaN(gain) ? 0 : gain
             };
         });
-    }
-
-    async loadLiveTableData() {
-        try {
-            const response = await fetch('https://tagmarkets-backend.onrender.com/api/live-trades?id=12249114');            
-            if (response.ok) {
-                const data = await response.json();
-                if (Array.isArray(data)) {
-                    this.liveTableTrades = data.map(t => {
-                        const dateObj = this.parseDate(t["Open Date"]);
-                        return {
-                            ...t,
-                            dt: dateObj.dt,
-                            d: dateObj.d,
-                            parsedGain: parseFloat(t["Gain"] || 0)
-                        };
-                    });
-                }
-            }
-        } catch (error) {
-            console.warn("Fehler beim Laden der Live-Tabelle vom Backend:", error);
-        }
     }
 
     initAdvancedCharts() {
@@ -525,8 +490,7 @@ class DualEngineApp {
     }
 
     exportCSV() {
-        const dataSource = (this.liveTableTrades && this.liveTableTrades.length > 0) ? this.liveTableTrades : this.rawTrades;
-        let tradesOnly = dataSource.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+        let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
         if(tradesOnly.length === 0) return;
         
         let csvContent = "data:text/csv;charset=utf-8,";
@@ -959,13 +923,12 @@ class DualEngineApp {
     renderStatsAndTable() {
         if (!this.dom.tradesBody) return;
 
-        const dataSource = (this.liveTableTrades && this.liveTableTrades.length > 0) ? this.liveTableTrades : this.rawTrades;
-
-        let tradesOnly = dataSource.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+        let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
         let tableTrades = [...tradesOnly].sort((a, b) => new Date(b.dt) - new Date(a.dt));
 
         if (!tableTrades || tableTrades.length === 0) {
-            this.dom.tradesBody.innerHTML = `<tr><td colspan="10" class="px-6 py-8 text-center text-zinc-500 font-sans">Warte auf Trade-Daten...</td></tr>`;
+            // Zeigt jetzt diesen Text an, wenn die API noch lädt oder leer ist
+            this.dom.tradesBody.innerHTML = `<tr><td colspan="10" class="px-6 py-8 text-center text-zinc-500 font-sans">Lade Live-Daten... Bitte warten.</td></tr>`;
             return;
         }
 
@@ -979,7 +942,6 @@ class DualEngineApp {
             const typeLabel = isLong ? 'Long' : 'Short';
             const typeColor = isLong ? 'text-emerald-400' : 'text-rose-400';
             
-            // Format time correctly depending on API or JSON source
             let entryTime = "-";
             let exitTime = "-";
             if(t["Open Date"] && t["Open Date"].includes(" ")) entryTime = t["Open Date"].split(" ")[1];

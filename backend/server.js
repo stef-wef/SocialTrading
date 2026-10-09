@@ -71,6 +71,10 @@ app.get('/api/live-trades', async (req, res) => {
             response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=${accountId}`);
             data = await response.json();
         }
+        
+        if (data.error === true) {
+            throw new Error("MyFXBook API Fehler: " + data.message);
+        }
 
         const rawList = data.history || data.trades || [];
         const cleanTrades = processTrades(rawList);
