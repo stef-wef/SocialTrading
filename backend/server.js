@@ -59,15 +59,32 @@ app.get('/api/live-trades', async (req, res) => {
     try {
         if (!sessionToken) await loginMyfxbook();
 
-        // Erlaubt das Abfragen beliebiger IDs via Query (?id=12076857)
-        const accountId = req.query.id || '12076857';
+        let accountId = null;
 
+        // 1. Automatisch DEINE eigene Account-ID abrufen
+        const accRes = await fetch(`https://www.myfxbook.com/api/get-my-accounts.json?session=${sessionToken}`);
+        let accData = await accRes.json();
+        
+        // Falls die Session abgelaufen ist: Neu einloggen
+        if (accData.error === true) {
+            await loginMyfxbook();
+            const retryAccRes = await fetch(`https://www.myfxbook.com/api/get-my-accounts.json?session=${sessionToken}`);
+            accData = await retryAccRes.json();
+        }
+
+        // Schnappt sich automatisch das erste Konto in deinem Profil
+        if (accData.accounts && accData.accounts.length > 0) {
+            accountId = accData.accounts[0].id; 
+        } else {
+            throw new Error("Kein MyFXBook Konto unter diesem Login gefunden.");
+        }
+
+        // 2. Trade-History für deine ID laden
         let response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=${accountId}`);
         let data = await response.json();
 
-        // Session abgelaufen? Erneut anmelden und Request wiederholen
         if (data.error === true) {
-            console.log("Session abgelaufen, Login wird wiederholt...");
+            console.log("Session abgelaufen beim History-Fetch, Login wird wiederholt...");
             await loginMyfxbook();
             response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=${accountId}`);
             data = await response.json();
