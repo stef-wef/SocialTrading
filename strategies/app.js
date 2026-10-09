@@ -172,7 +172,7 @@ class DualEngineApp {
                         },
                         {
                             type: 'bar',
-                            label: 'Trade PnL',
+                            label: 'Daily PnL',
                             data: [],
                             backgroundColor: (context) => {
                                 const val = context.raw || 0;
@@ -197,8 +197,9 @@ class DualEngineApp {
                                     return `Datum: ${d.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
                                 },
                                 label: (c) => {
+                                    let isDe = this.currentLang === 'de';
                                     if (c.datasetIndex === 0) return 'Drawdown: ' + c.parsed.y.toFixed(2) + '%';
-                                    return 'Trade PnL: ' + (c.parsed.y > 0 ? '+' : '') + c.parsed.y.toFixed(2) + '%';
+                                    return (isDe ? 'Tages-PnL: ' : 'Daily PnL: ') + (c.parsed.y > 0 ? '+' : '') + c.parsed.y.toFixed(2) + '%';
                                 } 
                             } 
                         } 
@@ -210,6 +211,7 @@ class DualEngineApp {
                     scales: {
                         x: { 
                             display: true, 
+                            offset: false, // Entfernt die Lücken an den Rändern bei Balkendiagrammen
                             grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false },
                             border: { display: false },
                             ticks: { 
@@ -229,7 +231,7 @@ class DualEngineApp {
                         },
                         y: { 
                             position: 'right', 
-                            grid: { color: 'rgba(255, 255, 255, 0.04)', drawTicks: false }, 
+                            grid: { color: 'rgba(255, 255, 255, 0.05)', drawTicks: false }, 
                             border: { dash: [4, 4], display: false }, 
                             ticks: { 
                                 callback: (v) => v + '%',
@@ -272,9 +274,8 @@ class DualEngineApp {
         let deposits = 0, withdrawals = 0, currentBal = 0, highestBal = 0;
         let currentGain = 0, peakGain = 0, maxDrawdown = 0;
         
-        let drawdownLabels = [];
-        let drawdownDataPoints = [];
-        let tradeGainDataPoints = []; 
+        // Tägliche Aggregation
+        let dailyData = {};
 
         let baseCapital = 1000;
         let simCurrentBal = baseCapital;
@@ -282,6 +283,7 @@ class DualEngineApp {
         chronologicalTrades.forEach(t => {
             let action = (t.Action || "").toUpperCase();
             let g = parseFloat(t.Gain) || 0;
+            let date = t.dt;
 
             if (action === 'BUY' || action === 'SELL') {
                 let simulatedProfit = simCurrentBal * (g / 100);
@@ -305,9 +307,12 @@ class DualEngineApp {
                 let dd = currentGain - peakGain; 
                 if (Math.abs(dd) > maxDrawdown) maxDrawdown = Math.abs(dd);
 
-                drawdownLabels.push(t.dt);
-                drawdownDataPoints.push(dd); 
-                tradeGainDataPoints.push(g); 
+                // Daten pro Tag bündeln (verhindert Zeitverzerrung in der X-Achse)
+                if (!dailyData[date]) {
+                    dailyData[date] = { pnl: 0, drawdown: 0 };
+                }
+                dailyData[date].pnl += g;
+                dailyData[date].drawdown = dd; // Speichert den End-of-Day Drawdown
 
                 if (t["Duration (DD:HH:MM:SS)"]) {
                     let parts = t["Duration (DD:HH:MM:SS)"].split(':');
@@ -318,6 +323,10 @@ class DualEngineApp {
                 }
             }
         });
+
+        let drawdownLabels = Object.keys(dailyData);
+        let drawdownDataPoints = drawdownLabels.map(d => dailyData[d].drawdown);
+        let tradeGainDataPoints = drawdownLabels.map(d => dailyData[d].pnl);
 
         const getMedian = (arr) => {
             if (arr.length === 0) return 0;
@@ -396,7 +405,6 @@ class DualEngineApp {
         if(avgWinLabel) avgWinLabel.innerText = "Typischer Win";
         if(avgLossLabel) avgLossLabel.innerText = "Typischer Loss";
 
-        // Dynamisches Update des Gewinn/Verlust Trades Zählers im Header
         const winLossHeaderEl = document.getElementById('kpi-win-loss-text');
         if (winLossHeaderEl) {
             winLossHeaderEl.innerHTML = `<span class="text-emerald-400 font-bold">${wins} Win</span> <span class="text-zinc-500 font-normal">/</span> <span class="text-rose-400 font-bold">${losses} Lose</span>`;
@@ -625,6 +633,186 @@ class DualEngineApp {
         });
     }
 
+    initEquityGrowthChart() {
+        const canvas = document.getElementById('equityGrowthChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        let labels = [];
+        let growthData = [];
+
+        if (this.rawTrades && this.rawTrades.length > 0) {
+            let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+            let chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
+            
+            // Tägliche Gruppierung auch für die Equity Kurve
+            let dailyGrowth = {};
+            let accumGain = 0;
+            chronologicalTrades.forEach(t => {
+                accumGain += parseFloat(t.Gain) || 0;
+                dailyGrowth[t.dt] = accumGain;
+            });
+
+            Object.keys(dailyGrowth).forEach(date => {
+                let d = new Date(date);
+                labels.push(d.toLocaleString('en-US', { month: 'short', day: '2-digit', year: '2-digit' }));
+                growthData.push(dailyGrowth[date].toFixed(2));
+            });
+        } else {
+            labels = ['Nov', 'Dec', 'Jan', 'Feb'];
+            growthData = [0, 5, 10, 15];
+        }
+
+        let gradient = ctx.createLinearGradient(0, 0, 0, 280);
+        gradient.addColorStop(0, 'rgba(0, 229, 255, 0.15)');
+        gradient.addColorStop(1, 'rgba(0, 229, 255, 0.0)');
+
+        this.equityChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Growth', data: growthData, borderColor: '#00E5FF', backgroundColor: gradient,
+                    borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointBackgroundColor: '#040914',
+                    pointBorderColor: '#00E5FF', pointBorderWidth: 2, fill: true, tension: 0.2
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                layout: { padding: { left: 0, right: 0, top: 5, bottom: 0 } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0A101C', titleColor: '#00E5FF',
+                        titleFont: { size: 13, family: "'JetBrains Mono', monospace", weight: 'bold' },
+                        bodyColor: '#E2E8F0', bodyFont: { size: 12, family: "'JetBrains Mono', monospace" },
+                        borderColor: '#1A2436', borderWidth: 1, padding: 14, displayColors: false,
+                        callbacks: { label: function(context) { return 'Growth: ' + context.parsed.y + '%'; } }
+                    }
+                },
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    x: { 
+                        grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false }, 
+                        border: { display: false },
+                        ticks: { 
+                            color: '#94A3B8', 
+                            font: { size: 10 }, 
+                            maxTicksLimit: 6,
+                            align: 'inner',
+                            padding: 5
+                        } 
+                    },
+                    y: { 
+                        position: 'right', 
+                        grid: { color: 'rgba(255, 255, 255, 0.04)', drawTicks: false }, 
+                        border: { dash: [4, 4], display: false }, 
+                        ticks: { 
+                            color: '#94A3B8', font: { size: 10 }, 
+                            mirror: true, z: 10, padding: 0, 
+                            callback: (v) => v + '%' 
+                        } 
+                    }
+                }
+            }
+        });
+    }
+
+    calcBacktest() {
+        if (!this.rawTrades || this.rawTrades.length === 0) return;
+
+        let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+        let chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
+
+        let capital = parseFloat(this.dom.btDepInput.value) || 10000;
+        let topup = parseFloat(this.dom.btTopInput ? this.dom.btTopInput.value : 0) || 0;
+        let mode = this.dom.btMode ? this.dom.btMode.value : 'reinvest';
+
+        let startStr = (this.dom.btStart && this.dom.btStart.value) || chronologicalTrades[0].dt;
+        let endStr = (this.dom.btEnd && this.dom.btEnd.value) || chronologicalTrades[chronologicalTrades.length - 1].dt;
+
+        let filteredTrades = chronologicalTrades.filter(t => t.dt >= startStr && t.dt <= endStr);
+        if (filteredTrades.length === 0) return;
+
+        let currentBalance = capital;
+        let startOfDayBalance = capital; 
+        let totalInvested = capital;
+        let totalPayouts = 0;
+        let lastMonth = '';
+        let lastDay = ''; 
+
+        let labels = [];
+        let dataPoints = [];
+        let investedPoints = [];
+
+        // Tägliche Gruppierung für korrekte Zeitleiste
+        let dailyBacktest = {};
+
+        const formatDate = (dateStr) => {
+            if (!dateStr) return '';
+            let parts = dateStr.split('-');
+            if (parts.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
+            return dateStr;
+        };
+
+        filteredTrades.forEach((t) => {
+            const currentMonth = t.dt.substring(0, 7);
+            const currentDay = t.dt;
+
+            if (lastMonth && currentMonth !== lastMonth && topup > 0) {
+                currentBalance += topup;
+                totalInvested += topup;
+            }
+            lastMonth = currentMonth;
+
+            if (lastDay !== currentDay) {
+                startOfDayBalance = currentBalance;
+            }
+            lastDay = currentDay;
+
+            let scaledGainPercent = t.parsedGain * this.backtestLeverageMult;
+            let tradeProfit = startOfDayBalance * (scaledGainPercent / 100);
+
+            if (mode === 'reinvest') {
+                currentBalance += tradeProfit;
+            } else {
+                totalPayouts += tradeProfit;
+            }
+            
+            dailyBacktest[t.dt] = {
+                balance: mode === 'reinvest' ? currentBalance : currentBalance + totalPayouts,
+                invested: totalInvested
+            };
+        });
+
+        Object.keys(dailyBacktest).forEach(date => {
+            labels.push(formatDate(date));
+            dataPoints.push(dailyBacktest[date].balance);
+            investedPoints.push(dailyBacktest[date].invested);
+        });
+
+        let finalBalance = dataPoints[dataPoints.length - 1];
+        let totalInvestedEnd = investedPoints[investedPoints.length - 1];
+        let netProfit = finalBalance - totalInvestedEnd;
+        let growth = totalInvestedEnd > 0 ? (netProfit / totalInvestedEnd) * 100 : 0;
+
+        if (this.dom.btResBal) this.dom.btResBal.innerText = '$' + finalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        let resInvestedEl = document.getElementById('bt-res-invested');
+        if (resInvestedEl) resInvestedEl.innerText = '$' + totalInvestedEnd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (this.dom.btResProf) {
+            let formattedProfit = (netProfit >= 0 ? '+' : '-') + '$' + Math.abs(netProfit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            this.dom.btResProf.innerText = formattedProfit;
+        }
+        if (this.dom.btResGrowth) this.dom.btResGrowth.innerText = (growth >= 0 ? '+' : '') + growth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+
+        if (this.btChart) {
+            this.btChart.data.labels = labels;
+            this.btChart.data.datasets[0].data = dataPoints;
+            this.btChart.data.datasets[1].data = investedPoints;
+            this.btChart.update();
+        }
+    }
+
     initBacktestChart() {
         const canvas = document.getElementById('backtestChart');
         if (!canvas) return;
@@ -714,179 +902,12 @@ class DualEngineApp {
                     y: {
                         position: 'right', 
                         grid: { color: 'rgba(255, 255, 255, 0.04)', drawTicks: false }, 
-                        border: { dash: [4, 4], display: false }, 
+                        border: { dash: [4, 4], display: false },
                         ticks: { 
                             maxTicksLimit: 6, font: { size: 10 }, color: '#94A3B8', 
                             mirror: true, z: 10, padding: 0, 
                             callback: (val) => val >= 1000 ? '$' + (val / 1000).toFixed(1) + 'k' : '$' + val 
                         }
-                    }
-                }
-            }
-        });
-    }
-
-    calcBacktest() {
-        if (!this.rawTrades || this.rawTrades.length === 0) return;
-
-        let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
-        let chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
-
-        let capital = parseFloat(this.dom.btDepInput.value) || 10000;
-        let topup = parseFloat(this.dom.btTopInput ? this.dom.btTopInput.value : 0) || 0;
-        let mode = this.dom.btMode ? this.dom.btMode.value : 'reinvest';
-
-        let startStr = (this.dom.btStart && this.dom.btStart.value) || chronologicalTrades[0].dt;
-        let endStr = (this.dom.btEnd && this.dom.btEnd.value) || chronologicalTrades[chronologicalTrades.length - 1].dt;
-
-        let filteredTrades = chronologicalTrades.filter(t => t.dt >= startStr && t.dt <= endStr);
-        if (filteredTrades.length === 0) return;
-
-        let currentBalance = capital;
-        let startOfDayBalance = capital; 
-        let totalInvested = capital;
-        let totalPayouts = 0;
-        let lastMonth = '';
-        let lastDay = ''; 
-
-        let labels = [];
-        let dataPoints = [];
-        let investedPoints = [];
-
-        const formatDate = (dateStr) => {
-            if (!dateStr) return '';
-            let parts = dateStr.split('-');
-            if (parts.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
-            return dateStr;
-        };
-
-        filteredTrades.forEach((t) => {
-            const currentMonth = t.dt.substring(0, 7);
-            const currentDay = t.dt;
-
-            if (lastMonth && currentMonth !== lastMonth && topup > 0) {
-                currentBalance += topup;
-                totalInvested += topup;
-            }
-            lastMonth = currentMonth;
-
-            if (lastDay !== currentDay) {
-                startOfDayBalance = currentBalance;
-            }
-            lastDay = currentDay;
-
-            let scaledGainPercent = t.parsedGain * this.backtestLeverageMult;
-            let tradeProfit = startOfDayBalance * (scaledGainPercent / 100);
-
-            if (mode === 'reinvest') {
-                currentBalance += tradeProfit;
-                dataPoints.push(currentBalance);
-            } else {
-                totalPayouts += tradeProfit;
-                dataPoints.push(currentBalance + totalPayouts);
-            }
-            investedPoints.push(totalInvested);
-            labels.push(formatDate(t.dt));
-        });
-
-        let finalBalance = mode === 'reinvest' ? dataPoints[dataPoints.length - 1] : (currentBalance + totalPayouts);
-        let netProfit = finalBalance - totalInvested;
-        let growth = totalInvested > 0 ? (netProfit / totalInvested) * 100 : 0;
-
-        if (this.dom.btResBal) this.dom.btResBal.innerText = '$' + finalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        let resInvestedEl = document.getElementById('bt-res-invested');
-        if (resInvestedEl) resInvestedEl.innerText = '$' + totalInvested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        if (this.dom.btResProf) {
-            let formattedProfit = (netProfit >= 0 ? '+' : '-') + '$' + Math.abs(netProfit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            this.dom.btResProf.innerText = formattedProfit;
-        }
-        if (this.dom.btResGrowth) this.dom.btResGrowth.innerText = (growth >= 0 ? '+' : '') + growth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
-
-        if (this.btChart) {
-            this.btChart.data.labels = labels;
-            this.btChart.data.datasets[0].data = dataPoints;
-            this.btChart.data.datasets[1].data = investedPoints;
-            this.btChart.update();
-        }
-    }
-
-    initEquityGrowthChart() {
-        const canvas = document.getElementById('equityGrowthChart');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-
-        let labels = [];
-        let growthData = [];
-
-        if (this.rawTrades && this.rawTrades.length > 0) {
-            let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
-            let chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
-            let step = Math.max(1, Math.floor(chronologicalTrades.length / 12));
-            let accumGain = 0;
-
-            for (let i = 0; i < chronologicalTrades.length; i++) {
-                accumGain += parseFloat(chronologicalTrades[i].Gain) || 0;
-                
-                if (i % step === 0 || i === chronologicalTrades.length - 1) {
-                    let d = new Date(chronologicalTrades[i].dt);
-                    labels.push(d.toLocaleString('en-US', { month: 'short', day: '2-digit', year: '2-digit' }));
-                    growthData.push(accumGain.toFixed(2));
-                }
-            }
-        } else {
-            labels = ['Nov', 'Dec', 'Jan', 'Feb'];
-            growthData = [0, 5, 10, 15];
-        }
-
-        let gradient = ctx.createLinearGradient(0, 0, 0, 280);
-        gradient.addColorStop(0, 'rgba(0, 229, 255, 0.15)');
-        gradient.addColorStop(1, 'rgba(0, 229, 255, 0.0)');
-
-        this.equityChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Growth', data: growthData, borderColor: '#00E5FF', backgroundColor: gradient,
-                    borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointBackgroundColor: '#040914',
-                    pointBorderColor: '#00E5FF', pointBorderWidth: 2, fill: true, tension: 0.2
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                layout: { padding: { left: 0, right: 0, top: 5, bottom: 0 } },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#0A101C', titleColor: '#00E5FF',
-                        titleFont: { size: 13, family: "'JetBrains Mono', monospace", weight: 'bold' },
-                        bodyColor: '#E2E8F0', bodyFont: { size: 12, family: "'JetBrains Mono', monospace" },
-                        borderColor: '#1A2436', borderWidth: 1, padding: 14, displayColors: false,
-                        callbacks: { label: function(context) { return 'Growth: ' + context.parsed.y + '%'; } }
-                    }
-                },
-                interaction: { mode: 'index', intersect: false },
-                scales: {
-                    x: { 
-                        grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false }, 
-                        border: { display: false },
-                        ticks: { 
-                            color: '#94A3B8', 
-                            font: { size: 10 }, 
-                            maxTicksLimit: 6,
-                            align: 'inner',
-                            padding: 5
-                        } 
-                    },
-                    y: { 
-                        position: 'right', 
-                        grid: { color: 'rgba(255, 255, 255, 0.04)', drawTicks: false }, 
-                        border: { dash: [4, 4], display: false }, 
-                        ticks: { 
-                            color: '#94A3B8', font: { size: 10 }, 
-                            mirror: true, z: 10, padding: 0, 
-                            callback: (v) => v + '%' 
-                        } 
                     }
                 }
             }
