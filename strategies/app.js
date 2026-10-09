@@ -269,7 +269,7 @@ class DualEngineApp {
         }
         this.applyTranslations();
 
-        // 1. STATISCHER LOAD: Lädt die lokalen Daten sofort, um die Seite verzögerungsfrei aufzubauen
+        // 1. STATISCHER LOAD: Lädt die lokalen Daten SOFORT für alle Diagramme, KPIs & Backtest
         await this.loadTradesData();
 
         const tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
@@ -286,16 +286,16 @@ class DualEngineApp {
         this.updateKPIs();
         this.initEquityGrowthChart();
         this.initBacktestChart();
-        this.renderStatsAndTable(); 
+        this.renderStatsAndTable(); // Baut die Tabelle sofort statisch auf, damit keine Lücke entsteht
         this.renderHeatmap();
         this.calcProjection();
         this.calcBacktest();
 
-        // 2. DYNAMISCHER LOAD: Zieht Live-Daten im Hintergrund, um nur die Tabelle unten zu füttern
+        // 2. DYNAMISCHER LOAD: Zieht im Hintergrund Live-Daten NUR für die Sonic-Tabelle
         if (!this.isNeo) {
             this.loadLiveTableData().then(() => {
                 if (this.liveTableTrades && this.liveTableTrades.length > 0) {
-                    this.renderStatsAndTable(); 
+                    this.renderStatsAndTable(); // Tauscht heimlich die Tabelle gegen Live-Daten aus
                 }
             });
         }
@@ -332,9 +332,9 @@ class DualEngineApp {
     }
 
     async loadTradesData() {
-        // Lädt immer die lokale JSON (verhindert das Warten auf den Backend Server)
         let data = null;
         
+        // Lädt IMMER die lokale JSON für den statischen Aufbau der Seite (KPIs, Charts etc.)
         const candidateFiles = this.isNeo
             ? ['../data/Neo_TradesData.json', '../data/NEO_TradesData.json', '../data/NEO_tradesdata.json', '../data/neo_tradesdata.json', '/data/Neo_TradesData.json', 'data/Neo_TradesData.json']
             : ['../data/Sonic_TradesData.json', '../data/Sonic_tradesdata.json', '../data/trades_data.json', '/data/Sonic_TradesData.json', 'data/Sonic_TradesData.json'];
@@ -1187,10 +1187,10 @@ class DualEngineApp {
             const openPrice = t["Open Price"] !== undefined && t["Open Price"] !== null ? Number(t["Open Price"]).toFixed(decimals) : '-';
             const closePrice = t["Close Price"] !== undefined && t["Close Price"] !== null ? Number(t["Close Price"]).toFixed(decimals) : '-';
             
-            // Formatierung der Lot-Zahl repariert
+            // Formatierung der Lot-Zahl repariert: Schneidet nicht mehr bei Mikro-Lots auf 0.00 ab
             let rawLots = t["Units/Lots"];
             if (typeof rawLots === 'object' && rawLots !== null) rawLots = rawLots.value;
-            const lots = rawLots !== undefined && rawLots !== null ? `${parseFloat(rawLots)} Lots` : '-';
+            const lots = (rawLots !== undefined && rawLots !== null && rawLots !== "") ? `${Number(rawLots)} Lots` : '-';
 
             const parsedG = t.parsedGain !== undefined ? t.parsedGain : (parseFloat(t.Gain) || 0);
             const isProfit = parsedG >= 0;
