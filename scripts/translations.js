@@ -50,11 +50,17 @@ const translations = {
         disclaimerTitle: "Nur zur Veranschaulichung — keine Erfolgsgarantie.",
         disclaimerText: "Dies ist eine mathematische Veranschaulichung basierend auf der historischen Durchschnitts-Performance und keine verbindliche Prognose. Einzelne Monate schwankten ungehebelt zwischen +0.35% und +2.10%. Die 24-fache Hebelannahme ist eine rechnerische Näherung — realer gehebelter Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist keine Garantie für zukünftige Ergebnisse. Sie können Ihr investiertes Kapital teilweise oder ganz verlieren. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie verkraften können.",
         
-        // Header Infos
+        // Header Infos & Navigation
         lblInstrument: "Instrument",
         lblWinLoss: "Gewinn / Verlust Trades",
         instrumentSonic: "XAUUSD · Gold vs. US Dollar",
         instrumentNeo: "EURUSD · Euro vs. US Dollar",
+        navMetrics: "Metrics",
+        navEquity: "Wachstum",
+        navFAQ: "FAQ",
+        navProjection: "Projektion",
+        navBacktest: "Backtest",
+        navTrades: "Trades",
 
         // FAQ Übersetzungen
         faqBadge1: "Über Sonic AI",
@@ -126,11 +132,17 @@ const translations = {
         disclaimerTitle: "Illustrative only — not a guarantee.",
         disclaimerText: "This is a mathematical illustration based on historical average performance, not a forecast. Individual months have ranged from +0.35% to +2.10% unleveraged. The 24× leverage assumption is an approximation — real leveraged trading involves margin requirements and liquidation risk that do not scale in a perfectly linear way. Past performance does not guarantee future results, and you can lose part or all of your capital. Trade only with funds you can afford to lose.",
         
-        // Header Infos
+        // Header Infos & Navigation
         lblInstrument: "Instrument",
         lblWinLoss: "Win / Loss Trades",
         instrumentSonic: "XAUUSD · Gold vs. US Dollar",
         instrumentNeo: "EURUSD · Euro vs. US Dollar",
+        navMetrics: "Metrics",
+        navEquity: "Growth",
+        navFAQ: "FAQ",
+        navProjection: "Projection",
+        navBacktest: "Backtest",
+        navTrades: "Trades",
 
         // FAQ Translations
         faqBadge1: "About Sonic AI",

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de" class="dark">
+<html lang="de" class="dark" style="scroll-behavior: smooth;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -171,6 +171,16 @@
                     <span id="kpi-win-loss-text" class="font-bold text-zinc-300">--- Win / --- Lose</span>
                 </div>
             </div>
+
+            <!-- Page Jump Navigation Menu -->
+            <nav class="flex flex-wrap justify-center gap-2 mt-6">
+                <a href="#metrics" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navMetrics">Metrics</a>
+                <a href="#equity-curve" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navEquity">Wachstum</a>
+                <a href="#faq" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navFAQ">FAQ</a>
+                <a href="#projection" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navProjection">Projektion</a>
+                <a href="#backtest" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navBacktest">Backtest</a>
+                <a href="#trades" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navTrades">Trades</a>
+            </nav>
         </div>
 
         <!-- 4 Haupt-KPIs -->
@@ -209,8 +219,24 @@
             </div>
         </div>
 
+        <!-- Strategie Profil -->
+        <div class="glass-panel p-6 flex flex-col md:flex-row gap-6 items-center justify-between">
+            <div class="flex-1">
+                <h2 class="text-lg font-extrabold text-white mb-2 flex items-center gap-2">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-accentCyan"></i> Strategie-Profil
+                </h2>
+                <p class="text-sm text-zinc-400 leading-relaxed">
+                    Professioneller algorithmischer Ansatz mit strengem Risikomanagement. Die Strategie handelt Ausbrüche und Mean-Reversion in liquiden Währungspaaren. Jeder Trade ist durch einen harten Stop-Loss abgesichert. Es wird konsequent auf riskante Methoden wie Martingale oder Grid-Trading verzichtet.
+                </p>
+            </div>
+            <div class="shrink-0 flex gap-2">
+                <span class="px-3 py-1 bg-darkBg border border-cardBorder rounded text-[10px] font-mono text-zinc-300 uppercase tracking-wide">Kein Martingale</span>
+                <span class="px-3 py-1 bg-darkBg border border-cardBorder rounded text-[10px] font-mono text-zinc-300 uppercase tracking-wide">Hard Stop-Loss</span>
+            </div>
+        </div>
+
         <!-- Performance Metrics -->
-        <div class="glass-panel p-6">
+        <div class="glass-panel p-6" id="metrics">
             <div class="flex items-center justify-between pb-4 mb-4 border-b border-cardBorder">
                 <div>
                     <h2 class="text-sm font-bold uppercase tracking-widest text-zinc-300">Performance Metrics</h2>
@@ -288,7 +314,7 @@
         </div>
 
         <!-- Equity Curve Panel -->
-        <div class="pt-4">
+        <div class="pt-4" id="equity-curve">
             <div class="text-center mb-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
                     <span class="w-1.5 h-1.5 rounded-full bg-accentCyan"></span> Equity Curve
@@ -377,7 +403,7 @@
         </div>
         
         <!-- FAQ Section -->
-        <div class="pt-10 pb-4">
+        <div class="pt-10 pb-4" id="faq">
             <!-- About Sonic AI -->
             <div class="mb-10">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-4">
@@ -470,7 +496,7 @@
         <div class="border-t border-cardBorder w-full my-6"></div>
 
         <!-- RECHNER 1: Projektions-Engine -->
-        <div class="pt-2">
+        <div class="pt-2" id="projection">
             <div class="text-center mb-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cardBg border border-cardBorder text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
                     <span class="w-1.5 h-1.5 rounded-full bg-accentCyan"></span> Wachstums-Projektion
@@ -567,7 +593,7 @@
         <div class="border-t border-cardBorder w-full my-6"></div>
 
         <!-- RECHNER 2: Historical Backtest Engine -->
-        <div>
+        <div id="backtest">
             <div class="text-center mb-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span data-i18n="btBadge">Historische Handelsdaten</span>
@@ -662,12 +688,12 @@
             </div>
             <p class="text-xs text-zinc-400 leading-relaxed font-sans">
                 <strong class="text-white font-semibold" data-i18n="disclaimerTitle">Nur zur Veranschaulichung — keine Erfolgsgarantie.</strong>
-                <span data-i18n="disclaimerText">Dies ist eine mathematische Veranschaulichung basierend auf der historischen Durchschnitts-Performance und keine verbindliche Prognose. Einzelne Monate schwankten ungehebelt zwischen +0.35% und +2.10%. Die 24× Hebelannahme ist eine rechnerische Näherung — realer gehebelter Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist keine Garantie für zukünftige Ergebnisse. Sie können Ihr investiertes Kapital teilweise oder ganz verlieren. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie verkraften können.</span>
+                <span data-i18n="disclaimerText">Dies ist eine mathematische Veranschaulichung basierend auf der historischen Durchschnitts-Performance und keine verbindliche Prognose. Einzelne Monate schwankten ungehebelt zwischen +0.35% und +2.10%. Die 24-fache Hebelannahme ist eine rechnerische Näherung — realer gehebelter Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist keine Garantie für zukünftige Ergebnisse. Sie können Ihr investiertes Kapital teilweise oder ganz verlieren. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie verkraften können.</span>
             </p>
         </div>
 
         <!-- Trade Historie Tabelle -->
-        <div class="glass-panel overflow-hidden mt-6">
+        <div class="glass-panel overflow-hidden mt-6" id="trades">
             <div class="px-6 py-5 border-b border-cardBorder flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-darkBg/40">
                 <div>
                     <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
@@ -712,7 +738,7 @@
 
     </div>
 
-    <script src="translations.js"></script>
+    <script src="../scripts/translations.js"></script>
     <script src="app.js"></script>
     <script>if (typeof lucide !== 'undefined') lucide.createIcons();</script>
 </body>

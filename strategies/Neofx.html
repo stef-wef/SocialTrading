@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de" class="dark">
+<html lang="de" class="dark" style="scroll-behavior: smooth;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -61,6 +61,7 @@
         }
         .tt-wrapper:hover .tt-text { visibility: visible; opacity: 1; }
         
+        /* Modifikator für Tooltips am rechten Rand, damit sie nicht abgeschnitten werden */
         .tt-wrapper.tt-right .tt-text {
             left: auto;
             right: 0;
@@ -171,6 +172,16 @@
                     <span id="kpi-win-loss-text" class="font-bold text-zinc-300">--- Win / --- Lose</span>
                 </div>
             </div>
+
+            <!-- Page Jump Navigation Menu -->
+            <nav class="flex flex-wrap justify-center gap-2 mt-6">
+                <a href="#metrics" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navMetrics">Metrics</a>
+                <a href="#equity-curve" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navEquity">Wachstum</a>
+                <a href="#faq" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navFAQ">FAQ</a>
+                <a href="#projection" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navProjection">Projektion</a>
+                <a href="#backtest" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navBacktest">Backtest</a>
+                <a href="#trades" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navTrades">Trades</a>
+            </nav>
         </div>
 
         <!-- 4 Haupt-KPIs -->
@@ -209,8 +220,24 @@
             </div>
         </div>
 
+        <!-- Strategie Profil -->
+        <div class="glass-panel p-6 flex flex-col md:flex-row gap-6 items-center justify-between">
+            <div class="flex-1">
+                <h2 class="text-lg font-extrabold text-white mb-2 flex items-center gap-2">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-accentCyan"></i> Strategie-Profil
+                </h2>
+                <p class="text-sm text-zinc-400 leading-relaxed">
+                    Professioneller algorithmischer Ansatz mit strengem Risikomanagement. Die Strategie handelt Ausbrüche und Mean-Reversion in liquiden Währungspaaren. Jeder Trade ist durch einen harten Stop-Loss abgesichert. Es wird konsequent auf riskante Methoden wie Martingale oder Grid-Trading verzichtet.
+                </p>
+            </div>
+            <div class="shrink-0 flex gap-2">
+                <span class="px-3 py-1 bg-darkBg border border-cardBorder rounded text-[10px] font-mono text-zinc-300 uppercase tracking-wide">Kein Martingale</span>
+                <span class="px-3 py-1 bg-darkBg border border-cardBorder rounded text-[10px] font-mono text-zinc-300 uppercase tracking-wide">Hard Stop-Loss</span>
+            </div>
+        </div>
+
         <!-- Performance Metrics -->
-        <div class="glass-panel p-6">
+        <div class="glass-panel p-6" id="metrics">
             <div class="flex items-center justify-between pb-4 mb-4 border-b border-cardBorder">
                 <div>
                     <h2 class="text-sm font-bold uppercase tracking-widest text-zinc-300">Performance Metrics</h2>
@@ -288,7 +315,7 @@
         </div>
 
         <!-- Equity Curve Panel -->
-        <div class="pt-4">
+        <div class="pt-4" id="equity-curve">
             <div class="text-center mb-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
                     <span class="w-1.5 h-1.5 rounded-full bg-accentCyan"></span> Equity Curve
@@ -375,18 +402,109 @@
                 </div>
             </div>
         </div>
+        
+        <!-- FAQ Section -->
+        <div class="pt-10 pb-4" id="faq">
+            <!-- About Sonic AI -->
+            <div class="mb-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-4">
+                    <span class="w-1.5 h-1.5 rounded-full bg-accentCyan"></span> <span data-i18n="faqBadge1">Über Sonic AI</span>
+                </div>
+                
+                <div class="glass-panel overflow-hidden divide-y divide-cardBorder/40">
+                    <div class="faq-item">
+                        <button class="faq-button w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none group">
+                            <span class="font-semibold text-white text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ1">Was ist Sonic AI?</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-400 transition-transform duration-300 transform"></i>
+                        </button>
+                        <div class="faq-answer px-6 pb-5 hidden">
+                            <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="faqA1">Sonic AI ist eine diskretionäre Goldstrategie (XAU/USD), die manuell von drei professionellen Tradern gehandelt wird. Sie treffen jede Einstiegs-, Stopp- und Ausstiegsentscheidung während der 24/5 Handelswoche selbst, und ihre Trades werden automatisch auf Ihr Konto kopiert – ohne dass Sie manuell eingreifen müssen.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <button class="faq-button w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none group">
+                            <span class="font-semibold text-white text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ2">Wie werden Handelsentscheidungen getroffen?</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-400 transition-transform duration-300 transform"></i>
+                        </button>
+                        <div class="faq-answer px-6 pb-5 hidden">
+                            <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="faqA2">Die drei Trader kombinieren Trendanalyse, Volatilitätsfilter und Multi-Timeframe-Bestätigungen. Ein Trade wird nur eröffnet, wenn alle drei bezüglich Richtung, Risiko und erwartetem Ertrag übereinstimmen – weshalb die Trefferquote auf dem verifizierten MyFXBook-Konto derzeit bei etwa 83 % und der Profit Factor bei 3,31 liegt.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-button w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none group">
+                            <span class="font-semibold text-white text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ3">Für wen ist Sonic AI geeignet?</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-400 transition-transform duration-300 transform"></i>
+                        </button>
+                        <div class="faq-answer px-6 pb-5 hidden">
+                            <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="faqA3">Sonic AI wurde für Investoren entwickelt, die ein automatisiertes Exposure in einer professionellen Gold-Trading-Strategie suchen – typischerweise Unternehmer, Freiberufler und langfristige Investoren, die durch eine passive Einkommensquelle diversifizieren möchten.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-button w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none group">
+                            <span class="font-semibold text-white text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ4">Ist es für Anfänger geeignet?</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-400 transition-transform duration-300 transform"></i>
+                        </button>
+                        <div class="faq-answer px-6 pb-5 hidden">
+                            <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="faqA4">Ja. Es ist keine Trading-Erfahrung erforderlich. Unser 7-Schritte-Onboarding führt Sie an einem Nachmittag durch die Kontoerstellung, KYC, Einzahlung und Aktivierung.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-button w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none group">
+                            <span class="font-semibold text-white text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ5">Welche Märkte werden gehandelt?</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-400 transition-transform duration-300 transform"></i>
+                        </button>
+                        <div class="faq-answer px-6 pb-5 hidden">
+                            <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="faqA5">Sonic AI handelt ausschließlich XAU/USD (Gold vs. US-Dollar) – das liquideste Rohstoffpaar der Welt.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk & Performance -->
+            <div class="mb-2">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-4">
+                    <span class="w-1.5 h-1.5 rounded-full bg-accentCyan"></span> <span data-i18n="faqBadge2">Risiko & Performance</span>
+                </div>
+                
+                <div class="glass-panel overflow-hidden divide-y divide-cardBorder/40">
+                    <div class="faq-item">
+                        <button class="faq-button w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none group">
+                            <span class="font-semibold text-white text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ6">Wie hoch ist der maximale Drawdown?</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-400 transition-transform duration-300 transform"></i>
+                        </button>
+                        <div class="faq-answer px-6 pb-5 hidden">
+                            <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="faqA6">Historischer Drawdown der Strategie: 0,86 % auf dem zugrunde liegenden MyFXBook-Konto. Der Drawdown auf individuellen Konten kann bei einer 24-fachen Hebelung wesentlich höher ausfallen – der Wert von 0,86 % bezieht sich auf die ungehebelte Strategie, nicht auf ein gehebeltes Investorenkonto. Mechanisch auf ein 24-fach gehebeltes Konto angewendet, entspräche diese Bewegung etwa 20,6 % der Equity, und zukünftige Drawdowns können historische Werte übersteigen.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-button w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none group">
+                            <span class="font-semibold text-white text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ7">Wie war die historische Performance von Sonic AI?</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-400 transition-transform duration-300 transform"></i>
+                        </button>
+                        <div class="faq-answer px-6 pb-5 hidden">
+                            <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="faqA7">Seit dem Start auf dem verifizierten MyFXBook-Konto hat Sonic AI jeden Monat im Plus geschlossen, mit einer durchschnittlichen Nettorendite von ca. +1,14 % pro Monat (bei 1x Hebel) – was etwa +27,4 % pro Monat auf dem 24-fach gehebelten Konto entspricht. Der Gesamtgewinn bis heute beträgt +29,23 % (bei 1x). Jeder Trade ist auf MyFXBook öffentlich verifizierbar.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="border-t border-cardBorder w-full my-6"></div>
 
         <!-- RECHNER 1: Projektions-Engine -->
-        <div class="pt-2">
+        <div class="pt-2" id="projection">
             <div class="text-center mb-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cardBg border border-cardBorder text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
                     <span class="w-1.5 h-1.5 rounded-full bg-accentCyan"></span> Wachstums-Projektion
                 </div>
-                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">NEO.FX <span class="text-accentCyan drop-shadow-[0_0_15px_rgba(0,229,255,0.6)]" data-i18n="projTitle">Projektions-Engine</span></h2>
-                <p class="text-xs md:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-                    Modelliert aus dem historischen Myfxbook-Monatsschnitt, berechnet mit <strong>24x</strong> Broker-Effekt, abzüglich <strong>30%</strong> Erfolgsbeteiligung (= <strong>14.50%</strong> netto / Monat).
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">Profit <span class="text-accentCyan drop-shadow-[0_0_15px_rgba(0,229,255,0.6)]" data-i18n="projTitle">Projektions-Engine</span></h2>
+                <p class="text-xs md:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed" data-i18n="projSub">
+                    Modelliert aus dem historischen Myfxbook-Monatsschnitt von <strong>1.14%</strong>, gehebelt mit <strong>24x</strong> Broker-Effekt, abzüglich <strong>30%</strong> Erfolgsbeteiligung (= <strong>19.15%</strong> netto / Monat).
                 </p>
             </div>
 
@@ -443,30 +561,30 @@
                         <p class="text-[10px] text-accentCyan uppercase tracking-widest font-bold mb-2" id="proj-scen-title">
                             Szenario nach <span id="proj-res-month">12</span> Monaten
                         </p>
-                        <p class="text-5xl md:text-6xl font-mono font-extrabold text-accentCyan tracking-tight mb-3 drop-shadow-[0_0_20px_rgba(0,229,255,0.4)]" id="proj-res-balance">$50'725</p>
+                        <p class="text-5xl md:text-6xl font-mono font-extrabold text-accentCyan tracking-tight mb-3 drop-shadow-[0_0_20px_rgba(0,229,255,0.4)]" id="proj-res-balance">$81'887</p>
                         <p class="text-xs text-zinc-400 font-mono">
-                            <span data-i18n="fromWord">Aus</span> <span class="text-white font-bold" id="proj-res-invested">$10'000</span> <span data-i18n="investedWord">investiert</span> · <strong class="text-emerald-400" id="proj-res-mult">5.1x</strong> your capital
+                            <span data-i18n="fromWord">Aus</span> <span class="text-white font-bold" id="proj-res-invested">$10'000</span> <span data-i18n="investedWord">investiert</span> · <strong class="text-emerald-400" id="proj-res-mult">8.2x</strong> your capital
                         </p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="glass-panel p-5 text-center">
-                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Konservativ (~5.00% / Mo)</p>
-                            <p class="text-xl font-mono font-bold text-white mb-0.5" id="proj-cons-balance">$17'959</p>
+                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="projCons">Konservativ (~5.88% / Mo)</p>
+                            <p class="text-xl font-mono font-bold text-white mb-0.5" id="proj-cons-balance">$19'858</p>
                         </div>
                         <div class="glass-panel p-5 text-center">
-                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Optimistisch (~22.00% / Mo)</p>
-                            <p class="text-xl font-mono font-bold text-white mb-0.5" id="proj-opt-balance">$108'722</p>
+                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="projOpt">Optimistisch (~35.28% / Mo)</p>
+                            <p class="text-xl font-mono font-bold text-white mb-0.5" id="proj-opt-balance">$368'805</p>
                         </div>
                     </div>
 
                     <div class="glass-panel p-5">
                         <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-3 text-center" data-i18n="projMilestones">Meilensteine</p>
                         <div class="grid grid-cols-4 gap-2 text-center divide-x divide-cardBorder font-mono">
-                            <div><p class="text-[9px] text-zinc-500 mb-1">M 1</p><p class="text-sm font-bold text-white" id="ms1-avg">$11'450</p></div>
-                            <div><p class="text-[9px] text-zinc-500 mb-1">M 3</p><p class="text-sm font-bold text-white" id="ms3-avg">$15'010</p></div>
-                            <div><p class="text-[9px] text-zinc-500 mb-1">M 6</p><p class="text-sm font-bold text-white" id="ms6-avg">$22'531</p></div>
-                            <div><p class="text-[9px] text-zinc-500 mb-1">M 12</p><p class="text-sm font-bold text-accentCyan" id="ms12-avg">$50'725</p></div>
+                            <div><p class="text-[9px] text-zinc-500 mb-1">M 1</p><p class="text-sm font-bold text-white" id="ms1-avg">$11'915</p></div>
+                            <div><p class="text-[9px] text-zinc-500 mb-1">M 3</p><p class="text-sm font-bold text-white" id="ms3-avg">$16'916</p></div>
+                            <div><p class="text-[9px] text-zinc-500 mb-1">M 6</p><p class="text-sm font-bold text-white" id="ms6-avg">$28'616</p></div>
+                            <div><p class="text-[9px] text-zinc-500 mb-1">M 12</p><p class="text-sm font-bold text-accentCyan" id="ms12-avg">$81'887</p></div>
                         </div>
                     </div>
                 </div>
@@ -476,7 +594,7 @@
         <div class="border-t border-cardBorder w-full my-6"></div>
 
         <!-- RECHNER 2: Historical Backtest Engine -->
-        <div>
+        <div id="backtest">
             <div class="text-center mb-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span data-i18n="btBadge">Historische Handelsdaten</span>
@@ -571,12 +689,12 @@
             </div>
             <p class="text-xs text-zinc-400 leading-relaxed font-sans">
                 <strong class="text-white font-semibold" data-i18n="disclaimerTitle">Nur zur Veranschaulichung — keine Erfolgsgarantie.</strong>
-                <span data-i18n="disclaimerText">Dies ist eine mathematische Veranschaulichung basierend auf der historischen Durchschnitts-Performance und keine verbindliche Prognose. Einzelne Monate schwankten ungehebelt zwischen +0.35% und +2.10%. Die 24× Hebelannahme ist eine rechnerische Näherung — realer gehebelter Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist keine Garantie für zukünftige Ergebnisse. Sie können Ihr investiertes Kapital teilweise oder ganz verlieren. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie verkraften können.</span>
+                <span data-i18n="disclaimerText">Dies ist eine mathematische Veranschaulichung basierend auf der historischen Durchschnitts-Performance und keine verbindliche Prognose. Einzelne Monate schwankten ungehebelt zwischen +0.35% und +2.10%. Die 24-fache Hebelannahme ist eine rechnerische Näherung — realer gehebelter Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist keine Garantie für zukünftige Ergebnisse. Sie können Ihr investiertes Kapital teilweise oder ganz verlieren. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie verkraften können.</span>
             </p>
         </div>
 
         <!-- Trade Historie Tabelle -->
-        <div class="glass-panel overflow-hidden mt-6">
+        <div class="glass-panel overflow-hidden mt-6" id="trades">
             <div class="px-6 py-5 border-b border-cardBorder flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-darkBg/40">
                 <div>
                     <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
@@ -588,7 +706,7 @@
                     <button id="export-csv-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold font-mono hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer">
                         <i data-lucide="download" class="w-3.5 h-3.5"></i> CSV Export
                     </button>
-                    <a href="https://www.myfxbook.com/members/WordSmithyFx/neofx/11800152" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accentCyan/10 border border-accentCyan/20 text-accentCyan text-xs font-semibold font-mono hover:bg-accentCyan/20 transition-colors">
+                    <a href="https://www.myfxbook.com/members/SonicExperts/sonic-ai/12076857" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accentCyan/10 border border-accentCyan/20 text-accentCyan text-xs font-semibold font-mono hover:bg-accentCyan/20 transition-colors">
                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i> MyFXBook
                     </a>
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold font-mono">
@@ -621,7 +739,7 @@
 
     </div>
 
-    <script src="translations.js"></script>
+    <script src="../scripts/translations.js"></script>
     <script src="app.js"></script>
     <script>if (typeof lucide !== 'undefined') lucide.createIcons();</script>
 </body>
