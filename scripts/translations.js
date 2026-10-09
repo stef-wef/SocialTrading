@@ -18,7 +18,13 @@ const translations = {
         profitFactor: "Profit Factor",
         lossMonths: "Verlust-Monate",
         tradesHeader: "Trades",
-        tradesSub: "Historische Ausführungen direkt aus dem Broker-Feed",
+        
+        dataStatusStatic: "Historische Daten (CSV)",
+        tradesSubLive: "Aktuelle Live-Transaktionen aus dem Broker-Feed (API)",
+        tradesSubStatic: "Historische Transaktionen aus lokalem CSV-Datenexport",
+        liveBadge: "Live API",
+        staticBadge: "CSV Historie",
+
         growthProj: "Wachstums-Projektion",
         projTitle: "Projektions-Engine",
         projSub: "Modelliert aus dem historischen Monatsschnitt, berechnet mit 24x Hebeleffekt, abzüglich 30% Erfolgsbeteiligung (= 19.15% netto / Monat).",
@@ -50,7 +56,6 @@ const translations = {
         disclaimerTitle: "Nur zur Veranschaulichung — keine Erfolgsgarantie.",
         disclaimerText: "Dies ist eine mathematische Veranschaulichung basierend auf der historischen Durchschnitts-Performance und keine verbindliche Prognose. Einzelne Monate schwankten ungehebelt zwischen +0.35% und +2.10%. Die 24-fache Hebelannahme ist eine rechnerische Näherung — realer gehebelter Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist keine Garantie für zukünftige Ergebnisse. Sie können Ihr investiertes Kapital teilweise oder ganz verlieren. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie verkraften können.",
         
-        // Header Infos & Navigation
         lblInstrument: "Instrument",
         lblWinLoss: "Gewinn / Verlust Trades",
         instrumentSonic: "XAUUSD · Gold vs. US Dollar",
@@ -62,12 +67,10 @@ const translations = {
         navBacktest: "Backtest",
         navTrades: "Trades",
 
-        // Strategie Profil Text
         stratProfileTitle: "Strategie-Profil",
         stratProfileTextSonic: "Professioneller diskretionärer Ansatz mit strengem Risikomanagement. Die Strategie handelt Ausbrüche und Mean-Reversion in liquiden Marktphasen. Jeder Trade ist durch einen harten Stop-Loss abgesichert. Es wird konsequent auf riskante Methoden wie Martingale oder Grid-Trading verzichtet.",
         stratProfileTextNeo: "Systematische, regelbasierte Forex-Strategie. Im Gegensatz zu vielen Ansätzen nutzt NEO.FX striktes Risikomanagement und sichert jeden Trade sofort mit einem Stop-Loss ab. Die Strategie verzichtet komplett auf Martingale- oder Grid-Systeme.",
 
-        // FAQ Sonic AI
         faqBadge1: "Über Sonic AI",
         faqTitle1: "Über Sonic AI",
         faqBadge2: "Risiko & Performance",
@@ -86,7 +89,6 @@ const translations = {
         faqQ7: "Wie war die historische Performance von Sonic AI?",
         faqA7: "Die historische Auswertung zeigt auf dem verifizierten MyFXBook-Konto einen durchschnittlichen Nettogewinn von ca. +1,14 % pro Monat (bei 1x Hebel). Gehebelte Resultate schwanken entsprechend stärker. Jeder dokumentierte Trade kann auf MyFXBook eingesehen werden.",
 
-        // FAQ NEO.FX
         faqNeoBadge1: "Über NEO.FX",
         faqNeoTitle1: "Über NEO.FX",
         faqNeoQ1: "Was ist NEO.FX?",
@@ -123,7 +125,13 @@ const translations = {
         profitFactor: "Profit Factor",
         lossMonths: "Loss Months",
         tradesHeader: "Trades",
-        tradesSub: "Documented executions directly from the broker feed",
+        
+        dataStatusStatic: "Historical Data (CSV)",
+        tradesSubLive: "Current live transactions from the broker feed (API)",
+        tradesSubStatic: "Historical transactions from local CSV export",
+        liveBadge: "Live API",
+        staticBadge: "CSV History",
+
         growthProj: "Growth Projection",
         projTitle: "Projection Engine",
         projSub: "Modeled from the historical monthly average, amplified 24x by broker leverage, minus 30% performance fee (= 19.15% net / month).",
@@ -155,7 +163,6 @@ const translations = {
         disclaimerTitle: "Illustrative only — not a guarantee.",
         disclaimerText: "This is a mathematical illustration based on historical average performance, not a forecast. Individual months have ranged from +0.35% to +2.10% unleveraged. The 24× leverage assumption is an approximation — real leveraged trading involves margin requirements and liquidation risk that do not scale in a perfectly linear way. Past performance does not guarantee future results, and you can lose part or all of your capital. Trade only with funds you can afford to lose.",
         
-        // Header Infos & Navigation
         lblInstrument: "Instrument",
         lblWinLoss: "Win / Loss Trades",
         instrumentSonic: "XAUUSD · Gold vs. US Dollar",
@@ -167,12 +174,10 @@ const translations = {
         navBacktest: "Backtest",
         navTrades: "Trades",
 
-        // Strategie Profil Text
         stratProfileTitle: "Strategy Profile",
         stratProfileTextSonic: "Professional discretionary approach with strict risk management. The strategy trades breakouts and mean-reversion in liquid market phases. Every trade is secured by a hard stop-loss. Risky methods like martingale or grid-trading are strictly avoided.",
         stratProfileTextNeo: "Systematic, rule-based Forex strategy. Unlike many approaches, NEO.FX utilizes strict risk management and immediately secures every trade with a stop-loss. The strategy completely avoids martingale or grid systems.",
 
-        // FAQ Sonic Translations
         faqBadge1: "About Sonic AI",
         faqTitle1: "About Sonic AI",
         faqBadge2: "Risk & Performance",
@@ -191,7 +196,6 @@ const translations = {
         faqQ7: "What has Sonic AI's historical performance been?",
         faqA7: "Historical data on the verified MyFXBook account shows an average net return of approximately +1.14% per month (at 1× leverage). Leveraged results fluctuate accordingly. Every documented trade can be verified on MyFXBook.",
 
-        // FAQ NEO.FX Translations
         faqNeoBadge1: "About NEO.FX",
         faqNeoTitle1: "About NEO.FX",
         faqNeoQ1: "What is NEO.FX?",
