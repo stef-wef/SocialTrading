@@ -39,46 +39,46 @@
 <body class="min-h-screen flex flex-col">
 
     <!-- Header -->
-    <header class="w-full border-b border-cardBorder px-6 py-4 flex justify-between items-center bg-darkBg/90 backdrop-blur-md sticky top-0 z-50">
+    <header class="w-full border-b border-cardBorder px-4 md:px-6 py-3 md:py-4 flex justify-between items-center bg-darkBg/90 backdrop-blur-md sticky top-0 z-50">
         <div class="flex items-center gap-3">
-            <h1 class="text-xl font-extrabold tracking-tight text-white">SOCIAL<span class="text-accentCyan">TRADING</span></h1>
+            <h1 class="text-lg md:text-xl font-extrabold tracking-tight text-white">SOCIAL<span class="text-accentCyan">TRADING</span></h1>
         </div>
         <div class="flex items-center gap-4">
-            <button id="langToggle" class="text-xs font-bold text-zinc-400 hover:text-white px-2.5 py-1 border border-cardBorder rounded transition-colors">
+            <button id="langToggle" class="text-[10px] md:text-xs font-bold text-zinc-400 hover:text-white px-2.5 py-1 border border-cardBorder rounded transition-colors">
                 EN
             </button>
         </div>
     </header>
 
     <!-- Hero Section -->
-    <main class="flex-1 w-full max-w-6xl mx-auto px-6 py-16 text-center">
-        <h2 class="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-6 leading-tight">
-            <span data-i18n="heroTitle1">Transparenz im Fokus.</span> <span class="text-accentCyan" data-i18n="heroTitle2">Echte Handelsdaten.</span>
+    <main class="flex-1 w-full max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16 text-center">
+        <h2 class="text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-4 md:mb-6 leading-tight">
+            <span data-i18n="heroTitle1">Transparenz im Fokus.</span> <br class="block sm:hidden"><span class="text-accentCyan" data-i18n="heroTitle2">Echte Handelsdaten.</span>
         </h2>
-        <p class="text-sm md:text-base text-zinc-400 leading-relaxed max-w-2xl mx-auto mb-14" data-i18n="heroSub">
+        <p class="text-xs md:text-sm text-zinc-400 leading-relaxed max-w-2xl mx-auto mb-10 md:mb-14" data-i18n="heroSub">
             Detaillierte Auswertungen und historische Performance-Daten moderner Social-Trading-Strategien – transparent, datenbasiert und nachvollziehbar.
         </p>
 
         <!-- Dynamisches Strategie-Grid -->
-        <div id="strategy-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left mb-16">
+        <div id="strategy-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-left mb-10 md:mb-16">
             <div class="col-span-full flex justify-center py-20">
                 <i data-lucide="loader-2" class="w-8 h-8 text-accentCyan animate-spin"></i>
             </div>
         </div>
 
         <!-- Risikohinweis auf der Startseite -->
-        <div class="p-6 rounded-2xl bg-[#0d0914]/80 border border-rose-500/30 flex items-start gap-4 text-left max-w-4xl mx-auto">
+        <div class="p-4 md:p-6 rounded-2xl bg-[#0d0914]/80 border border-rose-500/30 flex items-start gap-3 md:gap-4 text-left max-w-4xl mx-auto">
             <div class="text-rose-500 shrink-0 mt-0.5">
-                <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                <i data-lucide="alert-triangle" class="w-4 md:w-5 h-4 md:h-5"></i>
             </div>
-            <p class="text-xs text-zinc-400 leading-relaxed font-sans">
+            <p class="text-[10px] md:text-xs text-zinc-400 leading-relaxed font-sans">
                 <strong class="text-white font-semibold" data-i18n="disclaimerTitle">Wichtiger Risikohinweis:</strong>
                 <span data-i18n="disclaimerText">Der Handel mit Hebelprodukten (CFDs, Devisen) birgt erhebliche Risiken für Ihr Kapital und ist nicht für jeden Anleger geeignet. Vergangene Performance-Ergebnisse, Backtests oder Modellierungen stellen keine Garantie für zukünftige Wertentwicklungen dar. Die bereitgestellten Inhalte dienen ausschließlich Informations- und Analysezwecken und stellen keine Anlageberatung dar.</span>
             </p>
         </div>
     </main>
 
-    <footer class="border-t border-cardBorder py-8 px-6 text-center text-[10px] text-zinc-500 font-mono" data-i18n="footerText">
+    <footer class="border-t border-cardBorder py-6 md:py-8 px-4 md:px-6 text-center text-[9px] md:text-[10px] text-zinc-500 font-mono" data-i18n="footerText">
         &copy; 2026 Social Trading. Alle Rechte vorbehalten. Trading beinhaltet signifikante Verlustrisiken.
     </footer>
 
@@ -236,15 +236,14 @@
             grid.innerHTML = '';
             strategiesData.forEach(strat => {
                 const cardClasses = strat.active 
-                    ? 'glass-card p-7 flex flex-col justify-between group cursor-pointer h-full' 
-                    : 'glass-card p-7 flex flex-col justify-between opacity-50 cursor-not-allowed select-none h-full';
+                    ? 'glass-card p-5 md:p-7 flex flex-col justify-between group cursor-pointer h-full' 
+                    : 'glass-card p-5 md:p-7 flex flex-col justify-between opacity-50 cursor-not-allowed select-none h-full';
                 
                 const clickAction = strat.active ? `window.location.href='${strat.url}'` : '';
                 
-                // Hier wurde " · Live Feed" entfernt
                 const badgeOrStatus = strat.active 
-                    ? '<div class="w-2 h-2 rounded-full bg-emerald-400"></div><span class="text-[10px] text-zinc-400 font-mono uppercase tracking-widest">' + strat.asset + '</span>'
-                    : '<div class="w-2 h-2 rounded-full bg-amber-400"></div><span class="text-[10px] text-amber-400 font-mono uppercase tracking-widest">' + i18n[currentLang].comingSoon + '</span>';
+                    ? '<div class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-emerald-400"></div><span class="text-[9px] md:text-[10px] text-zinc-400 font-mono uppercase tracking-widest">' + strat.asset + '</span>'
+                    : '<div class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-amber-400"></div><span class="text-[9px] md:text-[10px] text-amber-400 font-mono uppercase tracking-widest">' + i18n[currentLang].comingSoon + '</span>';
 
                 let wonNum = parseInt(strat.tradesWon) || 0;
                 let lostNum = parseInt(strat.tradesLost) || 0;
@@ -254,63 +253,63 @@
                 const cardHTML = `
                     <div class="${cardClasses}" onclick="${clickAction}">
                         <div>
-                            <div class="flex items-center justify-between mb-5">
-                                <div class="flex items-center gap-2">
+                            <div class="flex items-center justify-between mb-4 md:mb-5">
+                                <div class="flex items-center gap-1.5 md:gap-2">
                                     ${badgeOrStatus}
                                 </div>
-                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">1:30 Hebel</span>
+                                <span class="text-[9px] md:text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">1:30 Hebel</span>
                             </div>
 
-                            <h3 class="text-3xl font-extrabold text-white mb-6 ${strat.active ? 'group-hover:text-accentCyan' : ''} transition-colors tracking-tight">${strat.name}</h3>
+                            <h3 class="text-2xl md:text-3xl font-extrabold text-white mb-4 md:mb-6 ${strat.active ? 'group-hover:text-accentCyan' : ''} transition-colors tracking-tight">${strat.name}</h3>
                             
                             <!-- Haupt-Zahlen (Gain & Max Drawdown) -->
-                            <div class="grid grid-cols-2 gap-3 mb-6 p-4 rounded-xl bg-darkBg/60 border border-cardBorder">
+                            <div class="grid grid-cols-2 gap-2 md:gap-3 mb-5 md:mb-6 p-3 md:p-4 rounded-xl bg-darkBg/60 border border-cardBorder">
                                 <div>
-                                    <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-mono">${i18n[currentLang].totalReturn}</p>
-                                    <p class="text-xl font-extrabold text-emerald-400 font-mono mt-0.5">${strat.totalReturn}</p>
+                                    <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-mono">${i18n[currentLang].totalReturn}</p>
+                                    <p class="text-lg md:text-xl font-extrabold text-emerald-400 font-mono mt-0.5">${strat.totalReturn}</p>
                                 </div>
                                 <div>
-                                    <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-mono">${i18n[currentLang].maxDrawdown}</p>
-                                    <p class="text-xl font-extrabold text-rose-400 font-mono mt-0.5">${strat.maxDd}</p>
+                                    <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-mono">${i18n[currentLang].maxDrawdown}</p>
+                                    <p class="text-lg md:text-xl font-extrabold text-rose-400 font-mono mt-0.5">${strat.maxDd}</p>
                                 </div>
                             </div>
 
                             <!-- Trefferquote & Visual Bar -->
-                            <div class="mb-6">
-                                <div class="flex justify-between items-center mb-1.5 font-mono text-xs">
+                            <div class="mb-5 md:mb-6">
+                                <div class="flex justify-between items-center mb-1.5 font-mono text-[10px] md:text-xs">
                                     <span class="text-zinc-400">${i18n[currentLang].winRate}</span>
                                     <span class="font-bold text-accentCyan">${strat.winRate}</span>
                                 </div>
-                                <div class="w-full h-2 rounded-full bg-zinc-800 flex overflow-hidden">
+                                <div class="w-full h-1.5 md:h-2 rounded-full bg-zinc-800 flex overflow-hidden">
                                     <div class="bg-emerald-400 h-full" style="width: ${winPct}%"></div>
                                     <div class="bg-rose-500 h-full" style="width: ${100 - winPct}%"></div>
                                 </div>
-                                <div class="flex justify-between items-center mt-1.5 font-mono text-[10px] text-zinc-500">
+                                <div class="flex justify-between items-center mt-1.5 font-mono text-[9px] md:text-[10px] text-zinc-500">
                                     <span>Win: <strong class="text-emerald-400">${strat.tradesWon}</strong></span>
                                     <span>Loss: <strong class="text-rose-400">${strat.tradesLost}</strong></span>
                                 </div>
                             </div>
 
                             <!-- Detailzeilen -->
-                            <div class="space-y-2.5 font-mono text-xs border-t border-cardBorder/60 pt-4">
+                            <div class="space-y-2 font-mono text-[10px] md:text-xs border-t border-cardBorder/60 pt-3 md:pt-4">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest">${i18n[currentLang].tradesMade}</span>
+                                    <span class="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-widest">${i18n[currentLang].tradesMade}</span>
                                     <span class="font-bold text-white">${strat.tradesMade}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
-                                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest">${i18n[currentLang].accountType}</span>
+                                    <span class="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-widest">${i18n[currentLang].accountType}</span>
                                     <span class="font-semibold text-zinc-300">Social Pool</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mt-7 pt-4 border-t border-cardBorder/60">
+                        <div class="mt-5 md:mt-7 pt-3 md:pt-4 border-t border-cardBorder/60">
                             ${strat.active ? `
-                                <span class="text-accentCyan text-xs font-bold uppercase tracking-wider flex items-center justify-between group-hover:translate-x-0.5 transition-transform">
-                                    ${i18n[currentLang].checkPerformance} <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                                <span class="text-accentCyan text-[10px] md:text-xs font-bold uppercase tracking-wider flex items-center justify-between group-hover:translate-x-0.5 transition-transform">
+                                    ${i18n[currentLang].checkPerformance} <i data-lucide="arrow-right" class="w-3 h-3 md:w-4 md:h-4"></i>
                                 </span>
                             ` : `
-                                <span class="text-zinc-500 text-xs font-bold uppercase tracking-wider">
+                                <span class="text-zinc-500 text-[10px] md:text-xs font-bold uppercase tracking-wider">
                                     ${i18n[currentLang].comingSoon}
                                 </span>
                             `}

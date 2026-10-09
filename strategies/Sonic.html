@@ -2,7 +2,7 @@
 <html lang="de" class="dark" style="scroll-behavior: smooth;">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SONIC. | Performance & Rechner</title>
     
     <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/lucide:zap.svg?color=%2300E5FF">
@@ -77,243 +77,204 @@
         }
         input[type=range]:focus { outline: none; }
 
-        input[type=range]::-webkit-slider-runnable-track { 
-            width: 100%; 
-            height: 3px; 
-            cursor: pointer; 
-            background: #1A2436; 
-            border-radius: 9999px;
-        }
-        input[type=range]::-webkit-slider-thumb { 
-            -webkit-appearance: none; 
-            appearance: none;
-            height: 16px; 
-            width: 16px; 
-            border-radius: 50%; 
-            background: #00E5FF; 
-            cursor: pointer; 
-            margin-top: -6.5px; 
-            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); 
-            border: 2px solid #040914; 
-            transition: transform 0.1s ease-in-out; 
-        }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 3px; cursor: pointer; background: #1A2436; border-radius: 9999px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #00E5FF; cursor: pointer; margin-top: -6.5px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); border: 2px solid #040914; transition: transform 0.1s ease-in-out; }
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 
-        input[type=range]::-moz-range-track { 
-            width: 100%; 
-            height: 3px; 
-            cursor: pointer; 
-            background: #1A2436; 
-            border-radius: 9999px;
-            border: none;
-        }
-        input[type=range]::-moz-range-thumb { 
-            height: 16px; 
-            width: 16px; 
-            border-radius: 50%; 
-            background: #00E5FF; 
-            cursor: pointer; 
-            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); 
-            border: 2px solid #040914; 
-            transition: transform 0.1s ease-in-out; 
-        }
+        input[type=range]::-moz-range-track { width: 100%; height: 3px; cursor: pointer; background: #1A2436; border-radius: 9999px; border: none; }
+        input[type=range]::-moz-range-thumb { height: 16px; width: 16px; border-radius: 50%; background: #00E5FF; cursor: pointer; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); border: 2px solid #040914; transition: transform 0.1s ease-in-out; }
         input[type=range]::-moz-range-thumb:hover { transform: scale(1.2); }
         input[type=range]::-moz-range-progress { background-color: transparent; }
 
         input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
-        }
-        input[type=number] { 
-            -moz-appearance: textfield; 
-            appearance: textfield;
-        }
-
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; appearance: textfield; }
         input[type="date"] { color-scheme: dark; }
 
+        /* Optimiertes Touch-Scrolling für Tabellen auf Smartphones */
         .table-scroll {
             scrollbar-width: thin;
             scrollbar-color: #1A2436 #0A101C;
+            -webkit-overflow-scrolling: touch; 
         }
-        .table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-        .table-scroll::-webkit-scrollbar-track { background: #0A101C; }
+        .table-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+        .table-scroll::-webkit-scrollbar-track { background: #0A101C; border-radius: 4px; }
         .table-scroll::-webkit-scrollbar-thumb { background: #1A2436; border-radius: 4px; }
         .table-scroll::-webkit-scrollbar-thumb:hover { background: #00E5FF; }
-
+        
         table { border-collapse: separate; border-spacing: 0; }
     </style>
 </head>
-<body class="p-4 md:p-8">
-    <div class="max-w-[1240px] mx-auto space-y-8">
+<body class="p-2 sm:p-4 md:p-8">
+    <div class="max-w-[1240px] mx-auto space-y-6 md:space-y-8">
 
         <!-- Navigation & Header -->
-        <div class="text-center pt-8 pb-2 relative">
-            <a href="../index.html" class="absolute left-0 top-8 text-zinc-400 hover:text-accentCyan flex items-center gap-2 text-xs font-bold uppercase tracking-wider transition-colors">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i> <span data-i18n="back">Zurück</span>
+        <div class="text-center pt-6 md:pt-8 pb-2 relative">
+            <a href="../index.html" class="absolute left-2 md:left-0 top-6 md:top-8 text-zinc-400 hover:text-accentCyan flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs font-bold uppercase tracking-wider transition-colors">
+                <i data-lucide="arrow-left" class="w-3 h-3 md:w-4 md:h-4"></i> <span data-i18n="back" class="hidden sm:inline">Zurück</span>
             </a>
-            <button id="langToggle" class="absolute right-0 top-8 text-xs font-bold text-zinc-400 hover:text-white px-2.5 py-1 border border-cardBorder rounded-lg transition-colors">
+            <button id="langToggle" class="absolute right-2 md:right-0 top-6 md:top-8 text-[10px] md:text-xs font-bold text-zinc-400 hover:text-white px-2 py-1 md:px-2.5 md:py-1 border border-cardBorder rounded-lg transition-colors">
                 EN
             </button>
-            <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-2">SONIC.</h1>
-            <p class="text-sm text-zinc-400 font-medium mb-4">Gold (XAU/USD) · Social Trading · 1:30 Hebel</p>
+            <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-1.5 md:mb-2">SONIC.</h1>
+            <p class="text-xs md:text-sm text-zinc-400 font-medium mb-4 md:mb-5">Gold (XAU/USD) · Social Trading · 1:30 Hebel</p>
 
             <!-- Instrument & Gewinn/Verlust Trades Header Badges + CSV Button -->
-            <div class="flex flex-wrap justify-center items-center gap-3">
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-cardBg border border-cardBorder font-mono text-xs shadow-sm">
-                    <span class="text-[10px] text-zinc-500 uppercase font-bold tracking-wider" data-i18n="lblInstrument">Instrument</span>
+            <div class="flex flex-wrap justify-center items-center gap-2 md:gap-3 w-full max-w-3xl mx-auto">
+                <div class="inline-flex items-center gap-1.5 md:gap-2 px-3 py-1.5 rounded-xl bg-cardBg border border-cardBorder font-mono text-[9px] md:text-xs shadow-sm">
+                    <span class="text-zinc-500 uppercase font-bold tracking-wider" data-i18n="lblInstrument">Instrument</span>
                     <span class="text-zinc-600">·</span>
-                    <span class="text-white font-semibold" data-i18n="instrumentSonic">XAUUSD · Gold vs. US Dollar</span>
+                    <span class="text-white font-semibold" data-i18n="instrumentSonic">XAUUSD</span>
                 </div>
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-cardBg border border-cardBorder font-mono text-xs shadow-sm">
-                    <span class="text-[10px] text-zinc-500 uppercase font-bold tracking-wider" data-i18n="lblWinLoss">Gewinn / Verlust Trades</span>
+                <div class="inline-flex items-center gap-1.5 md:gap-2 px-3 py-1.5 rounded-xl bg-cardBg border border-cardBorder font-mono text-[9px] md:text-xs shadow-sm">
+                    <span class="text-zinc-500 uppercase font-bold tracking-wider" data-i18n="lblWinLoss">Trades</span>
                     <span class="text-zinc-600">·</span>
-                    <span id="kpi-win-loss-text" class="font-bold text-zinc-300">--- Win / --- Lose</span>
+                    <span id="kpi-win-loss-text" class="font-bold text-zinc-300">---</span>
                 </div>
                 
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 font-mono text-xs shadow-sm">
+                <div class="inline-flex items-center gap-1.5 md:gap-2 px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 font-mono text-[9px] md:text-xs shadow-sm">
                     <div class="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
                     <span class="text-rose-400 font-semibold" data-i18n="dataStatusStatic">Historische Daten (CSV)</span>
                 </div>
                 
-                <button id="export-csv-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold font-mono hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer shadow-sm">
-                    <i data-lucide="download" class="w-3.5 h-3.5"></i> CSV Export
+                <button id="export-csv-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-300 text-[9px] md:text-xs font-semibold font-mono hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer shadow-sm">
+                    <i data-lucide="download" class="w-3 h-3 md:w-3.5 md:h-3.5"></i> CSV Export
                 </button>
             </div>
 
             <!-- Page Jump Navigation Menu -->
-            <nav class="flex flex-wrap justify-center gap-2 mt-6">
-                <a href="#metrics" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navMetrics">Metrics</a>
-                <a href="#equity-curve" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navEquity">Wachstum</a>
-                <a href="#faq" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navFAQ">FAQ</a>
-                <a href="#projection" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navProjection">Projektion</a>
-                <a href="#backtest" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navBacktest">Backtest</a>
-                <a href="#trades" class="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navTrades">Trades</a>
+            <nav class="flex flex-wrap justify-center gap-1.5 md:gap-2 mt-5 md:mt-6">
+                <a href="#metrics" class="text-[9px] md:text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-3 md:px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navMetrics">Metrics</a>
+                <a href="#equity-curve" class="text-[9px] md:text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-3 md:px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navEquity">Wachstum</a>
+                <a href="#faq" class="text-[9px] md:text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-3 md:px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navFAQ">FAQ</a>
+                <a href="#projection" class="text-[9px] md:text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-3 md:px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navProjection">Projektion</a>
+                <a href="#backtest" class="text-[9px] md:text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-3 md:px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navBacktest">Backtest</a>
+                <a href="#trades" class="text-[9px] md:text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-3 md:px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navTrades">Trades</a>
             </nav>
         </div>
 
         <!-- 4 Haupt-KPIs -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="glass-panel p-6 text-center">
-                <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2 flex justify-center items-center gap-1">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            <div class="glass-panel p-4 md:p-6 text-center">
+                <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1 md:mb-2 flex justify-center items-center gap-1">
                     <span data-i18n="totalGain">Gesamtrendite</span>
-                    <div class="tt-wrapper"><i data-lucide="help-circle" class="w-3.5 h-3.5"></i><span class="tt-text">Der gesamte prozentuale Zuwachs seit Start der Strategie.</span></div>
+                    <div class="tt-wrapper"><i data-lucide="help-circle" class="w-3 md:w-3.5 h-3 md:h-3.5"></i><span class="tt-text">Der gesamte prozentuale Zuwachs seit Start der Strategie.</span></div>
                 </div>
-                <p class="text-3xl font-extrabold text-emerald-400 font-mono" id="kpi-total-gain">---</p>
-                <p class="text-[10px] text-zinc-500 mt-1 font-mono">Since Inception</p>
+                <p class="text-2xl md:text-3xl font-extrabold text-emerald-400 font-mono" id="kpi-total-gain">---</p>
+                <p class="text-[9px] md:text-[10px] text-zinc-500 mt-1 font-mono">Since Inception</p>
             </div>
-            <div class="glass-panel p-6 text-center">
-                <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2 flex justify-center items-center gap-1">
+            <div class="glass-panel p-4 md:p-6 text-center">
+                <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1 md:mb-2 flex justify-center items-center gap-1">
                     <span data-i18n="maxDrawdown">Max Drawdown</span>
-                    <div class="tt-wrapper"><i data-lucide="help-circle" class="w-3.5 h-3.5"></i><span class="tt-text">Der maximale historische Wertverlust vom höchsten jemals erreichten Kontostand.</span></div>
+                    <div class="tt-wrapper"><i data-lucide="help-circle" class="w-3 md:w-3.5 h-3 md:h-3.5"></i><span class="tt-text">Der maximale historische Wertverlust vom höchsten jemals erreichten Kontostand.</span></div>
                 </div>
-                <p class="text-3xl font-extrabold text-rose-400 font-mono" id="kpi-max-drawdown">---</p>
-                <p class="text-[10px] text-zinc-500 mt-1 font-mono">Basis-Risiko</p>
+                <p class="text-2xl md:text-3xl font-extrabold text-rose-400 font-mono" id="kpi-max-drawdown">---</p>
+                <p class="text-[9px] md:text-[10px] text-zinc-500 mt-1 font-mono">Basis-Risiko</p>
             </div>
-            <div class="glass-panel p-6 text-center">
-                <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2 flex justify-center items-center gap-1">
+            <div class="glass-panel p-4 md:p-6 text-center">
+                <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1 md:mb-2 flex justify-center items-center gap-1">
                     <span data-i18n="liveTradesKpi">Erfasste Trades</span>
-                    <div class="tt-wrapper"><i data-lucide="help-circle" class="w-3.5 h-3.5"></i><span class="tt-text">Gesamtzahl der validierten Trades im MyFXBook-Feed.</span></div>
+                    <div class="tt-wrapper"><i data-lucide="help-circle" class="w-3 md:w-3.5 h-3 md:h-3.5"></i><span class="tt-text">Gesamtzahl der validierten Trades im MyFXBook-Feed.</span></div>
                 </div>
-                <p class="text-3xl font-extrabold text-white font-mono" id="kpi-trades">---</p>
-                <p class="text-[10px] text-zinc-500 mt-1 font-mono">Historisch dokumentiert</p>
+                <p class="text-2xl md:text-3xl font-extrabold text-white font-mono" id="kpi-trades">---</p>
+                <p class="text-[9px] md:text-[10px] text-zinc-500 mt-1 font-mono">Historisch dokumentiert</p>
             </div>
-            <div class="glass-panel p-6 text-center">
-                <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-2 flex justify-center items-center gap-1">
+            <div class="glass-panel p-4 md:p-6 text-center">
+                <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1 md:mb-2 flex justify-center items-center gap-1">
                     <span data-i18n="avgMonth">Ø Monat Rendite</span>
-                    <div class="tt-wrapper"><i data-lucide="help-circle" class="w-3.5 h-3.5"></i><span class="tt-text">Der durchschnittliche monatliche Zuwachs (Compounded).</span></div>
+                    <div class="tt-wrapper"><i data-lucide="help-circle" class="w-3 md:w-3.5 h-3 md:h-3.5"></i><span class="tt-text">Der durchschnittliche monatliche Zuwachs (Compounded).</span></div>
                 </div>
-                <p class="text-3xl font-extrabold text-accentCyan font-mono" id="kpi-monthly-gain">---</p>
-                <p class="text-[10px] text-zinc-500 mt-1 font-mono">Compounded</p>
+                <p class="text-2xl md:text-3xl font-extrabold text-accentCyan font-mono" id="kpi-monthly-gain">---</p>
+                <p class="text-[9px] md:text-[10px] text-zinc-500 mt-1 font-mono">Compounded</p>
             </div>
         </div>
 
         <!-- Strategie Profil -->
-        <div class="glass-panel p-6 flex flex-col md:flex-row gap-6 items-center justify-between">
+        <div class="glass-panel p-4 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 items-start md:items-center justify-between">
             <div class="flex-1">
-                <h2 class="text-lg font-extrabold text-white mb-2 flex items-center gap-2">
-                    <i data-lucide="shield-check" class="w-5 h-5 text-accentCyan"></i> <span data-i18n="stratProfileTitle">Strategie-Profil</span>
+                <h2 class="text-base md:text-lg font-extrabold text-white mb-2 flex items-center gap-2">
+                    <i data-lucide="shield-check" class="w-4 md:w-5 h-4 md:h-5 text-accentCyan"></i> <span data-i18n="stratProfileTitle">Strategie-Profil</span>
                 </h2>
-                <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="stratProfileTextSonic">
+                <p class="text-xs md:text-sm text-zinc-400 leading-relaxed" data-i18n="stratProfileTextSonic">
                     Professioneller diskretionärer Ansatz mit strengem Risikomanagement. Die Strategie handelt Ausbrüche und Mean-Reversion in liquiden Marktphasen. Jeder Trade ist durch einen harten Stop-Loss abgesichert. Es wird konsequent auf riskante Methoden wie Martingale oder Grid-Trading verzichtet.
                 </p>
             </div>
-            <div class="shrink-0 flex gap-2">
-                <span class="px-3 py-1 bg-darkBg border border-cardBorder rounded text-[10px] font-mono text-zinc-300 uppercase tracking-wide">Kein Martingale</span>
-                <span class="px-3 py-1 bg-darkBg border border-cardBorder rounded text-[10px] font-mono text-zinc-300 uppercase tracking-wide">Hard Stop-Loss</span>
+            <div class="shrink-0 flex flex-wrap gap-2 w-full md:w-auto">
+                <span class="px-2 md:px-3 py-1 bg-darkBg border border-cardBorder rounded text-[9px] md:text-[10px] font-mono text-zinc-300 uppercase tracking-wide">Kein Martingale</span>
+                <span class="px-2 md:px-3 py-1 bg-darkBg border border-cardBorder rounded text-[9px] md:text-[10px] font-mono text-zinc-300 uppercase tracking-wide">Hard Stop-Loss</span>
             </div>
         </div>
 
         <!-- Performance Metrics -->
-        <div class="glass-panel p-6" id="metrics">
-            <div class="flex items-center justify-between pb-4 mb-4 border-b border-cardBorder">
+        <div class="glass-panel p-4 md:p-6" id="metrics">
+            <div class="flex items-center justify-between pb-3 md:pb-4 mb-3 md:mb-4 border-b border-cardBorder">
                 <div>
-                    <h2 class="text-sm font-bold uppercase tracking-widest text-zinc-300">Performance Metrics</h2>
-                    <p class="text-xs text-zinc-500 mt-0.5">Statistische Auswertung des Myfxbook-Portfolios</p>
+                    <h2 class="text-xs md:text-sm font-bold uppercase tracking-widest text-zinc-300">Performance Metrics</h2>
+                    <p class="text-[10px] md:text-xs text-zinc-500 mt-0.5" data-i18n="metricsSub">Statistische Auswertung des Myfxbook-Portfolios</p>
                 </div>
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 font-mono text-left">
-                <div class="p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
-                    <div class="text-[10px] text-zinc-500 uppercase flex items-center gap-1">Tages-Durchschnitt <div class="tt-wrapper"><i data-lucide="help-circle" class="w-3 h-3"></i><span class="tt-text">Durchschnittlicher Zuwachs pro gehandeltem Tag.</span></div></div>
-                    <p class="text-lg font-bold text-emerald-400 mt-0.5" id="kpi-daily-avg">---</p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4 font-mono text-left">
+                <div class="p-2.5 md:p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
+                    <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase flex items-center gap-1" data-i18n="dailyAvg">Tages-Durchschnitt <div class="tt-wrapper hidden md:block"><i data-lucide="help-circle" class="w-3 h-3"></i><span class="tt-text">Durchschnittlicher Zuwachs pro gehandeltem Tag.</span></div></div>
+                    <p class="text-base md:text-lg font-bold text-emerald-400 mt-0.5" id="kpi-daily-avg">---</p>
                 </div>
-                <div class="p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
-                    <div class="text-[10px] text-zinc-500 uppercase flex items-center gap-1">Profit Factor <div class="tt-wrapper"><i data-lucide="help-circle" class="w-3 h-3"></i><span class="tt-text">Bruttogewinn geteilt durch Bruttoverlust. Werte > 1.0 sind profitabel.</span></div></div>
-                    <p class="text-lg font-bold text-white mt-0.5" id="kpi-profit-factor">---</p>
+                <div class="p-2.5 md:p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
+                    <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase flex items-center gap-1" data-i18n="profitFactor">Profit Factor <div class="tt-wrapper hidden md:block"><i data-lucide="help-circle" class="w-3 h-3"></i><span class="tt-text">Bruttogewinn geteilt durch Bruttoverlust. Werte > 1.0 sind profitabel.</span></div></div>
+                    <p class="text-base md:text-lg font-bold text-white mt-0.5" id="kpi-profit-factor">---</p>
                 </div>
-                <div class="p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
-                    <div class="text-[10px] text-zinc-500 uppercase flex items-center gap-1">Ø Trade-Dauer <div class="tt-wrapper"><i data-lucide="help-circle" class="w-3 h-3"></i><span class="tt-text">Die durchschnittliche Haltedauer einer offenen Position.</span></div></div>
-                    <p class="text-lg font-bold text-white mt-0.5" id="kpi-avg-duration">---</p>
+                <div class="p-2.5 md:p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
+                    <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase flex items-center gap-1" data-i18n="avgTradeDuration">Ø Trade-Dauer <div class="tt-wrapper hidden md:block"><i data-lucide="help-circle" class="w-3 h-3"></i><span class="tt-text">Die durchschnittliche Haltedauer einer offenen Position.</span></div></div>
+                    <p class="text-base md:text-lg font-bold text-white mt-0.5" id="kpi-avg-duration">---</p>
                 </div>
-                <div class="p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
-                    <div class="text-[10px] text-zinc-500 uppercase flex items-center gap-1">Verlust-Monate <div class="tt-wrapper"><i data-lucide="help-circle" class="w-3 h-3"></i><span class="tt-text">Anzahl der Monate, die mit einem negativen Gesamtergebnis abgeschlossen wurden.</span></div></div>
-                    <p class="text-lg font-bold text-emerald-400 mt-0.5" id="kpi-loss-months">0</p>
+                <div class="p-2.5 md:p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
+                    <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase flex items-center gap-1" data-i18n="lossMonths">Verlust-Monate <div class="tt-wrapper hidden md:block"><i data-lucide="help-circle" class="w-3 h-3"></i><span class="tt-text">Anzahl der Monate, die mit einem negativen Gesamtergebnis abgeschlossen wurden.</span></div></div>
+                    <p class="text-base md:text-lg font-bold text-emerald-400 mt-0.5" id="kpi-loss-months">0</p>
                 </div>
             </div>
         </div>
 
         <!-- Advanced Analytics: Drawdown & Risk/Reward -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 glass-panel p-6 flex flex-col">
-                <h3 class="text-xs font-bold uppercase tracking-widest text-zinc-300 mb-4 flex justify-between items-center">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+            <div class="lg:col-span-2 glass-panel p-4 md:p-6 flex flex-col">
+                <h3 class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-300 mb-3 md:mb-4 flex justify-between items-center">
                     Drawdown & PNL Analyse 
-                    <div class="tt-wrapper tt-right text-zinc-500"><i data-lucide="help-circle" class="w-4 h-4"></i><span class="tt-text">Visualisiert die "Underwater Curve" (Rot) sowie die Einzelgewinne und -verluste jedes Trades (Balken).</span></div>
+                    <div class="tt-wrapper tt-right text-zinc-500"><i data-lucide="help-circle" class="w-3.5 md:w-4 h-3.5 md:h-4"></i><span class="tt-text">Visualisiert die "Underwater Curve" (Rot) sowie die Einzelgewinne und -verluste jedes Trades (Balken).</span></div>
                 </h3>
-                <div class="w-full h-full min-h-[200px] relative flex-1">
+                <div class="w-full h-full min-h-[180px] md:min-h-[200px] relative flex-1">
                     <canvas id="drawdownChart"></canvas>
                 </div>
             </div>
-            <div class="glass-panel p-6 flex flex-col">
-                <h3 class="text-xs font-bold uppercase tracking-widest text-zinc-300 mb-4 flex justify-between items-center">
+            <div class="glass-panel p-4 md:p-6 flex flex-col">
+                <h3 class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-300 mb-3 md:mb-4 flex justify-between items-center">
                     Risk / Reward 
-                    <div class="tt-wrapper tt-right text-zinc-500"><i data-lucide="help-circle" class="w-4 h-4"></i><span class="tt-text">Zeigt das Verhältnis zwischen dem typischen (Median) Gewinn-Trade und Verlust-Trade in $.</span></div>
+                    <div class="tt-wrapper tt-right text-zinc-500"><i data-lucide="help-circle" class="w-3.5 md:w-4 h-3.5 md:h-4"></i><span class="tt-text">Zeigt das Verhältnis zwischen dem typischen (Median) Gewinn-Trade und Verlust-Trade in $.</span></div>
                 </h3>
-                <div class="w-full h-full min-h-[160px] relative flex-1 flex justify-center items-center mb-4">
+                <div class="w-full h-full min-h-[140px] md:min-h-[160px] relative flex-1 flex justify-center items-center mb-3 md:mb-4">
                     <canvas id="rrChart"></canvas>
                 </div>
-                <div class="flex justify-between text-xs font-mono bg-darkBg/50 p-3 rounded-lg border border-cardBorder/50">
-                    <div class="flex flex-col"><span class="text-zinc-500 text-[10px] uppercase">Typischer Win</span><span id="avg-win-text" class="text-emerald-400 font-bold">--</span></div>
-                    <div class="flex flex-col text-right"><span class="text-zinc-500 text-[10px] uppercase">Typischer Loss</span><span id="avg-loss-text" class="text-rose-400 font-bold">--</span></div>
+                <div class="flex justify-between text-[10px] md:text-xs font-mono bg-darkBg/50 p-2.5 md:p-3 rounded-lg border border-cardBorder/50">
+                    <div class="flex flex-col"><span class="text-zinc-500 text-[8px] md:text-[10px] uppercase">Typischer Win</span><span id="avg-win-text" class="text-emerald-400 font-bold">--</span></div>
+                    <div class="flex flex-col text-right"><span class="text-zinc-500 text-[8px] md:text-[10px] uppercase">Typischer Loss</span><span id="avg-loss-text" class="text-rose-400 font-bold">--</span></div>
                 </div>
             </div>
         </div>
 
         <!-- Heatmap -->
-        <div class="glass-panel p-6">
-            <h3 class="text-xs font-bold uppercase tracking-widest text-zinc-300 mb-4 flex justify-between items-center">
+        <div class="glass-panel p-4 md:p-6">
+            <h3 class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-300 mb-3 md:mb-4 flex justify-between items-center">
                 Monatliche Performance Heatmap 
-                <div class="tt-wrapper tt-right text-zinc-500"><i data-lucide="help-circle" class="w-4 h-4"></i><span class="tt-text">Monatliche Netto-Renditen im chronologischen Überblick.</span></div>
+                <div class="tt-wrapper tt-right text-zinc-500"><i data-lucide="help-circle" class="w-3.5 md:w-4 h-3.5 md:h-4"></i><span class="tt-text">Monatliche Netto-Renditen im chronologischen Überblick.</span></div>
             </h3>
             <div class="overflow-x-auto table-scroll pb-2">
-                <table class="w-full text-center text-xs font-mono min-w-[600px]">
+                <table class="w-full text-center text-[10px] md:text-xs font-mono min-w-[600px]">
                     <thead>
                         <tr class="text-zinc-500 border-b border-cardBorder">
-                            <th class="p-2 font-semibold">Jahr</th>
-                            <th class="p-2 font-medium">Jan</th><th class="p-2 font-medium">Feb</th><th class="p-2 font-medium">Mär</th>
-                            <th class="p-2 font-medium">Apr</th><th class="p-2 font-medium">Mai</th><th class="p-2 font-medium">Jun</th>
-                            <th class="p-2 font-medium">Jul</th><th class="p-2 font-medium">Aug</th><th class="p-2 font-medium">Sep</th>
-                            <th class="p-2 font-medium">Okt</th><th class="p-2 font-medium">Nov</th><th class="p-2 font-medium">Dez</th>
-                            <th class="p-2 font-bold text-white">YTD</th>
+                            <th class="p-1.5 md:p-2 font-semibold">Jahr</th>
+                            <th class="p-1.5 md:p-2 font-medium">Jan</th><th class="p-1.5 md:p-2 font-medium">Feb</th><th class="p-1.5 md:p-2 font-medium">Mär</th>
+                            <th class="p-1.5 md:p-2 font-medium">Apr</th><th class="p-1.5 md:p-2 font-medium">Mai</th><th class="p-1.5 md:p-2 font-medium">Jun</th>
+                            <th class="p-1.5 md:p-2 font-medium">Jul</th><th class="p-1.5 md:p-2 font-medium">Aug</th><th class="p-1.5 md:p-2 font-medium">Sep</th>
+                            <th class="p-1.5 md:p-2 font-medium">Okt</th><th class="p-1.5 md:p-2 font-medium">Nov</th><th class="p-1.5 md:p-2 font-medium">Dez</th>
+                            <th class="p-1.5 md:p-2 font-bold text-white">YTD</th>
                         </tr>
                     </thead>
                     <tbody id="heatmap-body" class="divide-y divide-cardBorder/40">
@@ -323,15 +284,15 @@
         </div>
 
         <!-- Equity Curve Panel -->
-        <div class="pt-4" id="equity-curve">
-            <div class="text-center mb-8">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
-                    <span class="w-1.5 h-1.5 rounded-full bg-accentCyan"></span> Equity Curve
+        <div class="pt-2 md:pt-4" id="equity-curve">
+            <div class="text-center mb-6 md:mb-8">
+                <div class="inline-flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-[9px] md:text-[10px] font-mono font-bold tracking-widest uppercase mb-2.5 md:mb-3">
+                    <span class="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-accentCyan"></span> Equity Curve
                 </div>
-                <h2 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-2">
-                    Historischer <span class="text-accentCyan">Wachstumsverlauf.</span>
+                <h2 class="text-2xl sm:text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-2">
+                    Historischer <br class="block sm:hidden"><span class="text-accentCyan">Wachstumsverlauf.</span>
                 </h2>
-                <p class="text-xs md:text-sm text-zinc-400 max-w-xl mx-auto">
+                <p class="text-[10px] md:text-xs lg:text-sm text-zinc-400 max-w-xl mx-auto px-4">
                     Dokumentierte MyFXBook-Statistiken von Beginn bis heute.
                 </p>
             </div>
@@ -339,57 +300,57 @@
             <div class="glass-panel overflow-hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-cardBorder font-sans">
                     
-                    <div class="lg:col-span-4 p-5 flex flex-col justify-between text-xs bg-darkBg/40 h-full">
+                    <div class="lg:col-span-4 p-4 md:p-5 flex flex-col justify-between text-[10px] md:text-xs bg-darkBg/40 h-full">
                         <div>
-                            <div class="flex items-center justify-between mb-4 border-b border-cardBorder pb-2">
-                                <span class="text-[11px] font-semibold text-accentCyan uppercase tracking-widest">Live Metrics</span>
-                                <a href="https://www.myfxbook.com/portfolio/sonic/12249114" target="_blank" rel="noopener noreferrer" class="text-[10px] font-semibold text-zinc-500 hover:text-white flex items-center gap-1 transition-colors">
+                            <div class="flex items-center justify-between mb-3 md:mb-4 border-b border-cardBorder pb-2">
+                                <span class="text-[9px] md:text-[11px] font-semibold text-accentCyan uppercase tracking-widest">Live Metrics</span>
+                                <a href="https://www.myfxbook.com/portfolio/sonic/12249114" target="_blank" rel="noopener noreferrer" class="text-[9px] md:text-[10px] font-semibold text-zinc-500 hover:text-white flex items-center gap-1 transition-colors">
                                     MyFXBook <i data-lucide="external-link" class="w-3 h-3"></i>
                                 </a>
                             </div>
 
-                            <div class="space-y-2.5 font-mono">
-                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1.5">
+                            <div class="space-y-2 md:space-y-2.5 font-mono">
+                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1 md:pb-1.5">
                                     <span class="text-zinc-500">Gain :</span>
-                                    <span class="font-bold text-emerald-400 text-sm" id="myfx-gain">---</span>
+                                    <span class="font-bold text-emerald-400 text-xs md:text-sm" id="myfx-gain">---</span>
                                 </div>
-                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1.5">
+                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1 md:pb-1.5">
                                     <span class="text-zinc-500">Abs. Gain:</span>
-                                    <span class="font-bold text-emerald-400 text-sm" id="myfx-abs-gain">---</span>
+                                    <span class="font-bold text-emerald-400 text-xs md:text-sm" id="myfx-abs-gain">---</span>
                                 </div>
-                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1.5">
+                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1 md:pb-1.5">
                                     <span class="text-zinc-500">Daily:</span>
                                     <span class="font-semibold text-white" id="myfx-daily">---</span>
                                 </div>
-                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1.5">
+                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1 md:pb-1.5">
                                     <span class="text-zinc-500">Monthly:</span>
                                     <span class="font-semibold text-white" id="myfx-monthly">---</span>
                                 </div>
-                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1.5">
+                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1 md:pb-1.5">
                                     <span class="text-zinc-500">Drawdown:</span>
                                     <span class="font-semibold text-rose-400" id="myfx-drawdown">---</span>
                                 </div>
-                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1.5 pt-1">
+                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1 md:pb-1.5 pt-1">
                                     <span class="text-zinc-500">Balance:</span>
                                     <span class="font-bold text-white" id="myfx-balance">---</span>
                                 </div>
-                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1.5">
+                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1 md:pb-1.5">
                                     <span class="text-zinc-500">Equity:</span>
                                     <span class="font-semibold text-zinc-300" id="myfx-equity">---</span>
                                 </div>
-                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1.5">
+                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1 md:pb-1.5">
                                     <span class="text-zinc-500">Highest:</span>
                                     <span class="text-zinc-300" id="myfx-highest">---</span>
                                 </div>
-                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1.5">
+                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1 md:pb-1.5">
                                     <span class="text-zinc-500">Profit:</span>
                                     <span class="font-bold text-emerald-400" id="myfx-profit">---</span>
                                 </div>
-                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1.5">
+                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1 md:pb-1.5">
                                     <span class="text-zinc-500">Deposits:</span>
                                     <span class="text-zinc-300" id="myfx-deposits">---</span>
                                 </div>
-                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1.5">
+                                <div class="flex justify-between items-center border-b border-dashed border-cardBorder/50 pb-1 md:pb-1.5">
                                     <span class="text-zinc-500">Withdrawals:</span>
                                     <span class="text-zinc-300" id="myfx-withdrawals">---</span>
                                 </div>
@@ -397,12 +358,12 @@
                         </div>
                     </div>
 
-                    <div class="lg:col-span-8 p-5 flex flex-col bg-cardBg h-full">
+                    <div class="lg:col-span-8 p-4 md:p-5 flex flex-col bg-cardBg h-full">
                         <div class="flex justify-between items-center border-b border-cardBorder pb-2 mb-3 shrink-0">
-                            <span class="text-[11px] font-semibold text-accentCyan uppercase tracking-widest">Equity Growth Chart</span>
-                            <i data-lucide="bar-chart-2" class="w-4 h-4 text-zinc-500"></i>
+                            <span class="text-[9px] md:text-[11px] font-semibold text-accentCyan uppercase tracking-widest">Equity Growth Chart</span>
+                            <i data-lucide="bar-chart-2" class="w-3.5 md:w-4 h-3.5 md:h-4 text-zinc-500"></i>
                         </div>
-                        <div class="w-full flex-1 relative min-h-[280px]">
+                        <div class="w-full flex-1 relative min-h-[220px] md:min-h-[280px]">
                             <canvas id="equityGrowthChart"></canvas>
                         </div>
                     </div>
@@ -412,61 +373,61 @@
         </div>
         
         <!-- FAQ Section -->
-        <div class="pt-10 pb-4" id="faq">
+        <div class="pt-8 md:pt-10 pb-2 md:pb-4" id="faq">
             <!-- About Sonic AI -->
-            <div class="mb-10">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-4">
-                    <span class="w-1.5 h-1.5 rounded-full bg-accentCyan"></span> <span data-i18n="faqBadge1">Über Sonic AI</span>
+            <div class="mb-8 md:mb-10">
+                <div class="inline-flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-[9px] md:text-[10px] font-mono font-bold tracking-widest uppercase mb-3 md:mb-4">
+                    <span class="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-accentCyan"></span> <span data-i18n="faqBadge1">Über Sonic AI</span>
                 </div>
                 
                 <div class="glass-panel overflow-hidden divide-y divide-cardBorder/40">
                     <div class="faq-item">
-                        <button class="faq-button w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none group">
-                            <span class="font-semibold text-white text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ1">Was ist Sonic AI?</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-400 transition-transform duration-300 transform"></i>
+                        <button class="faq-button w-full px-4 md:px-6 py-4 md:py-5 flex items-center justify-between text-left focus:outline-none group">
+                            <span class="font-semibold text-white text-xs sm:text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ1">Was ist Sonic AI?</span>
+                            <i data-lucide="chevron-down" class="w-3.5 md:w-4 h-3.5 md:h-4 text-zinc-400 transition-transform duration-300 transform shrink-0 ml-2"></i>
                         </button>
-                        <div class="faq-answer px-6 pb-5 hidden">
-                            <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="faqA1">Sonic AI ist eine diskretionäre Goldstrategie (XAU/USD), die manuell von drei professionellen Tradern gehandelt wird. Sie treffen jede Einstiegs-, Stopp- und Ausstiegsentscheidung während der Handelswoche selbst, und ihre Trades können über bestehende Systeme auf Ihr Konto kopiert werden.</p>
+                        <div class="faq-answer px-4 md:px-6 pb-4 md:pb-5 hidden">
+                            <p class="text-xs md:text-sm text-zinc-400 leading-relaxed" data-i18n="faqA1">Sonic AI ist eine diskretionäre Goldstrategie (XAU/USD), die manuell von drei professionellen Tradern gehandelt wird. Sie treffen jede Einstiegs-, Stopp- und Ausstiegsentscheidung während der Handelswoche selbst, und ihre Trades können über bestehende Systeme auf Ihr Konto kopiert werden.</p>
                         </div>
                     </div>
                     
                     <div class="faq-item">
-                        <button class="faq-button w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none group">
-                            <span class="font-semibold text-white text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ2">Wie werden Handelsentscheidungen getroffen?</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-400 transition-transform duration-300 transform"></i>
+                        <button class="faq-button w-full px-4 md:px-6 py-4 md:py-5 flex items-center justify-between text-left focus:outline-none group">
+                            <span class="font-semibold text-white text-xs sm:text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ2">Wie werden Handelsentscheidungen getroffen?</span>
+                            <i data-lucide="chevron-down" class="w-3.5 md:w-4 h-3.5 md:h-4 text-zinc-400 transition-transform duration-300 transform shrink-0 ml-2"></i>
                         </button>
-                        <div class="faq-answer px-6 pb-5 hidden">
-                            <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="faqA2">Die drei Trader kombinieren Trendanalyse, Volatilitätsfilter und Multi-Timeframe-Bestätigungen. Ein Trade wird nur eröffnet, wenn alle drei bezüglich Richtung, Risiko und erwartetem Ertrag übereinstimmen.</p>
+                        <div class="faq-answer px-4 md:px-6 pb-4 md:pb-5 hidden">
+                            <p class="text-xs md:text-sm text-zinc-400 leading-relaxed" data-i18n="faqA2">Die drei Trader kombinieren Trendanalyse, Volatilitätsfilter und Multi-Timeframe-Bestätigungen. Ein Trade wird nur eröffnet, wenn alle drei bezüglich Richtung, Risiko und erwartetem Ertrag übereinstimmen.</p>
                         </div>
                     </div>
 
                     <div class="faq-item">
-                        <button class="faq-button w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none group">
-                            <span class="font-semibold text-white text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ3">Für wen ist Sonic AI geeignet?</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-400 transition-transform duration-300 transform"></i>
+                        <button class="faq-button w-full px-4 md:px-6 py-4 md:py-5 flex items-center justify-between text-left focus:outline-none group">
+                            <span class="font-semibold text-white text-xs sm:text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ3">Für wen ist Sonic AI geeignet?</span>
+                            <i data-lucide="chevron-down" class="w-3.5 md:w-4 h-3.5 md:h-4 text-zinc-400 transition-transform duration-300 transform shrink-0 ml-2"></i>
                         </button>
-                        <div class="faq-answer px-6 pb-5 hidden">
-                            <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="faqA3">Sonic AI richtet sich an Investoren, die ihr Portfolio durch eine alternative, fremdverwaltete Gold-Trading-Strategie diversifizieren möchten.</p>
+                        <div class="faq-answer px-4 md:px-6 pb-4 md:pb-5 hidden">
+                            <p class="text-xs md:text-sm text-zinc-400 leading-relaxed" data-i18n="faqA3">Sonic AI richtet sich an Investoren, die ihr Portfolio durch eine alternative, fremdverwaltete Gold-Trading-Strategie diversifizieren möchten.</p>
                         </div>
                     </div>
 
                     <div class="faq-item">
-                        <button class="faq-button w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none group">
-                            <span class="font-semibold text-white text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ4">Ist es für Anfänger geeignet?</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-400 transition-transform duration-300 transform"></i>
+                        <button class="faq-button w-full px-4 md:px-6 py-4 md:py-5 flex items-center justify-between text-left focus:outline-none group">
+                            <span class="font-semibold text-white text-xs sm:text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ4">Ist es für Anfänger geeignet?</span>
+                            <i data-lucide="chevron-down" class="w-3.5 md:w-4 h-3.5 md:h-4 text-zinc-400 transition-transform duration-300 transform shrink-0 ml-2"></i>
                         </button>
-                        <div class="faq-answer px-6 pb-5 hidden">
-                            <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="faqA4">Die technische Einrichtung erfordert keine fortgeschrittenen Trading-Kenntnisse. Unser 7-Schritte-Onboarding führt Sie durch die Kontoerstellung, Verifizierung (KYC) und Verknüpfung.</p>
+                        <div class="faq-answer px-4 md:px-6 pb-4 md:pb-5 hidden">
+                            <p class="text-xs md:text-sm text-zinc-400 leading-relaxed" data-i18n="faqA4">Die technische Einrichtung erfordert keine fortgeschrittenen Trading-Kenntnisse. Unser 7-Schritte-Onboarding führt Sie durch die Kontoerstellung, Verifizierung (KYC) und Verknüpfung.</p>
                         </div>
                     </div>
 
                     <div class="faq-item">
-                        <button class="faq-button w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none group">
-                            <span class="font-semibold text-white text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ5">Welche Märkte werden gehandelt?</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-400 transition-transform duration-300 transform"></i>
+                        <button class="faq-button w-full px-4 md:px-6 py-4 md:py-5 flex items-center justify-between text-left focus:outline-none group">
+                            <span class="font-semibold text-white text-xs sm:text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ5">Welche Märkte werden gehandelt?</span>
+                            <i data-lucide="chevron-down" class="w-3.5 md:w-4 h-3.5 md:h-4 text-zinc-400 transition-transform duration-300 transform shrink-0 ml-2"></i>
                         </button>
-                        <div class="faq-answer px-6 pb-5 hidden">
-                            <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="faqA5">Sonic AI handelt primär XAU/USD (Gold vs. US-Dollar).</p>
+                        <div class="faq-answer px-4 md:px-6 pb-4 md:pb-5 hidden">
+                            <p class="text-xs md:text-sm text-zinc-400 leading-relaxed" data-i18n="faqA5">Sonic AI handelt primär XAU/USD (Gold vs. US-Dollar).</p>
                         </div>
                     </div>
                 </div>
@@ -474,58 +435,58 @@
 
             <!-- Risk & Performance -->
             <div class="mb-2">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-4">
-                    <span class="w-1.5 h-1.5 rounded-full bg-accentCyan"></span> <span data-i18n="faqBadge2">Risiko & Performance</span>
+                <div class="inline-flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-[9px] md:text-[10px] font-mono font-bold tracking-widest uppercase mb-3 md:mb-4">
+                    <span class="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-accentCyan"></span> <span data-i18n="faqBadge2">Risiko & Performance</span>
                 </div>
                 
                 <div class="glass-panel overflow-hidden divide-y divide-cardBorder/40">
                     <div class="faq-item">
-                        <button class="faq-button w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none group">
-                            <span class="font-semibold text-white text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ6">Wie hoch ist der maximale Drawdown?</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-400 transition-transform duration-300 transform"></i>
+                        <button class="faq-button w-full px-4 md:px-6 py-4 md:py-5 flex items-center justify-between text-left focus:outline-none group">
+                            <span class="font-semibold text-white text-xs sm:text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ6">Wie hoch ist der maximale Drawdown?</span>
+                            <i data-lucide="chevron-down" class="w-3.5 md:w-4 h-3.5 md:h-4 text-zinc-400 transition-transform duration-300 transform shrink-0 ml-2"></i>
                         </button>
-                        <div class="faq-answer px-6 pb-5 hidden">
-                            <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="faqA6">Historischer Drawdown der Strategie: 0,86 % auf dem zugrunde liegenden MyFXBook-Konto. Auf individuellen Konten kann der Drawdown bei Hebelnutzung (z.B. 24-fach) wesentlich höher ausfallen. Zukünftige Drawdowns können die historischen Maximalwerte übersteigen.</p>
+                        <div class="faq-answer px-4 md:px-6 pb-4 md:pb-5 hidden">
+                            <p class="text-xs md:text-sm text-zinc-400 leading-relaxed" data-i18n="faqA6">Historischer Drawdown der Strategie: 0,86 % auf dem zugrunde liegenden MyFXBook-Konto. Auf individuellen Konten kann der Drawdown bei Hebelnutzung (z.B. 24-fach) wesentlich höher ausfallen. Zukünftige Drawdowns können die historischen Maximalwerte übersteigen.</p>
                         </div>
                     </div>
 
                     <div class="faq-item">
-                        <button class="faq-button w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none group">
-                            <span class="font-semibold text-white text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ7">Wie war die historische Performance von Sonic AI?</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-400 transition-transform duration-300 transform"></i>
+                        <button class="faq-button w-full px-4 md:px-6 py-4 md:py-5 flex items-center justify-between text-left focus:outline-none group">
+                            <span class="font-semibold text-white text-xs sm:text-sm md:text-base group-hover:text-accentCyan transition-colors" data-i18n="faqQ7">Wie war die historische Performance von Sonic AI?</span>
+                            <i data-lucide="chevron-down" class="w-3.5 md:w-4 h-3.5 md:h-4 text-zinc-400 transition-transform duration-300 transform shrink-0 ml-2"></i>
                         </button>
-                        <div class="faq-answer px-6 pb-5 hidden">
-                            <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="faqA7">Die historische Auswertung zeigt auf dem verifizierten MyFXBook-Konto einen durchschnittlichen Nettogewinn von ca. +1,14 % pro Monat (bei 1x Hebel). Gehebelte Resultate schwanken entsprechend stärker. Jeder dokumentierte Trade kann auf MyFXBook eingesehen werden.</p>
+                        <div class="faq-answer px-4 md:px-6 pb-4 md:pb-5 hidden">
+                            <p class="text-xs md:text-sm text-zinc-400 leading-relaxed" data-i18n="faqA7">Die historische Auswertung zeigt auf dem verifizierten MyFXBook-Konto einen durchschnittlichen Nettogewinn von ca. +1,14 % pro Monat (bei 1x Hebel). Gehebelte Resultate schwanken entsprechend stärker. Jeder dokumentierte Trade kann auf MyFXBook eingesehen werden.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="border-t border-cardBorder w-full my-6"></div>
+        <div class="border-t border-cardBorder w-full my-4 md:my-6"></div>
 
         <!-- RECHNER 1: Projektions-Engine -->
         <div class="pt-2" id="projection">
-            <div class="text-center mb-8">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cardBg border border-cardBorder text-accentCyan text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
-                    <span class="w-1.5 h-1.5 rounded-full bg-accentCyan"></span> Wachstums-Projektion
+            <div class="text-center mb-6 md:mb-8">
+                <div class="inline-flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 rounded-full bg-cardBg border border-cardBorder text-accentCyan text-[9px] md:text-[10px] font-mono font-bold tracking-widest uppercase mb-2.5 md:mb-3">
+                    <span class="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-accentCyan"></span> Wachstums-Projektion
                 </div>
-                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">Profit <span class="text-accentCyan drop-shadow-[0_0_15px_rgba(0,229,255,0.6)]" data-i18n="projTitle">Projektions-Engine</span></h2>
-                <p class="text-xs md:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed" data-i18n="projSub">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">Profit <br class="block sm:hidden"><span class="text-accentCyan drop-shadow-[0_0_15px_rgba(0,229,255,0.6)]" data-i18n="projTitle">Projektions-Engine</span></h2>
+                <p class="text-[10px] md:text-xs lg:text-sm text-zinc-400 max-w-2xl mx-auto px-4 leading-relaxed" data-i18n="projSub">
                     Modelliert aus dem historischen Myfxbook-Monatsschnitt von <strong>1.14%</strong>, gehebelt mit <strong>24x</strong> Broker-Effekt, abzüglich <strong>30%</strong> Erfolgsbeteiligung (= <strong>19.15%</strong> netto / Monat).
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 items-stretch">
                 <!-- Linke Spalte: Rechner & Schalter -->
-                <div class="lg:col-span-5 glass-panel p-8 space-y-7 flex flex-col justify-between">
-                    <div class="space-y-7">
+                <div class="lg:col-span-5 glass-panel p-5 md:p-8 space-y-6 md:space-y-7 flex flex-col justify-between">
+                    <div class="space-y-6 md:space-y-7">
                         <div>
                             <div class="flex justify-between items-end mb-2">
-                                <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="projDeposit">Startkapital</label>
+                                <label class="text-[9px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="projDeposit">Startkapital</label>
                                 <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-accentCyan focus-within:shadow-[0_2px_10px_rgba(0,229,255,0.4)] transition-all">
-                                    <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
-                                    <input type="number" id="proj-deposit" value="10000" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
+                                    <span class="text-zinc-500 font-mono text-xs md:text-sm mr-1">$</span>
+                                    <input type="number" id="proj-deposit" value="10000" class="w-20 sm:w-28 bg-transparent text-white font-mono font-bold text-right text-base sm:text-lg outline-none">
                                 </div>
                             </div>
                             <input type="range" id="proj-deposit-slider" min="100" max="100000" step="100" value="10000">
@@ -533,10 +494,10 @@
 
                         <div>
                             <div class="flex justify-between items-end mb-2">
-                                <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="projTopup">Monatliches Top-Up</label>
+                                <label class="text-[9px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="projTopup">Monatliches Top-Up</label>
                                 <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-accentCyan focus-within:shadow-[0_2px_10px_rgba(0,229,255,0.4)] transition-all">
-                                    <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
-                                    <input type="number" id="proj-topup" value="0" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
+                                    <span class="text-zinc-500 font-mono text-xs md:text-sm mr-1">$</span>
+                                    <input type="number" id="proj-topup" value="0" class="w-20 sm:w-28 bg-transparent text-white font-mono font-bold text-right text-base sm:text-lg outline-none">
                                 </div>
                             </div>
                             <input type="range" id="proj-topup-slider" min="0" max="10000" step="50" value="0">
@@ -544,17 +505,17 @@
 
                         <div>
                             <div class="flex justify-between items-end mb-2">
-                                <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="projMonths">Laufzeit (Monate)</label>
+                                <label class="text-[9px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="projMonths">Laufzeit (Monate)</label>
                                 <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-accentCyan focus-within:shadow-[0_2px_10px_rgba(0,229,255,0.4)] transition-all">
-                                    <input type="number" id="proj-months" value="12" min="1" max="24" class="w-16 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
+                                    <input type="number" id="proj-months" value="12" min="1" max="24" class="w-12 sm:w-16 bg-transparent text-white font-mono font-bold text-right text-base sm:text-lg outline-none">
                                 </div>
                             </div>
                             <input type="range" id="proj-months-slider" min="1" max="24" step="1" value="12">
                         </div>
 
                         <div class="pt-2 border-t border-cardBorder">
-                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btMode">Gewinn-Modus</label>
-                            <select id="proj-mode-select" class="w-full appearance-none bg-darkBg border border-cardBorder rounded px-3 py-2.5 text-xs text-white font-mono font-semibold outline-none focus:border-accentCyan focus:shadow-[0_0_10px_rgba(0,229,255,0.3)] cursor-pointer transition-all">
+                            <label class="text-[9px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btMode">Gewinn-Modus</label>
+                            <select id="proj-mode-select" class="w-full appearance-none bg-darkBg border border-cardBorder rounded px-3 py-2 text-[10px] md:text-xs text-white font-mono font-semibold outline-none focus:border-accentCyan focus:shadow-[0_0_10px_rgba(0,229,255,0.3)] cursor-pointer transition-all">
                                 <option value="reinvest" data-i18n="projModeReinvest">Täglich Reinvestieren (Zinseszins)</option>
                                 <option value="payout" data-i18n="projModePayout">Auszahlen (Konstantes Kapital)</option>
                             </select>
@@ -564,86 +525,86 @@
 
                 <!-- Rechte Spalte: Großes Ergebnis & Meilensteine -->
                 <div class="lg:col-span-7 flex flex-col gap-4">
-                    <div class="glass-panel p-8 text-center flex-1 flex flex-col justify-center relative overflow-hidden">
+                    <div class="glass-panel p-6 md:p-8 text-center flex-1 flex flex-col justify-center relative overflow-hidden">
                         <div class="absolute inset-0 bg-gradient-to-b from-accentCyan/5 to-transparent pointer-events-none"></div>
-                        <p class="text-[10px] text-accentCyan uppercase tracking-widest font-bold mb-2" id="proj-scen-title">
+                        <p class="text-[9px] md:text-[10px] text-accentCyan uppercase tracking-widest font-bold mb-2" id="proj-scen-title">
                             Szenario nach <span id="proj-res-month">12</span> Monaten
                         </p>
-                        <p class="text-5xl md:text-6xl font-mono font-extrabold text-accentCyan tracking-tight mb-3 drop-shadow-[0_0_20px_rgba(0,229,255,0.4)]" id="proj-res-balance">$81'887</p>
-                        <p class="text-xs text-zinc-400 font-mono">
+                        <p class="text-4xl sm:text-5xl md:text-6xl font-mono font-extrabold text-accentCyan tracking-tight mb-2 md:mb-3 drop-shadow-[0_0_20px_rgba(0,229,255,0.4)]" id="proj-res-balance">$81'887</p>
+                        <p class="text-[10px] md:text-xs text-zinc-400 font-mono">
                             <span data-i18n="fromWord">Aus</span> <span class="text-white font-bold" id="proj-res-invested">$10'000</span> <span data-i18n="investedWord">investiert</span> · <strong class="text-emerald-400" id="proj-res-mult">8.2x</strong> your capital
                         </p>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="glass-panel p-5 text-center">
-                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="projCons">Konservativ (~5.88% / Mo)</p>
-                            <p class="text-xl font-mono font-bold text-white mb-0.5" id="proj-cons-balance">$19'858</p>
+                    <div class="grid grid-cols-2 gap-3 md:gap-4">
+                        <div class="glass-panel p-4 md:p-5 text-center">
+                            <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="projCons">Konservativ (~5.88% / Mo)</p>
+                            <p class="text-lg md:text-xl font-mono font-bold text-white mb-0.5" id="proj-cons-balance">$19'858</p>
                         </div>
-                        <div class="glass-panel p-5 text-center">
-                            <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="projOpt">Optimistisch (~35.28% / Mo)</p>
-                            <p class="text-xl font-mono font-bold text-white mb-0.5" id="proj-opt-balance">$368'805</p>
+                        <div class="glass-panel p-4 md:p-5 text-center">
+                            <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="projOpt">Optimistisch (~35.28% / Mo)</p>
+                            <p class="text-lg md:text-xl font-mono font-bold text-white mb-0.5" id="proj-opt-balance">$368'805</p>
                         </div>
                     </div>
 
-                    <div class="glass-panel p-5">
-                        <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-3 text-center" data-i18n="projMilestones">Meilensteine</p>
-                        <div class="grid grid-cols-4 gap-2 text-center divide-x divide-cardBorder font-mono">
-                            <div><p class="text-[9px] text-zinc-500 mb-1">M 1</p><p class="text-sm font-bold text-white" id="ms1-avg">$11'915</p></div>
-                            <div><p class="text-[9px] text-zinc-500 mb-1">M 3</p><p class="text-sm font-bold text-white" id="ms3-avg">$16'916</p></div>
-                            <div><p class="text-[9px] text-zinc-500 mb-1">M 6</p><p class="text-sm font-bold text-white" id="ms6-avg">$28'616</p></div>
-                            <div><p class="text-[9px] text-zinc-500 mb-1">M 12</p><p class="text-sm font-bold text-accentCyan" id="ms12-avg">$81'887</p></div>
+                    <div class="glass-panel p-4 md:p-5">
+                        <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-2 md:mb-3 text-center" data-i18n="projMilestones">Meilensteine</p>
+                        <div class="grid grid-cols-4 gap-1.5 md:gap-2 text-center divide-x divide-cardBorder font-mono">
+                            <div><p class="text-[8px] md:text-[9px] text-zinc-500 mb-1">M 1</p><p class="text-xs sm:text-sm font-bold text-white" id="ms1-avg">$11'915</p></div>
+                            <div><p class="text-[8px] md:text-[9px] text-zinc-500 mb-1">M 3</p><p class="text-xs sm:text-sm font-bold text-white" id="ms3-avg">$16'916</p></div>
+                            <div><p class="text-[8px] md:text-[9px] text-zinc-500 mb-1">M 6</p><p class="text-xs sm:text-sm font-bold text-white" id="ms6-avg">$28'616</p></div>
+                            <div><p class="text-[8px] md:text-[9px] text-zinc-500 mb-1">M 12</p><p class="text-xs sm:text-sm font-bold text-accentCyan" id="ms12-avg">$81'887</p></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="border-t border-cardBorder w-full my-6"></div>
+        <div class="border-t border-cardBorder w-full my-4 md:my-6"></div>
 
         <!-- RECHNER 2: Historical Backtest Engine -->
         <div id="backtest">
-            <div class="text-center mb-8">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-widest uppercase mb-3">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span data-i18n="btBadge">Historische Handelsdaten</span>
+            <div class="text-center mb-6 md:mb-8">
+                <div class="inline-flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[9px] md:text-[10px] font-mono font-bold tracking-widest uppercase mb-2.5 md:mb-3">
+                    <span class="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-emerald-500"></span> <span data-i18n="btBadge">Historische Handelsdaten</span>
                 </div>
-                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">Historical <span class="text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.6)]" data-i18n="btTitle">Backtest-Engine</span></h2>
-                <p class="text-xs md:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed" data-i18n="btSub">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">Historical <br class="block sm:hidden"><span class="text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.6)]" data-i18n="btTitle">Backtest-Engine</span></h2>
+                <p class="text-[10px] md:text-xs lg:text-sm text-zinc-400 max-w-2xl mx-auto px-4 leading-relaxed" data-i18n="btSub">
                     Simuliert den Verlauf mit synchronisierter Hebel-Skalierung (16.8x Netto) und monatlicher Zuzahlung.
                 </p>
             </div>
 
-            <!-- Banner über die volle Breite -->
-            <div class="glass-panel p-6 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
+            <!-- Banner über die volle Breite (Auf Mobile 2x2 Grid) -->
+            <div class="glass-panel p-4 md:p-6 mb-5 md:mb-6 grid grid-cols-2 lg:grid-cols-4 gap-y-5 gap-x-4 items-center">
                 <div class="text-left">
-                    <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btSimBal">Simuliertes Endguthaben</p>
-                    <p class="text-2xl md:text-3xl font-mono font-extrabold text-emerald-400 tracking-tight" id="bt-res-balance">$0.00</p>
+                    <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btSimBal">Simuliertes Endguthaben</p>
+                    <p class="text-lg sm:text-xl md:text-3xl font-mono font-extrabold text-emerald-400 tracking-tight" id="bt-res-balance">$0.00</p>
                 </div>
-                <div class="text-left sm:border-l sm:border-cardBorder sm:pl-6">
-                    <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btInvested">Investiertes Kapital</p>
-                    <p class="text-xl md:text-2xl font-mono font-bold text-zinc-300" id="bt-res-invested">$0.00</p>
+                <div class="text-left border-l border-cardBorder pl-3 sm:pl-4 md:pl-6">
+                    <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btInvested">Investiertes Kapital</p>
+                    <p class="text-sm sm:text-base md:text-2xl font-mono font-bold text-zinc-300" id="bt-res-invested">$0.00</p>
                 </div>
-                <div class="text-left pt-4 sm:pt-0 border-t sm:border-t-0 border-cardBorder lg:border-l lg:pl-6">
-                    <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btProfit">Reingewinn</p>
-                    <p class="text-xl md:text-2xl font-mono font-bold text-white" id="bt-res-profit">+$0.00</p>
+                <div class="text-left pt-4 lg:pt-0 border-t lg:border-t-0 border-cardBorder lg:border-l lg:pl-6">
+                    <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btProfit">Reingewinn</p>
+                    <p class="text-sm sm:text-base md:text-2xl font-mono font-bold text-white" id="bt-res-profit">+$0.00</p>
                 </div>
-                <div class="text-left sm:border-l sm:border-cardBorder sm:pl-6 pt-4 sm:pt-0 border-t sm:border-t-0 border-cardBorder">
-                    <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btGrowth">Wachstum</p>
-                    <p class="text-xl md:text-2xl font-mono font-bold text-emerald-400" id="bt-res-growth">+0.00%</p>
+                <div class="text-left pt-4 lg:pt-0 border-t lg:border-t-0 border-l border-cardBorder pl-3 sm:pl-4 md:pl-6">
+                    <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btGrowth">Wachstum</p>
+                    <p class="text-sm sm:text-base md:text-2xl font-mono font-bold text-emerald-400" id="bt-res-growth">+0.00%</p>
                 </div>
             </div>
 
             <!-- Unten: Rechner links, Grafik rechts -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 items-stretch">
                 <!-- Rechner Einstellungen -->
-                <div class="lg:col-span-5 glass-panel p-8 space-y-6 flex flex-col justify-between">
-                    <div class="space-y-6">
+                <div class="lg:col-span-5 glass-panel p-5 md:p-8 space-y-5 md:space-y-6 flex flex-col justify-between">
+                    <div class="space-y-5 md:space-y-6">
                         <div>
                             <div class="flex justify-between items-end mb-2">
-                                <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="btCapital">Startkapital</label>
+                                <label class="text-[9px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-bold" data-i18n="btCapital">Startkapital</label>
                                 <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 focus-within:shadow-[0_2px_10px_rgba(52,211,153,0.4)] transition-all">
-                                    <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
-                                    <input type="number" id="bt-capital" value="10000" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
+                                    <span class="text-zinc-500 font-mono text-xs md:text-sm mr-1">$</span>
+                                    <input type="number" id="bt-capital" value="10000" class="w-20 sm:w-28 bg-transparent text-white font-mono font-bold text-right text-base sm:text-lg outline-none">
                                 </div>
                             </div>
                             <input type="range" id="bt-capital-slider" min="100" max="100000" step="100" value="10000">
@@ -651,30 +612,30 @@
 
                         <div>
                             <div class="flex justify-between items-end mb-2">
-                                <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Monatliches Top-Up</label>
+                                <label class="text-[9px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Monatliches Top-Up</label>
                                 <div class="flex items-center border-b border-cardBorder pb-1 focus-within:border-emerald-400 focus-within:shadow-[0_2px_10px_rgba(52,211,153,0.4)] transition-all">
-                                    <span class="text-zinc-500 font-mono text-sm mr-1">$</span>
-                                    <input type="number" id="bt-topup" value="0" class="w-28 bg-transparent text-white font-mono font-bold text-right text-lg outline-none">
+                                    <span class="text-zinc-500 font-mono text-xs md:text-sm mr-1">$</span>
+                                    <input type="number" id="bt-topup" value="0" class="w-20 sm:w-28 bg-transparent text-white font-mono font-bold text-right text-base sm:text-lg outline-none">
                                 </div>
                             </div>
                             <input type="range" id="bt-topup-slider" min="0" max="10000" step="50" value="0">
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-2 gap-3 md:gap-4">
                             <div>
-                                <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btStart">Startdatum</label>
-                                <input type="date" id="bt-start-date" class="w-full bg-darkBg border border-cardBorder rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-emerald-400 focus:shadow-[0_0_10px_rgba(52,211,153,0.3)] transition-all">
+                                <label class="text-[9px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-1.5 md:mb-2" data-i18n="btStart">Startdatum</label>
+                                <input type="date" id="bt-start-date" class="w-full bg-darkBg border border-cardBorder rounded px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs text-white font-mono outline-none focus:border-emerald-400 focus:shadow-[0_0_10px_rgba(52,211,153,0.3)] transition-all">
                             </div>
                             <div>
-                                <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btEnd">Enddatum</label>
-                                <input type="date" id="bt-end-date" class="w-full bg-darkBg border border-cardBorder rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-emerald-400 focus:shadow-[0_0_10px_rgba(52,211,153,0.3)] transition-all">
+                                <label class="text-[9px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-1.5 md:mb-2" data-i18n="btEnd">Enddatum</label>
+                                <input type="date" id="bt-end-date" class="w-full bg-darkBg border border-cardBorder rounded px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs text-white font-mono outline-none focus:border-emerald-400 focus:shadow-[0_0_10px_rgba(52,211,153,0.3)] transition-all">
                             </div>
                         </div>
                     </div>
 
-                    <div class="pt-6 border-t border-cardBorder">
-                        <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btMode">Gewinn-Modus</label>
-                        <select id="bt-mode-select" class="w-full appearance-none bg-darkBg border border-cardBorder rounded px-3 py-2.5 text-xs text-white font-mono font-semibold outline-none focus:border-emerald-400 focus:shadow-[0_0_10px_rgba(52,211,153,0.3)] cursor-pointer transition-all">
+                    <div class="pt-5 md:pt-6 border-t border-cardBorder">
+                        <label class="text-[9px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-bold block mb-2" data-i18n="btMode">Gewinn-Modus</label>
+                        <select id="bt-mode-select" class="w-full appearance-none bg-darkBg border border-cardBorder rounded px-3 py-2 text-[10px] md:text-xs text-white font-mono font-semibold outline-none focus:border-emerald-400 focus:shadow-[0_0_10px_rgba(52,211,153,0.3)] cursor-pointer transition-all">
                             <option value="reinvest" data-i18n="modeReinvest">Täglich Reinvestieren (Zinseszins)</option>
                             <option value="payout" data-i18n="modePayout">Auszahlen (Konstantes Kapital)</option>
                         </select>
@@ -682,7 +643,7 @@
                 </div>
 
                 <!-- Rechner Grafik -->
-                <div class="lg:col-span-7 glass-panel p-6 flex flex-col justify-between min-h-[360px]">
+                <div class="lg:col-span-7 glass-panel p-4 md:p-6 flex flex-col justify-between min-h-[250px] md:min-h-[360px]">
                     <div class="w-full h-full relative flex-1">
                         <canvas id="backtestChart"></canvas>
                     </div>
@@ -691,50 +652,50 @@
         </div>
 
         <!-- Disclaimer Warning Box -->
-        <div class="p-6 rounded-2xl bg-[#0d0914]/80 border border-rose-500/30 flex items-start gap-4 mt-6">
+        <div class="p-4 md:p-6 rounded-2xl bg-[#0d0914]/80 border border-rose-500/30 flex items-start gap-3 md:gap-4 mt-5 md:mt-6">
             <div class="text-rose-500 shrink-0 mt-0.5">
-                <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                <i data-lucide="alert-triangle" class="w-4 md:w-5 h-4 md:h-5"></i>
             </div>
-            <p class="text-xs text-zinc-400 leading-relaxed font-sans">
+            <p class="text-[10px] md:text-xs text-zinc-400 leading-relaxed font-sans">
                 <strong class="text-white font-semibold" data-i18n="disclaimerTitle">Nur zur Veranschaulichung — keine Erfolgsgarantie.</strong>
                 <span data-i18n="disclaimerText">Dies ist eine mathematische Veranschaulichung basierend auf der historischen Durchschnitts-Performance und keine verbindliche Prognose. Einzelne Monate schwankten ungehebelt zwischen +0.35% und +2.10%. Die 24-fache Hebelannahme ist eine rechnerische Näherung — realer gehebelter Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist keine Garantie für zukünftige Ergebnisse. Sie können Ihr investiertes Kapital teilweise oder ganz verlieren. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie verkraften können.</span>
             </p>
         </div>
 
         <!-- Trade Historie Tabelle -->
-        <div class="glass-panel overflow-hidden mt-6" id="trades">
-            <div class="px-6 py-5 border-b border-cardBorder flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-darkBg/40">
+        <div class="glass-panel overflow-hidden mt-5 md:mt-6" id="trades">
+            <div class="px-4 md:px-6 py-4 md:py-5 border-b border-cardBorder flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-darkBg/40">
                 <div>
-                    <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                    <h2 class="text-lg md:text-xl font-extrabold text-white tracking-tight flex flex-wrap items-center gap-2">
                         <span data-i18n="tradesHeader">Trades</span>
-                        <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-mono uppercase tracking-widest ml-1" data-i18n="liveBadge">Live API</span>
+                        <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-mono uppercase tracking-widest mt-1 sm:mt-0" data-i18n="liveBadge">Live API</span>
                     </h2>
-                    <p class="text-xs text-zinc-400 mt-0.5" data-i18n="tradesSubLive">Aktuelle Live-Transaktionen aus dem Broker-Feed (API)</p>
+                    <p class="text-[10px] md:text-xs text-zinc-400 mt-1 md:mt-0.5" data-i18n="tradesSubLive">Aktuelle Live-Transaktionen aus dem Broker-Feed (API)</p>
                 </div>
-                <div class="flex items-center flex-wrap gap-3 mt-3 sm:mt-0">
-                    <a href="https://www.myfxbook.com/portfolio/sonic/12249114" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accentCyan/10 border border-accentCyan/20 text-accentCyan text-xs font-semibold font-mono hover:bg-accentCyan/20 transition-colors">
+                <div class="flex items-center flex-wrap gap-2 w-full md:w-auto">
+                    <a href="https://www.myfxbook.com/portfolio/sonic/12249114" target="_blank" rel="noopener noreferrer" class="flex-1 md:flex-none justify-center inline-flex items-center gap-1.5 px-3 py-2 md:py-1.5 rounded-lg bg-accentCyan/10 border border-accentCyan/20 text-accentCyan text-[10px] md:text-xs font-semibold font-mono hover:bg-accentCyan/20 transition-colors">
                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i> MyFXBook
                     </a>
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold font-mono">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Geschlossene Trades (<span id="stat-total">0</span>)
+                    <div class="flex-1 md:flex-none justify-center inline-flex items-center gap-1.5 md:gap-2 px-3 py-2 md:py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] md:text-xs font-semibold font-mono">
+                        <span class="w-1.5 md:w-2 h-1.5 md:h-2 rounded-full bg-emerald-400"></span> <span class="hidden sm:inline">Geschlossene</span> Trades (<span id="stat-total">0</span>)
                     </div>
                 </div>
             </div>
 
-            <div class="overflow-x-auto max-h-[600px] table-scroll bg-cardBg">
-                <table class="w-full text-left text-xs whitespace-nowrap">
+            <div class="overflow-x-auto max-h-[500px] md:max-h-[600px] table-scroll bg-cardBg">
+                <table class="w-full text-left text-[10px] md:text-xs whitespace-nowrap min-w-[900px]">
                     <thead class="sticky top-0 bg-darkBg/95 backdrop-blur z-10 shadow-md">
-                        <tr class="text-zinc-400 uppercase tracking-wider text-[11px] border-b border-cardBorder">
-                            <th class="px-6 py-3.5 font-semibold">Strategie</th>
-                            <th class="px-6 py-3.5 font-semibold">Instrument</th>
-                            <th class="px-6 py-3.5 font-semibold">Typ</th>
-                            <th class="px-6 py-3.5 font-semibold">Größe</th>
-                            <th class="px-6 py-3.5 font-semibold">Datum</th>
-                            <th class="px-6 py-3.5 font-semibold">Einstiegspreis</th>
-                            <th class="px-6 py-3.5 font-semibold">Ausstiegspreis</th>
-                            <th class="px-6 py-3.5 font-semibold">Einstiegszeit</th>
-                            <th class="px-6 py-3.5 font-semibold">Ausstiegszeit</th>
-                            <th class="px-6 py-3.5 font-semibold text-right">PnL (%)</th>
+                        <tr class="text-zinc-400 uppercase tracking-wider text-[9px] md:text-[11px] border-b border-cardBorder">
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Strategie</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Instrument</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Typ</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Größe</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Datum</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Einstiegspreis</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Ausstiegspreis</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Einstiegszeit</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Ausstiegszeit</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold text-right">PnL (%)</th>
                         </tr>
                     </thead>
                     <tbody id="trades-table-body" class="divide-y divide-cardBorder/40 text-zinc-300 font-mono">
