@@ -13,7 +13,19 @@ let sessionToken = null;
 
 async function loginMyfxbook() {
     try {
-        const res = await fetch(`https://www.myfxbook.com/api/login.json?email=${process.env.MYFXBOOK_EMAIL}&password=${process.env.MYFXBOOK_PASSWORD}`);
+        // WICHTIG: Sonderzeichen (wie das &) müssen für die URL codiert werden!
+        const email = encodeURIComponent(process.env.MYFXBOOK_EMAIL);
+        const password = encodeURIComponent(process.env.MYFXBOOK_PASSWORD);
+        
+        const res = await fetch(`https://www.myfxbook.com/api/login.json?email=${email}&password=${password}`);
+        
+        // Sicherheits-Check, falls MyFXBook eine HTML-Fehlerseite (z.B. von Cloudflare) schickt
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            const text = await res.text();
+            throw new Error("MyFXBook hat kein JSON zurückgegeben. Evtl. Blockade. HTML-Snippet: " + text.substring(0, 100));
+        }
+
         const data = await res.json();
         if (data.error === false) {
             sessionToken = data.session;
@@ -22,7 +34,7 @@ async function loginMyfxbook() {
             console.error("Myfxbook Login Fehler:", data.message);
         }
     } catch (err) {
-        console.error("Login-Verbindungsfehler:", err);
+        console.error("Login-Verbindungsfehler:", err.message);
     }
 }
 
@@ -58,10 +70,20 @@ app.get('/api/live-trades', async (req, res) => {
     try {
         if (!sessionToken) await loginMyfxbook();
 
-        // Nutzt primär deine NEUE Sonic Account ID
         const accountId = req.query.id || '12249114'; 
 
+        // Wenn der Login fehlgeschlagen ist (z.B. wegen Timeout)
+        if (!sessionToken) {
+             return res.status(500).json({ error: "Login bei MyFXBook ist fehlgeschlagen. Bitte Render-Logs prüfen." });
+        }
+
         let response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=${accountId}`);
+        
+        let contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+             throw new Error("API-Antwort für History ist kein JSON. MyFXBook blockiert möglicherweise die Anfrage.");
+        }
+        
         let data = await response.json();
 
         // Session abgelaufen? Erneut anmelden und Request wiederholen
@@ -81,7 +103,7 @@ app.get('/api/live-trades', async (req, res) => {
 
         res.json(cleanTrades);
     } catch (error) {
-        console.error("API Fehler:", error);
+        console.error("API Fehler:", error.message);
         res.status(500).json({ error: error.message });
     }
 });
