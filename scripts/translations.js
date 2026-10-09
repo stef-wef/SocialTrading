@@ -62,7 +62,7 @@ const translations = {
         navBacktest: "Backtest",
         navTrades: "Trades",
 
-        // FAQ Übersetzungen
+        // FAQ Sonic AI
         faqBadge1: "Über Sonic AI",
         faqTitle1: "Über Sonic AI",
         faqBadge2: "Risiko & Performance",
@@ -79,7 +79,25 @@ const translations = {
         faqQ6: "Wie hoch ist der maximale Drawdown?",
         faqA6: "Historischer Drawdown der Strategie: 0,86 % auf dem zugrunde liegenden MyFXBook-Konto. Der Drawdown auf individuellen Konten kann bei einer 24-fachen Hebelung wesentlich höher ausfallen – der Wert von 0,86 % bezieht sich auf die ungehebelte Strategie, nicht auf ein gehebeltes Investorenkonto. Mechanisch auf ein 24-fach gehebeltes Konto angewendet, entspräche diese Bewegung etwa 20,6 % der Equity, und zukünftige Drawdowns können historische Werte übersteigen.",
         faqQ7: "Wie war die historische Performance von Sonic AI?",
-        faqA7: "Seit dem Start auf dem verifizierten MyFXBook-Konto hat Sonic AI jeden Monat im Plus geschlossen, mit einer durchschnittlichen Nettorendite von ca. +1,14 % pro Monat (bei 1x Hebel) – was etwa +27,4 % pro Monat auf dem 24-fach gehebelten Konto entspricht. Der Gesamtgewinn bis heute beträgt +29,23 % (bei 1x). Jeder Trade ist auf MyFXBook öffentlich verifizierbar."
+        faqA7: "Seit dem Start auf dem verifizierten MyFXBook-Konto hat Sonic AI jeden Monat im Plus geschlossen, mit einer durchschnittlichen Nettorendite von ca. +1,14 % pro Monat (bei 1x Hebel) – was etwa +27,4 % pro Monat auf dem 24-fach gehebelten Konto entspricht. Der Gesamtgewinn bis heute beträgt +29,23 % (bei 1x). Jeder Trade ist auf MyFXBook öffentlich verifizierbar.",
+
+        // FAQ NEO.FX
+        faqNeoBadge1: "Über NEO.FX",
+        faqNeoTitle1: "Über NEO.FX",
+        faqNeoQ1: "Was ist NEO.FX?",
+        faqNeoA1: "NEO.FX ist eine algorithmische Forex-Strategie, die vollautomatisch handelt. Im Gegensatz zu vielen riskanten Ansätzen nutzt NEO.FX striktes Risikomanagement und verzichtet komplett auf Martingale- oder Grid-Systeme.",
+        faqNeoQ2: "Wie werden Handelsentscheidungen getroffen?",
+        faqNeoA2: "Das System analysiert Preisausbrüche und Mean-Reversion-Muster in liquiden Marktphasen. Jeder Trade wird sofort beim Einstieg mit einem harten Stop-Loss versehen. Dies sorgt für eine extrem hohe Trefferquote von über 90 % bei kleinen, konsistenten Gewinnen.",
+        faqNeoQ3: "Für wen ist NEO.FX geeignet?",
+        faqNeoA3: "Für Investoren, die völlig passiv und ohne eigene Trading-Erfahrung von den Bewegungen im weltgrößten Devisenmarkt profitieren möchten.",
+        faqNeoQ4: "Ist es für Anfänger geeignet?",
+        faqNeoA4: "Absolut. Das System kopiert die Trades automatisch auf Ihr eigenes Konto. Unser Onboarding hilft Ihnen bei der reibungslosen Einrichtung.",
+        faqNeoQ5: "Welche Märkte werden gehandelt?",
+        faqNeoA5: "NEO.FX handelt ausschließlich EUR/USD (Euro vs. US-Dollar) – das stabilste und liquideste Währungspaar der Welt.",
+        faqNeoQ6: "Wie hoch ist der maximale Drawdown?",
+        faqNeoA6: "Der historische Drawdown auf dem Master-Account (ungehebelt) lag bei etwa 0,90 %. Auf gehebelten Accounts potenziert sich dieser Wert entsprechend den angewendeten Multiplikatoren.",
+        faqNeoQ7: "Wie war die historische Performance von NEO.FX?",
+        faqNeoA7: "Die Strategie liefert ein extrem konstantes Wachstum durch eine sehr hohe Win-Rate. Der durchschnittliche monatliche Zuwachs (ungehebelt) liegt bei ca. +0,57 %, mit minimalen Schwankungen."
     },
     en: {
         back: "Back",
@@ -144,7 +162,7 @@ const translations = {
         navBacktest: "Backtest",
         navTrades: "Trades",
 
-        // FAQ Translations
+        // FAQ Sonic Translations
         faqBadge1: "About Sonic AI",
         faqTitle1: "About Sonic AI",
         faqBadge2: "Risk & Performance",
@@ -161,6 +179,24 @@ const translations = {
         faqQ6: "What is the maximum drawdown?",
         faqA6: "Historical strategy drawdown: 0.86% on the underlying MyFXBook account. Individual account drawdown may be materially higher when using 24× amplification — the 0.86% figure is measured on the unleveraged strategy, not on an amplified investor account. Applied mechanically to a 24× amplified account, an equivalent move would be roughly 20.6% of equity, and future drawdowns may exceed any historical figure.",
         faqQ7: "What has Sonic AI's historical performance been?",
-        faqA7: "Since going live on the verified MyFXBook account, Sonic AI has closed every month in profit with an average net return of approximately +1.14% per month at 1× leverage — which is roughly +27.4% per month on the 24× amplified account. Total gain to date is +29.23% at 1×. Every trade is publicly verifiable on MyFXBook."
+        faqA7: "Since going live on the verified MyFXBook account, Sonic AI has closed every month in profit with an average net return of approximately +1.14% per month at 1× leverage — which is roughly +27.4% per month on the 24× amplified account. Total gain to date is +29.23% at 1×. Every trade is publicly verifiable on MyFXBook.",
+
+        // FAQ NEO.FX Translations
+        faqNeoBadge1: "About NEO.FX",
+        faqNeoTitle1: "About NEO.FX",
+        faqNeoQ1: "What is NEO.FX?",
+        faqNeoA1: "NEO.FX is a fully automated algorithmic Forex strategy. Unlike many risky approaches, NEO.FX uses strict risk management and completely avoids martingale or grid systems.",
+        faqNeoQ2: "How are trading decisions made?",
+        faqNeoA2: "The system analyzes price breakouts and mean-reversion patterns in liquid market phases. Every trade is immediately secured with a hard stop-loss upon entry. This ensures an extremely high win rate of over 90% with small, consistent profits.",
+        faqNeoQ3: "Who is NEO.FX suitable for?",
+        faqNeoA3: "For investors who want to benefit from movements in the world's largest foreign exchange market entirely passively and without their own trading experience.",
+        faqNeoQ4: "Can beginners use it?",
+        faqNeoA4: "Absolutely. The system automatically copies the trades to your own account. Our onboarding will assist you with a smooth setup.",
+        faqNeoQ5: "What markets are traded?",
+        faqNeoA5: "NEO.FX trades exclusively EUR/USD (Euro vs. US Dollar) – the most stable and liquid currency pair in the world.",
+        faqNeoQ6: "What is the maximum drawdown?",
+        faqNeoA6: "The historical drawdown on the master account (unleveraged) was approximately 0.90%. On leveraged accounts, this value increases according to the applied multipliers.",
+        faqNeoQ7: "What has NEO.FX's historical performance been?",
+        faqNeoA7: "The strategy delivers extremely consistent growth through a very high win rate. The average monthly growth (unleveraged) is about +0.57%, with minimal volatility."
     }
 };
