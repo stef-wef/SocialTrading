@@ -1,224 +1,7 @@
-const translations = {
-    de: {
-        back: "Zurück",
-        totalGain: "Gesamtrendite",
-        maxDrawdown: "Max Drawdown",
-        liveTradesKpi: "Erfasste Trades",
-        avgMonth: "Ø Monat Rendite",
-        winRate: "Trefferquote",
-        accountPoolDetails: "Account Details",
-        poolSub: "Social Trading Pool",
-        aumPool: "AUM Pool",
-        perfFee: "Erfolgsbeteiligung",
-        avgTradeDuration: "Ø Trade-Dauer",
-        minInvestment: "Min. Investment",
-        performanceMetrics: "Performance Metrics",
-        metricsSub: "Statistische Auswertung des Myfxbook-Portfolios",
-        dailyAvg: "Tages-Durchschnitt",
-        profitFactor: "Profit Factor",
-        lossMonths: "Verlust-Monate",
-        tradesHeader: "Trades",
-        tradesSub: "Historische Ausführungen direkt aus dem Broker-Feed",
-        growthProj: "Wachstums-Projektion",
-        projTitle: "Projektions-Engine",
-        projSub: "Modelliert aus dem historischen Monatsschnitt, berechnet mit 24x Hebeleffekt, abzüglich 30% Erfolgsbeteiligung (= 19.15% netto / Monat).",
-        projDeposit: "Startkapital",
-        projTopup: "Monatliches Top-Up",
-        projMonths: "Laufzeit (Monate)",
-        projAvgScen: "Szenario nach",
-        monthsWord: "Monaten",
-        fromWord: "Aus",
-        investedWord: "investiert",
-        projCons: "Konservativ (~5.88% / Mo)",
-        projOpt: "Optimistisch (~35.28% / Mo)",
-        projMilestones: "Meilensteine",
-        btBadge: "Historische Handelsdaten",
-        btTitle: "Backtest-Engine",
-        btSub: "Simuliert den Verlauf mit synchronisierter Hebel-Skalierung (16.8x Netto) und monatlicher Zuzahlung.",
-        btCapital: "Startkapital",
-        btStart: "Startdatum",
-        btEnd: "Enddatum",
-        btMode: "Gewinn-Modus",
-        modeReinvest: "Täglich Reinvestieren (Zinseszins)",
-        modePayout: "Auszahlen (Konstantes Kapital)",
-        projModeReinvest: "Täglich Reinvestieren (Zinseszins)",
-        projModePayout: "Auszahlen (Konstantes Kapital)",
-        btSimBal: "Simuliertes Endguthaben",
-        btInvested: "Investiertes Kapital",
-        btProfit: "Reingewinn",
-        btGrowth: "Wachstum",
-        disclaimerTitle: "Nur zur Veranschaulichung — keine Erfolgsgarantie.",
-        disclaimerText: "Dies ist eine mathematische Veranschaulichung basierend auf der historischen Durchschnitts-Performance und keine verbindliche Prognose. Einzelne Monate schwankten ungehebelt zwischen +0.35% und +2.10%. Die 24-fache Hebelannahme ist eine rechnerische Näherung — realer gehebelter Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist keine Garantie für zukünftige Ergebnisse. Sie können Ihr investiertes Kapital teilweise oder ganz verlieren. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie verkraften können.",
-        
-        // Header Infos & Navigation
-        lblInstrument: "Instrument",
-        lblWinLoss: "Gewinn / Verlust Trades",
-        instrumentSonic: "XAUUSD · Gold vs. US Dollar",
-        instrumentNeo: "EURUSD · Euro vs. US Dollar",
-        navMetrics: "Metrics",
-        navEquity: "Wachstum",
-        navFAQ: "FAQ",
-        navProjection: "Projektion",
-        navBacktest: "Backtest",
-        navTrades: "Trades",
-
-        // Strategie Profil Text
-        stratProfileTitle: "Strategie-Profil",
-        stratProfileTextSonic: "Professioneller diskretionärer Ansatz mit strengem Risikomanagement. Die Strategie handelt Ausbrüche und Mean-Reversion in liquiden Marktphasen. Jeder Trade ist durch einen harten Stop-Loss abgesichert. Es wird konsequent auf riskante Methoden wie Martingale oder Grid-Trading verzichtet.",
-        stratProfileTextNeo: "Systematische, regelbasierte Forex-Strategie. Im Gegensatz zu vielen Ansätzen nutzt NEO.FX striktes Risikomanagement und sichert jeden Trade sofort mit einem Stop-Loss ab. Die Strategie verzichtet komplett auf Martingale- oder Grid-Systeme.",
-
-        // FAQ Sonic AI
-        faqBadge1: "Über Sonic AI",
-        faqTitle1: "Über Sonic AI",
-        faqBadge2: "Risiko & Performance",
-        faqQ1: "Was ist Sonic AI?",
-        faqA1: "Sonic AI ist eine diskretionäre Goldstrategie (XAU/USD), die manuell von drei professionellen Tradern gehandelt wird. Sie treffen jede Einstiegs-, Stopp- und Ausstiegsentscheidung während der Handelswoche selbst, und ihre Trades können über bestehende Systeme auf Ihr Konto kopiert werden.",
-        faqQ2: "Wie werden Handelsentscheidungen getroffen?",
-        faqA2: "Die drei Trader kombinieren Trendanalyse, Volatilitätsfilter und Multi-Timeframe-Bestätigungen. Ein Trade wird nur eröffnet, wenn alle drei bezüglich Richtung, Risiko und erwartetem Ertrag übereinstimmen.",
-        faqQ3: "Für wen ist Sonic AI geeignet?",
-        faqA3: "Sonic AI richtet sich an Investoren, die ihr Portfolio durch eine alternative, fremdverwaltete Gold-Trading-Strategie diversifizieren möchten.",
-        faqQ4: "Ist es für Anfänger geeignet?",
-        faqA4: "Die technische Einrichtung erfordert keine fortgeschrittenen Trading-Kenntnisse. Unser 7-Schritte-Onboarding führt Sie durch die Kontoerstellung, Verifizierung (KYC) und Verknüpfung.",
-        faqQ5: "Welche Märkte werden gehandelt?",
-        faqA5: "Sonic AI handelt primär XAU/USD (Gold vs. US-Dollar).",
-        faqQ6: "Wie hoch ist der maximale Drawdown?",
-        faqA6: "Historischer Drawdown der Strategie: 0,86 % auf dem zugrunde liegenden MyFXBook-Konto. Auf individuellen Konten kann der Drawdown bei Hebelnutzung (z.B. 24-fach) wesentlich höher ausfallen. Zukünftige Drawdowns können die historischen Maximalwerte übersteigen.",
-        faqQ7: "Wie war die historische Performance von Sonic AI?",
-        faqA7: "Die historische Auswertung zeigt auf dem verifizierten MyFXBook-Konto einen durchschnittlichen Nettogewinn von ca. +1,14 % pro Monat (bei 1x Hebel). Gehebelte Resultate schwanken entsprechend stärker. Jeder dokumentierte Trade kann auf MyFXBook eingesehen werden.",
-
-        // FAQ NEO.FX
-        faqNeoBadge1: "Über NEO.FX",
-        faqNeoTitle1: "Über NEO.FX",
-        faqNeoQ1: "Was ist NEO.FX?",
-        faqNeoA1: "NEO.FX ist eine systematische Forex-Strategie. Der Fokus liegt auf vorab definierten Regeln des Risikomanagements, wobei bewusst auf Ansätze wie Martingale- oder Grid-Systeme verzichtet wird.",
-        faqNeoQ2: "Wie werden Handelsentscheidungen getroffen?",
-        faqNeoA2: "Das System analysiert Preisausbrüche und Mean-Reversion-Muster in liquiden Marktphasen. Jeder Trade wird beim Einstieg mit einem festen Stop-Loss versehen, um das Risiko im Voraus zu definieren.",
-        faqNeoQ3: "Für wen ist NEO.FX geeignet?",
-        faqNeoA3: "Für Nutzer, die eine systematische Strategie im Devisenmarkt kopieren möchten, um ein bestehendes Portfolio zu diversifizieren.",
-        faqNeoQ4: "Ist es für Anfänger geeignet?",
-        faqNeoA4: "Das Onboarding hilft bei der technischen Einrichtung des Copy-Trading-Systems, wofür keine aktive Trading-Erfahrung im Alltag notwendig ist.",
-        faqNeoQ5: "Welche Märkte werden gehandelt?",
-        faqNeoA5: "NEO.FX handelt EUR/USD (Euro vs. US-Dollar).",
-        faqNeoQ6: "Wie hoch ist der maximale Drawdown?",
-        faqNeoA6: "Der historische Drawdown auf dem Master-Account (ungehebelt) lag bei etwa 0,90 %. Auf gehebelten Accounts erhöht sich dieser Wert basierend auf den angewendeten Multiplikatoren.",
-        faqNeoQ7: "Wie war die historische Performance von NEO.FX?",
-        faqNeoA7: "Die historische Auswertung der Strategie zeigt ein durchschnittliches monatliches Wachstum (ungehebelt) von ca. +0,57 % auf dem Master-Account. Vergangene Ergebnisse sind kein Indikator für zukünftige Performance."
-    },
-    en: {
-        back: "Back",
-        totalGain: "Total Gain",
-        maxDrawdown: "Max Drawdown",
-        liveTradesKpi: "Recorded Trades",
-        avgMonth: "Avg Monthly Return",
-        winRate: "Win Rate",
-        accountPoolDetails: "Account Details",
-        poolSub: "Social Trading Pool",
-        aumPool: "AUM Pool",
-        perfFee: "Performance Fee",
-        avgTradeDuration: "Avg Trade Duration",
-        minInvestment: "Min. Investment",
-        performanceMetrics: "Performance Metrics",
-        metricsSub: "Statistical evaluation of the Myfxbook portfolio",
-        dailyAvg: "Daily Average",
-        profitFactor: "Profit Factor",
-        lossMonths: "Loss Months",
-        tradesHeader: "Trades",
-        tradesSub: "Documented executions directly from the broker feed",
-        growthProj: "Growth Projection",
-        projTitle: "Projection Engine",
-        projSub: "Modeled from the historical monthly average, amplified 24x by broker leverage, minus 30% performance fee (= 19.15% net / month).",
-        projDeposit: "Starting Deposit",
-        projTopup: "Monthly Top-Up",
-        projMonths: "Time Horizon (Months)",
-        projAvgScen: "Scenario After",
-        monthsWord: "Months",
-        fromWord: "From",
-        investedWord: "invested",
-        projCons: "Conservative (~5.88% / Mo)",
-        projOpt: "Optimistic (~35.28% / Mo)",
-        projMilestones: "Milestones",
-        btBadge: "Historical Trading Data",
-        btTitle: "Backtest Engine",
-        btSub: "Simulates trade history with synchronized leverage scaling (16.8x net) and monthly top-up.",
-        btCapital: "Starting Capital",
-        btStart: "Start Date",
-        btEnd: "End Date",
-        btMode: "Profit Mode",
-        modeReinvest: "Daily Reinvest (Compound)",
-        modePayout: "Daily Payout (Constant Capital)",
-        projModeReinvest: "Daily Reinvest (Compound)",
-        projModePayout: "Daily Payout (Constant Capital)",
-        btSimBal: "Simulated Balance",
-        btInvested: "Invested Capital",
-        btProfit: "Net Profit",
-        btGrowth: "Growth",
-        disclaimerTitle: "Illustrative only — not a guarantee.",
-        disclaimerText: "This is a mathematical illustration based on historical average performance, not a forecast. Individual months have ranged from +0.35% to +2.10% unleveraged. The 24× leverage assumption is an approximation — real leveraged trading involves margin requirements and liquidation risk that do not scale in a perfectly linear way. Past performance does not guarantee future results, and you can lose part or all of your capital. Trade only with funds you can afford to lose.",
-        
-        // Header Infos & Navigation
-        lblInstrument: "Instrument",
-        lblWinLoss: "Win / Loss Trades",
-        instrumentSonic: "XAUUSD · Gold vs. US Dollar",
-        instrumentNeo: "EURUSD · Euro vs. US Dollar",
-        navMetrics: "Metrics",
-        navEquity: "Growth",
-        navFAQ: "FAQ",
-        navProjection: "Projection",
-        navBacktest: "Backtest",
-        navTrades: "Trades",
-
-        // Strategie Profil Text
-        stratProfileTitle: "Strategy Profile",
-        stratProfileTextSonic: "Professional discretionary approach with strict risk management. The strategy trades breakouts and mean-reversion in liquid market phases. Every trade is secured by a hard stop-loss. Risky methods like martingale or grid-trading are strictly avoided.",
-        stratProfileTextNeo: "Systematic, rule-based Forex strategy. Unlike many approaches, NEO.FX utilizes strict risk management and immediately secures every trade with a stop-loss. The strategy completely avoids martingale or grid systems.",
-
-        // FAQ Sonic Translations
-        faqBadge1: "About Sonic AI",
-        faqTitle1: "About Sonic AI",
-        faqBadge2: "Risk & Performance",
-        faqQ1: "What is Sonic AI?",
-        faqA1: "Sonic AI is a discretionary gold (XAU/USD) strategy traded manually by three professional traders. They make entry, stop, and exit decisions themselves during the trading week, and these trades can be copied to your account.",
-        faqQ2: "How are trading decisions made?",
-        faqA2: "The three traders combine trend analysis, volatility filters, and multi-timeframe confirmation. A trade is only opened when all three agree on direction, risk, and expected outcome.",
-        faqQ3: "Who is Sonic AI suitable for?",
-        faqA3: "Sonic AI is designed for investors looking to diversify their portfolio with an alternative, third-party managed gold trading strategy.",
-        faqQ4: "Can beginners use it?",
-        faqA4: "The technical setup does not require advanced trading experience. Our 7-step onboarding guides you through account creation, verification (KYC), and linking.",
-        faqQ5: "What markets are traded?",
-        faqA5: "Sonic AI primarily trades XAU/USD (gold vs US dollar).",
-        faqQ6: "What is the maximum drawdown?",
-        faqA6: "Historical strategy drawdown: 0.86% on the underlying MyFXBook account. Individual account drawdowns may be materially higher when using leverage (e.g., 24×). Future drawdowns may exceed historical maximums.",
-        faqQ7: "What has Sonic AI's historical performance been?",
-        faqA7: "Historical data on the verified MyFXBook account shows an average net return of approximately +1.14% per month (at 1× leverage). Leveraged results fluctuate accordingly. Every documented trade can be verified on MyFXBook.",
-
-        // FAQ NEO.FX Translations
-        faqNeoBadge1: "About NEO.FX",
-        faqNeoTitle1: "About NEO.FX",
-        faqNeoQ1: "What is NEO.FX?",
-        faqNeoA1: "NEO.FX is a systematic Forex strategy. The focus is on predefined risk management rules, deliberately avoiding approaches like martingale or grid systems.",
-        faqNeoQ2: "How are trading decisions made?",
-        faqNeoA2: "The system analyzes price breakouts and mean-reversion patterns in liquid market phases. Every trade is secured with a hard stop-loss upon entry to define the risk upfront.",
-        faqNeoQ3: "Who is NEO.FX suitable for?",
-        faqNeoA3: "For users who wish to copy a systematic strategy in the foreign exchange market to diversify their existing portfolio.",
-        faqNeoQ4: "Can beginners use it?",
-        faqNeoA4: "The onboarding helps you with the technical setup of the copy trading system, requiring no active daily trading experience.",
-        faqNeoQ5: "What markets are traded?",
-        faqNeoA5: "NEO.FX trades EUR/USD (Euro vs. US Dollar).",
-        faqNeoQ6: "What is the maximum drawdown?",
-        faqNeoA6: "The historical drawdown on the master account (unleveraged) was approximately 0.90%. On leveraged accounts, this value increases based on the applied multipliers.",
-        faqNeoQ7: "What has NEO.FX's historical performance been?",
-        faqNeoA7: "The historical evaluation of the strategy shows an average monthly growth (unleveraged) of about +0.57% on the master account. Past performance is not indicative of future results."
-    }
-};
-
 class DualEngineApp {
     constructor() {
-        // Daten für KPIs, Charts, Backtest (werden immer aus den JSON Dateien geladen)
         this.rawTrades = [];
-        
-        // Daten ausschließlich für die Tabelle und den CSV-Export (wird bei Sonic live geladen)
         this.liveTableTrades = null; 
-        
         this.btChart = null;
         this.equityChart = null;
         this.drawdownChart = null;
@@ -291,14 +74,13 @@ class DualEngineApp {
             this.dom.btEnd.value = chronologicalTrades[chronologicalTrades.length - 1].dt;
         }
 
-        // Baut die Seite sofort mit den lokalen Daten auf (Keine Wartezeit)
         this.initAdvancedCharts();
         this.setupListeners();
         this.setupAccordions();
         this.updateKPIs();
         this.initEquityGrowthChart();
         this.initBacktestChart();
-        this.renderStatsAndTable(); // Rendert Tabelle initial mit lokalen Daten
+        this.renderStatsAndTable(); 
         this.renderHeatmap();
         this.calcProjection();
         this.calcBacktest();
@@ -306,12 +88,41 @@ class DualEngineApp {
         // Lade Live-Daten vom Backend NUR für die Sonic-Tabelle
         if (!this.isNeo) {
             this.loadLiveTableData().then(() => {
-                // Sobald der Server antwortet, wird AUSSCHLIESSLICH die Tabelle unten geupdatet
                 if (this.liveTableTrades && this.liveTableTrades.length > 0) {
                     this.renderStatsAndTable(); 
                 }
             });
         }
+    }
+
+    parseDate(dateStr) {
+        let dt = "2025-01-01";
+        let d = "01.01.2025";
+        if (!dateStr) return { dt, d };
+
+        const timePart = dateStr.split(" ")[1] || "";
+        const datePart = dateStr.split(" ")[0];
+
+        if (datePart.includes("/")) { // MM/DD/YYYY Format
+            const p = datePart.split("/");
+            if(p.length === 3) {
+                dt = `${p[2]}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
+                d = `${p[1].padStart(2,'0')}.${p[0].padStart(2,'0')}.${p[2]} ${timePart}`;
+            }
+        } else if (datePart.includes(".")) { // DD.MM.YYYY Format
+            const p = datePart.split(".");
+            if(p.length === 3) {
+                dt = `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+                d = `${p[0].padStart(2,'0')}.${p[1].padStart(2,'0')}.${p[2]} ${timePart}`;
+            }
+        } else if (datePart.includes("-")) { // YYYY-MM-DD Format
+            const p = datePart.split("-");
+            if(p.length === 3) {
+                dt = datePart;
+                d = `${p[2]}.${p[1]}.${p[0]} ${timePart}`;
+            }
+        }
+        return { dt, d };
     }
 
     async loadTradesData() {
@@ -331,64 +142,49 @@ class DualEngineApp {
             } catch (e) {}
         }
 
+        // NOTFALL-FALLBACK: Wenn die lokale Datei fehlt, lade über die API (damit die Seite nicht kaputt ist!)
+        if ((!data || !Array.isArray(data) || data.length === 0) && !this.isNeo) {
+            console.warn("Lokale JSON fehlt! Lade Notfall-Daten über die API...");
+            try {
+                const response = await fetch('https://tagmarkets-backend.onrender.com/api/live-trades?id=12249114');
+                if (response.ok) {
+                    data = await response.json();
+                }
+            } catch (e) {
+                console.error("API Fallback fehlgeschlagen.");
+            }
+        }
+
         if (!data || !Array.isArray(data)) {
-            console.warn("Konnte lokale JSON Daten nicht laden.");
+            console.warn("Konnte überhaupt keine Daten laden.");
             this.rawTrades = [];
             return;
         }
 
         this.rawTrades = data.map(t => {
-            const dateString = t["Open Date"] || "";
-            let dt = "2025-01-01";
-            let d = "01.01.2025";
-
-            if (dateString) {
-                const datePart = dateString.split(" ")[0];
-                const parts = datePart.split("/");
-                if (parts.length === 3) {
-                    const MM = parts[0].padStart(2, '0');
-                    const DD = parts[1].padStart(2, '0');
-                    const YYYY = parts[2];
-                    dt = `${YYYY}-${MM}-${DD}`;
-                    d = `${DD}.${MM}.${YYYY} ${dateString.split(" ")[1] || ''}`;
-                }
-            }
-
+            const dateObj = this.parseDate(t["Open Date"]);
             const gain = parseFloat(t["Gain"] || 0);
-
             return {
                 ...t,
-                dt,
-                d,
+                dt: dateObj.dt,
+                d: dateObj.d,
                 parsedGain: isNaN(gain) ? 0 : gain
             };
         });
     }
 
-    // Lädt Daten exklusiv für die Live-Tabelle
     async loadLiveTableData() {
         try {
-            // ACHTUNG: Die alte statische ID wurde entfernt. Das Backend holt nun dynamisch DEINE eigene ID.
-            const response = await fetch('https://tagmarkets-backend.onrender.com/api/live-trades');            
+            const response = await fetch('https://tagmarkets-backend.onrender.com/api/live-trades?id=12249114');            
             if (response.ok) {
                 const data = await response.json();
                 if (Array.isArray(data)) {
                     this.liveTableTrades = data.map(t => {
-                        const dateString = t["Open Date"] || "";
-                        let dt = "2025-01-01";
-                        if (dateString) {
-                            const datePart = dateString.split(" ")[0];
-                            const parts = datePart.split("/");
-                            if (parts.length === 3) {
-                                const MM = parts[0].padStart(2, '0');
-                                const DD = parts[1].padStart(2, '0');
-                                const YYYY = parts[2];
-                                dt = `${YYYY}-${MM}-${DD}`;
-                            }
-                        }
+                        const dateObj = this.parseDate(t["Open Date"]);
                         return {
                             ...t,
-                            dt,
+                            dt: dateObj.dt,
+                            d: dateObj.d,
                             parsedGain: parseFloat(t["Gain"] || 0)
                         };
                     });
@@ -729,7 +525,6 @@ class DualEngineApp {
     }
 
     exportCSV() {
-        // Nutzen der Live-Daten für den Export, falls vorhanden
         const dataSource = (this.liveTableTrades && this.liveTableTrades.length > 0) ? this.liveTableTrades : this.rawTrades;
         let tradesOnly = dataSource.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
         if(tradesOnly.length === 0) return;
@@ -1098,7 +893,7 @@ class DualEngineApp {
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                layout: { padding: { left: 0, right: 0, top: 10, bottom: 0 } },
+                layout: { padding: { left: 0, right: 10, top: 10, bottom: 0 } },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -1164,18 +959,16 @@ class DualEngineApp {
     renderStatsAndTable() {
         if (!this.dom.tradesBody) return;
 
-        // NUTZUNG DER LIVE DATEN (falls vorhanden) FÜR DIE TABELLE
         const dataSource = (this.liveTableTrades && this.liveTableTrades.length > 0) ? this.liveTableTrades : this.rawTrades;
 
         let tradesOnly = dataSource.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
         let tableTrades = [...tradesOnly].sort((a, b) => new Date(b.dt) - new Date(a.dt));
 
         if (!tableTrades || tableTrades.length === 0) {
-            this.dom.tradesBody.innerHTML = `<tr><td colspan="10" class="px-6 py-8 text-center text-zinc-500 font-sans">Warte auf Trade-Daten. Bitte prüfe, ob die JSON-Datei im Ordner <code>data/</code> liegt.</td></tr>`;
+            this.dom.tradesBody.innerHTML = `<tr><td colspan="10" class="px-6 py-8 text-center text-zinc-500 font-sans">Warte auf Trade-Daten...</td></tr>`;
             return;
         }
 
-        // Tausche die Gesamtzahl der Trades in der Tabelle mit den tatsächlichen aus der gewählten Quelle
         const statTotalEl = document.getElementById('stat-total');
         if(statTotalEl) statTotalEl.innerText = tableTrades.length;
 
@@ -1185,19 +978,22 @@ class DualEngineApp {
             const isLong = rawAction === 'BUY';
             const typeLabel = isLong ? 'Long' : 'Short';
             const typeColor = isLong ? 'text-emerald-400' : 'text-rose-400';
-            const openParts = (t["Open Date"] || "").split(" ");
-            const closeParts = (t["Close Date"] || "").split(" ");
-            let dateStr = t.dt || "-";
-            let entryTime = openParts[1] || "-";
-            let exitTime = closeParts[1] || "-";
+            
+            // Format time correctly depending on API or JSON source
+            let entryTime = "-";
+            let exitTime = "-";
+            if(t["Open Date"] && t["Open Date"].includes(" ")) entryTime = t["Open Date"].split(" ")[1];
+            else if(t.d && t.d.includes(" ")) entryTime = t.d.split(" ")[1];
+            
+            if(t["Close Date"] && t["Close Date"].includes(" ")) exitTime = t["Close Date"].split(" ")[1];
 
             const symbol = t["Symbol"] || (this.isNeo ? 'EURUSD' : 'XAUUSD');
             const isForex = symbol.includes('EUR') || symbol.includes('USD') && !symbol.includes('XAU');
             const decimals = isForex ? 5 : 2;
 
-            const openPrice = t["Open Price"] !== undefined ? Number(t["Open Price"]).toFixed(decimals) : '-';
-            const closePrice = t["Close Price"] !== undefined ? Number(t["Close Price"]).toFixed(decimals) : '-';
-            const lots = t["Units/Lots"] !== undefined ? `${Number(t["Units/Lots"]).toFixed(2)} Lots` : '-';
+            const openPrice = t["Open Price"] !== undefined && t["Open Price"] !== null ? Number(t["Open Price"]).toFixed(decimals) : '-';
+            const closePrice = t["Close Price"] !== undefined && t["Close Price"] !== null ? Number(t["Close Price"]).toFixed(decimals) : '-';
+            const lots = t["Units/Lots"] !== undefined && t["Units/Lots"] !== null ? `${Number(t["Units/Lots"]).toFixed(2)} Lots` : '-';
 
             const parsedG = t.parsedGain !== undefined ? t.parsedGain : (parseFloat(t.Gain) || 0);
             const isProfit = parsedG >= 0;
@@ -1207,7 +1003,7 @@ class DualEngineApp {
 
             const logo = `<div class="flex items-center gap-2"><div class="w-5 h-5 rounded-full ${this.isNeo ? 'bg-emerald-500/20 text-emerald-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center text-[10px]"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5v-2.1c2.1-.3 3.5-1.7 3.5-3.4 0-1.6-1.2-2.7-2.8-2.9v-2c1.9.3 2.9 1.4 3 2.8h1.8c-.2-2.4-1.9-4.2-4.8-4.5V3h-1.4v1.4c-2.3.3-4.1 1.9-4.1 4 0 2 1.6 3.3 3.7 3.7v2.3c-2-.3-3.2-1.5-3.3-3.1H6.9c.2 2.6 2.1 4.5 4.7 4.8v2.4h1.4z"/></svg></div><span class="font-extrabold text-white text-xs tracking-wide">${stratName}</span></div>`;
 
-            html += `<tr class="hover:bg-cardBorder/25 transition-colors border-b border-cardBorder/30"><td class="px-6 py-4 font-sans">${logo}</td><td class="px-6 py-4 font-semibold text-zinc-300">${symbol}.f</td><td class="px-6 py-4 font-semibold ${typeColor}">${typeLabel}</td><td class="px-6 py-4 text-zinc-400">${lots}</td><td class="px-6 py-4 text-zinc-300 font-semibold">${dateStr}</td><td class="px-6 py-4 text-white font-bold">${openPrice}</td><td class="px-6 py-4 text-white font-bold">${closePrice}</td><td class="px-6 py-4 text-zinc-400">${entryTime}</td><td class="px-6 py-4 text-zinc-400">${exitTime}</td><td class="px-6 py-4 text-right font-extrabold ${profitClass} text-sm">${formattedGain}</td></tr>`;
+            html += `<tr class="hover:bg-cardBorder/25 transition-colors border-b border-cardBorder/30"><td class="px-6 py-4 font-sans">${logo}</td><td class="px-6 py-4 font-semibold text-zinc-300">${symbol}.f</td><td class="px-6 py-4 font-semibold ${typeColor}">${typeLabel}</td><td class="px-6 py-4 text-zinc-400">${lots}</td><td class="px-6 py-4 text-zinc-300 font-semibold">${t.dt || "-"}</td><td class="px-6 py-4 text-white font-bold">${openPrice}</td><td class="px-6 py-4 text-white font-bold">${closePrice}</td><td class="px-6 py-4 text-zinc-400">${entryTime}</td><td class="px-6 py-4 text-zinc-400">${exitTime}</td><td class="px-6 py-4 text-right font-extrabold ${profitClass} text-sm">${formattedGain}</td></tr>`;
         });
         this.dom.tradesBody.innerHTML = html;
     }
