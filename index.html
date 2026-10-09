@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de" class="dark">
+<html lang="de" class="dark" style="scroll-behavior: smooth;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -30,13 +30,20 @@
         }
     </script>
     <style>
-        body { background-color: #040914; color: #F8FAFC; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+        html, body { 
+            background-color: #040914 !important; 
+            color: #F8FAFC; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            -webkit-font-smoothing: antialiased; 
+            overflow-x: hidden; /* Verhindert den Scrollbalken auf Mobile */
+            width: 100%;
+        }
         ::-webkit-scrollbar { display: none; }
         .glass-card { background-color: #0A101C; border: 1px solid #1A2436; border-radius: 16px; transition: all 0.3s ease; }
         .glass-card:hover:not(.opacity-50) { border-color: rgba(0, 229, 255, 0.3); transform: translateY(-4px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5); }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col overflow-x-hidden">
 
     <!-- Header -->
     <header class="w-full border-b border-cardBorder px-4 md:px-6 py-3 md:py-4 flex justify-between items-center bg-darkBg/90 backdrop-blur-md sticky top-0 z-50">
