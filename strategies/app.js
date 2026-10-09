@@ -211,14 +211,14 @@ class DualEngineApp {
                     scales: {
                         x: { 
                             display: true, 
-                            offset: false, // Entfernt die Lücken an den Rändern bei Balkendiagrammen
+                            offset: false, // WICHTIG: Verhindert, dass Balken das Chart nach außen drücken
                             grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false },
                             border: { display: false },
                             ticks: { 
                                 maxTicksLimit: 6, 
                                 font: { size: 10 }, 
                                 color: '#94A3B8',
-                                align: 'inner',
+                                align: 'inner', // Zieht Text nach innen
                                 padding: 5,
                                 callback: function(val, index) {
                                     let label = this.getLabelForValue(val);
@@ -235,7 +235,7 @@ class DualEngineApp {
                             border: { dash: [4, 4], display: false }, 
                             ticks: { 
                                 callback: (v) => v + '%',
-                                mirror: true,
+                                mirror: true, // Zieht Y-Achsen Text nach innen
                                 z: 10,
                                 padding: 0 
                             } 
