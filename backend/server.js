@@ -19,7 +19,7 @@ async function loginMyfxbook() {
         const contentType = res.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
             const text = await res.text();
-            throw new Error("MyFXBook blockiert die Anfrage (Kein JSON).");
+            throw new Error("MyFXBook blockiert die Anfrage (Kein JSON). HTML: " + text.substring(0, 100));
         }
 
         const data = await res.json();
@@ -32,24 +32,6 @@ async function loginMyfxbook() {
     } catch (err) {
         console.error("Login-Verbindungsfehler:", err.message);
     }
-}
-
-// Wir filtern HIER nichts mehr heraus, damit das Frontend die Deposits für die %-Rechnung kennt!
-function processTrades(rawList) {
-    if (!Array.isArray(rawList)) return [];
-
-    return rawList.map(t => ({
-        ...t,
-        "Open Date": t["Open Date"] || t.openTime || "",
-        "Close Date": t["Close Date"] || t.closeTime || "",
-        "Symbol": t["Symbol"] || t.symbol || "",
-        "Action": (t["Action"] || t.action || "").toUpperCase(),
-        "Units/Lots": t["Units/Lots"] || (t.sizing ? t.sizing.value : null) || t.lots || t.volume || 0,
-        "Open Price": t["Open Price"] !== undefined ? t["Open Price"] : t.openPrice,
-        "Close Price": t["Close Price"] !== undefined ? t["Close Price"] : t.closePrice,
-        "Profit": t["Profit"] !== undefined ? t["Profit"] : t.profit,
-        "Gain": t["Gain"] !== undefined ? t["Gain"] : (t.gain || 0)
-    }));
 }
 
 app.get('/', (req, res) => {
@@ -66,27 +48,64 @@ app.get('/api/live-trades', async (req, res) => {
              return res.status(500).json({ error: "Login bei MyFXBook ist fehlgeschlagen." });
         }
 
-        let response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=${accountId}`);
-        
-        let contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-             throw new Error("API-Antwort für History ist kein JSON.");
-        }
-        
-        let data = await response.json();
+        // 1. Zuerst die Account-Daten abrufen, um den aktuellen Kontostand (Balance) zu erhalten
+        let accRes = await fetch(`https://www.myfxbook.com/api/get-my-accounts.json?session=${sessionToken}`);
+        let accData = await accRes.json();
 
-        if (data.error === true) {
+        // Wenn Session abgelaufen, neu einloggen
+        if (accData.error === true) {
+            console.log("Session abgelaufen, Login wird wiederholt...");
             await loginMyfxbook();
-            response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=${accountId}`);
-            data = await response.json();
+            accRes = await fetch(`https://www.myfxbook.com/api/get-my-accounts.json?session=${sessionToken}`);
+            accData = await accRes.json();
         }
+
+        let currentBalance = 1200; // Fallback
+        if (accData.accounts) {
+            const account = accData.accounts.find(a => a.id.toString() === accountId.toString());
+            if (account && account.balance) {
+                currentBalance = account.balance;
+            }
+        }
+
+        // 2. Jetzt die Trade-Historie abrufen
+        let response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=${accountId}`);
+        let data = await response.json();
         
         if (data.error === true) {
             throw new Error("MyFXBook API Fehler: " + data.message);
         }
 
         const rawList = data.history || data.trades || [];
-        const cleanTrades = processTrades(rawList);
+
+        // 3. Trades filtern und die Prozentuale Rendite (Gain) mit dem echten Kontostand berechnen
+        const cleanTrades = rawList
+            .filter(t => {
+                const action = (t.action || t.Action || '').toLowerCase();
+                return action === 'buy' || action === 'sell';
+            })
+            .map(t => {
+                let lots = t["Units/Lots"] || (t.sizing ? t.sizing.value : null) || t.lots || t.volume || 0;
+                let profit = t["Profit"] !== undefined ? t["Profit"] : (t.profit || 0);
+                let gain = t["Gain"] !== undefined ? t["Gain"] : (t.gain || null);
+
+                // Berechnet die korrekte Prozentzahl, da MyFXBook API sie oft weglässt
+                if (gain === null || gain === 0) {
+                    gain = currentBalance > 0 ? (profit / currentBalance) * 100 : 0;
+                }
+
+                return {
+                    "Open Date": t["Open Date"] || t.openTime || "",
+                    "Close Date": t["Close Date"] || t.closeTime || "",
+                    "Symbol": t["Symbol"] || t.symbol || "",
+                    "Action": (t["Action"] || t.action || "").toUpperCase(),
+                    "Units/Lots": lots,
+                    "Open Price": t["Open Price"] !== undefined ? t["Open Price"] : t.openPrice,
+                    "Close Price": t["Close Price"] !== undefined ? t["Close Price"] : t.closePrice,
+                    "Profit": profit,
+                    "Gain": gain
+                };
+            });
 
         res.json(cleanTrades);
     } catch (error) {

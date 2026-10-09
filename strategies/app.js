@@ -206,6 +206,8 @@ const translations = {
 class DualEngineApp {
     constructor() {
         this.rawTrades = [];
+        this.liveTableTrades = null; 
+        
         this.btChart = null;
         this.equityChart = null;
         this.drawdownChart = null;
@@ -267,6 +269,7 @@ class DualEngineApp {
         }
         this.applyTranslations();
 
+        // 1. STATISCHER LOAD: Lädt die lokalen Daten sofort, um die Seite verzögerungsfrei aufzubauen
         await this.loadTradesData();
 
         const tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
@@ -287,6 +290,15 @@ class DualEngineApp {
         this.renderHeatmap();
         this.calcProjection();
         this.calcBacktest();
+
+        // 2. DYNAMISCHER LOAD: Zieht Live-Daten im Hintergrund, um nur die Tabelle unten zu füttern
+        if (!this.isNeo) {
+            this.loadLiveTableData().then(() => {
+                if (this.liveTableTrades && this.liveTableTrades.length > 0) {
+                    this.renderStatsAndTable(); 
+                }
+            });
+        }
     }
 
     parseDate(dateStr) {
@@ -320,79 +332,61 @@ class DualEngineApp {
     }
 
     async loadTradesData() {
+        // Lädt immer die lokale JSON (verhindert das Warten auf den Backend Server)
         let data = null;
+        
+        const candidateFiles = this.isNeo
+            ? ['../data/Neo_TradesData.json', '../data/NEO_TradesData.json', '../data/NEO_tradesdata.json', '../data/neo_tradesdata.json', '/data/Neo_TradesData.json', 'data/Neo_TradesData.json']
+            : ['../data/Sonic_TradesData.json', '../data/Sonic_tradesdata.json', '../data/trades_data.json', '/data/Sonic_TradesData.json', 'data/Sonic_TradesData.json'];
 
-        if (!this.isNeo) {
+        for (const file of candidateFiles) {
             try {
-                const response = await fetch('https://tagmarkets-backend.onrender.com/api/live-trades');
+                let response = await fetch(file);
                 if (response.ok) {
                     data = await response.json();
+                    break;
                 }
-            } catch (e) {
-                console.error("Backend nicht erreichbar:", e);
-            }
-        } else {
-            const candidateFiles = ['../data/Neo_TradesData.json', '../data/NEO_TradesData.json', '../data/NEO_tradesdata.json', '../data/neo_tradesdata.json', '/data/Neo_TradesData.json', 'data/Neo_TradesData.json'];
-            for (const file of candidateFiles) {
-                try {
-                    let response = await fetch(file);
-                    if (response.ok) {
-                        data = await response.json();
-                        break;
-                    }
-                } catch (e) {}
-            }
+            } catch (e) {}
         }
 
         if (!data || !Array.isArray(data)) {
-            console.warn("Konnte Daten nicht laden.");
+            console.warn("Konnte lokale JSON Daten nicht laden.");
             this.rawTrades = [];
             return;
         }
 
-        let mappedData = data.map(t => {
+        this.rawTrades = data.map(t => {
             const dateObj = this.parseDate(t["Open Date"]);
-            return { ...t, dt: dateObj.dt, d: dateObj.d };
-        });
-
-        // Wir sortieren chronologisch, um den Kontostand richtig hochzurechnen
-        mappedData.sort((a, b) => new Date(a.dt) - new Date(b.dt));
-
-        let runningBalance = 0;
-
-        this.rawTrades = mappedData.map(t => {
-            let action = (t.Action || "").toUpperCase();
-            let profit = parseFloat(t.Profit) || 0;
-
-            if (action === 'DEPOSIT' || action === 'WITHDRAWAL') {
-                runningBalance += profit;
-            }
-
-            let computedGain = parseFloat(t.Gain) || 0;
-
-            // Berechnet die Prozentrendite dynamisch, falls die API sie auslässt!
-            if ((action === 'BUY' || action === 'SELL') && computedGain === 0 && runningBalance > 0) {
-                computedGain = (profit / runningBalance) * 100;
-                runningBalance += profit; 
-            }
-
-            // Entschachtelt das Lot-Objekt von MyFXBook korrekt
-            let lots = t["Units/Lots"];
-            if (typeof lots === 'object' && lots !== null && lots.value !== undefined) {
-                lots = lots.value;
-            } else if (t.sizing && t.sizing.value !== undefined) {
-                lots = t.sizing.value;
-            } else if (t.volume !== undefined) {
-                lots = t.volume;
-            }
-
+            const gain = parseFloat(t["Gain"] || 0);
             return {
                 ...t,
-                "Units/Lots": lots,
-                Gain: computedGain,
-                parsedGain: computedGain
+                dt: dateObj.dt,
+                d: dateObj.d,
+                parsedGain: isNaN(gain) ? 0 : gain
             };
         });
+    }
+
+    async loadLiveTableData() {
+        try {
+            const response = await fetch('https://tagmarkets-backend.onrender.com/api/live-trades');            
+            if (response.ok) {
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    this.liveTableTrades = data.map(t => {
+                        const dateObj = this.parseDate(t["Open Date"]);
+                        return {
+                            ...t,
+                            dt: dateObj.dt,
+                            d: dateObj.d,
+                            parsedGain: parseFloat(t["Gain"] || 0)
+                        };
+                    });
+                }
+            }
+        } catch (error) {
+            console.warn("Fehler beim Laden der Live-Tabelle vom Backend:", error);
+        }
     }
 
     initAdvancedCharts() {
@@ -725,7 +719,8 @@ class DualEngineApp {
     }
 
     exportCSV() {
-        let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+        const dataSource = (this.liveTableTrades && this.liveTableTrades.length > 0) ? this.liveTableTrades : this.rawTrades;
+        let tradesOnly = dataSource.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
         if(tradesOnly.length === 0) return;
         
         let csvContent = "data:text/csv;charset=utf-8,";
@@ -1158,7 +1153,9 @@ class DualEngineApp {
     renderStatsAndTable() {
         if (!this.dom.tradesBody) return;
 
-        let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+        const dataSource = (this.liveTableTrades && this.liveTableTrades.length > 0) ? this.liveTableTrades : this.rawTrades;
+
+        let tradesOnly = dataSource.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
         let tableTrades = [...tradesOnly].sort((a, b) => new Date(b.dt) - new Date(a.dt));
 
         if (!tableTrades || tableTrades.length === 0) {
@@ -1189,7 +1186,11 @@ class DualEngineApp {
 
             const openPrice = t["Open Price"] !== undefined && t["Open Price"] !== null ? Number(t["Open Price"]).toFixed(decimals) : '-';
             const closePrice = t["Close Price"] !== undefined && t["Close Price"] !== null ? Number(t["Close Price"]).toFixed(decimals) : '-';
-            const lots = t["Units/Lots"] !== undefined && t["Units/Lots"] !== null ? `${Number(t["Units/Lots"]).toFixed(2)} Lots` : '-';
+            
+            // Formatierung der Lot-Zahl repariert
+            let rawLots = t["Units/Lots"];
+            if (typeof rawLots === 'object' && rawLots !== null) rawLots = rawLots.value;
+            const lots = rawLots !== undefined && rawLots !== null ? `${parseFloat(rawLots)} Lots` : '-';
 
             const parsedG = t.parsedGain !== undefined ? t.parsedGain : (parseFloat(t.Gain) || 0);
             const isProfit = parsedG >= 0;
