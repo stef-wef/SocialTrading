@@ -211,14 +211,13 @@ class DualEngineApp {
                     scales: {
                         x: { 
                             display: true, 
-                            offset: false, // WICHTIG: Verhindert, dass Balken das Chart nach außen drücken
+                            offset: true, // Lässt den ersten/letzten Balken sauber stehen
                             grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false },
                             border: { display: false },
                             ticks: { 
                                 maxTicksLimit: 6, 
                                 font: { size: 10 }, 
                                 color: '#94A3B8',
-                                align: 'inner', // Zieht Text nach innen
                                 padding: 5,
                                 callback: function(val, index) {
                                     let label = this.getLabelForValue(val);
@@ -235,9 +234,9 @@ class DualEngineApp {
                             border: { dash: [4, 4], display: false }, 
                             ticks: { 
                                 callback: (v) => v + '%',
-                                mirror: true, // Zieht Y-Achsen Text nach innen
-                                z: 10,
-                                padding: 0 
+                                color: '#94A3B8',
+                                font: { size: 10 },
+                                padding: 8 // Zieht den Text sauber vom Diagramm weg
                             } 
                         }
                     }
@@ -274,9 +273,7 @@ class DualEngineApp {
         let deposits = 0, withdrawals = 0, currentBal = 0, highestBal = 0;
         let currentGain = 0, peakGain = 0, maxDrawdown = 0;
         
-        // Tägliche Aggregation
         let dailyData = {};
-
         let baseCapital = 1000;
         let simCurrentBal = baseCapital;
 
@@ -307,12 +304,11 @@ class DualEngineApp {
                 let dd = currentGain - peakGain; 
                 if (Math.abs(dd) > maxDrawdown) maxDrawdown = Math.abs(dd);
 
-                // Daten pro Tag bündeln (verhindert Zeitverzerrung in der X-Achse)
                 if (!dailyData[date]) {
                     dailyData[date] = { pnl: 0, drawdown: 0 };
                 }
                 dailyData[date].pnl += g;
-                dailyData[date].drawdown = dd; // Speichert den End-of-Day Drawdown
+                dailyData[date].drawdown = dd; 
 
                 if (t["Duration (DD:HH:MM:SS)"]) {
                     let parts = t["Duration (DD:HH:MM:SS)"].split(':');
@@ -645,7 +641,6 @@ class DualEngineApp {
             let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
             let chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
             
-            // Tägliche Gruppierung auch für die Equity Kurve
             let dailyGrowth = {};
             let accumGain = 0;
             chronologicalTrades.forEach(t => {
@@ -699,7 +694,6 @@ class DualEngineApp {
                             color: '#94A3B8', 
                             font: { size: 10 }, 
                             maxTicksLimit: 6,
-                            align: 'inner',
                             padding: 5
                         } 
                     },
@@ -709,7 +703,7 @@ class DualEngineApp {
                         border: { dash: [4, 4], display: false }, 
                         ticks: { 
                             color: '#94A3B8', font: { size: 10 }, 
-                            mirror: true, z: 10, padding: 0, 
+                            padding: 8, 
                             callback: (v) => v + '%' 
                         } 
                     }
@@ -745,7 +739,6 @@ class DualEngineApp {
         let dataPoints = [];
         let investedPoints = [];
 
-        // Tägliche Gruppierung für korrekte Zeitleiste
         let dailyBacktest = {};
 
         const formatDate = (dateStr) => {
@@ -895,7 +888,6 @@ class DualEngineApp {
                             maxTicksLimit: 6, 
                             font: { size: 10 }, 
                             color: '#94A3B8',
-                            align: 'inner',
                             padding: 5
                         } 
                     },
@@ -905,7 +897,7 @@ class DualEngineApp {
                         border: { dash: [4, 4], display: false },
                         ticks: { 
                             maxTicksLimit: 6, font: { size: 10 }, color: '#94A3B8', 
-                            mirror: true, z: 10, padding: 0, 
+                            padding: 8, 
                             callback: (val) => val >= 1000 ? '$' + (val / 1000).toFixed(1) + 'k' : '$' + val 
                         }
                     }
