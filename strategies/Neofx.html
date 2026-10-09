@@ -41,7 +41,7 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
-            overflow-x: hidden; /* Behebt den Balken auf dem Handy */
+            overflow-x: hidden; 
             width: 100%;
         }
 
@@ -181,7 +181,7 @@
                     <div class="tt-wrapper"><i data-lucide="help-circle" class="w-3 md:w-3.5 h-3 md:h-3.5"></i><span class="tt-text">Der maximale historische Wertverlust vom höchsten jemals erreichten Kontostand.</span></div>
                 </div>
                 <p class="text-2xl md:text-3xl font-extrabold text-rose-400 font-mono" id="kpi-max-drawdown">---</p>
-                <p class="text-[9px] md:text-[10px] text-zinc-500 mt-1 font-mono">Basis-Risiko</p>
+                <p class="text-[9px] md:text-[10px] text-zinc-500 mt-1 font-mono" data-i18n="baseRisk">Basis-Risiko</p>
             </div>
             <div class="glass-panel p-4 md:p-6 text-center">
                 <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1 md:mb-2 flex justify-center items-center gap-1">
@@ -189,7 +189,7 @@
                     <div class="tt-wrapper"><i data-lucide="help-circle" class="w-3 md:w-3.5 h-3 md:h-3.5"></i><span class="tt-text">Gesamtzahl der validierten Trades im MyFXBook-Feed.</span></div>
                 </div>
                 <p class="text-2xl md:text-3xl font-extrabold text-white font-mono" id="kpi-trades">---</p>
-                <p class="text-[9px] md:text-[10px] text-zinc-500 mt-1 font-mono">Historisch dokumentiert</p>
+                <p class="text-[9px] md:text-[10px] text-zinc-500 mt-1 font-mono" data-i18n="histDoc">Historisch dokumentiert</p>
             </div>
             <div class="glass-panel p-4 md:p-6 text-center">
                 <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1 md:mb-2 flex justify-center items-center gap-1">
@@ -212,8 +212,8 @@
                 </p>
             </div>
             <div class="shrink-0 flex flex-wrap gap-2 w-full md:w-auto">
-                <span class="px-2 md:px-3 py-1 bg-darkBg border border-cardBorder rounded text-[9px] md:text-[10px] font-mono text-zinc-300 uppercase tracking-wide">Kein Martingale</span>
-                <span class="px-2 md:px-3 py-1 bg-darkBg border border-cardBorder rounded text-[9px] md:text-[10px] font-mono text-zinc-300 uppercase tracking-wide">Hard Stop-Loss</span>
+                <span class="px-2 md:px-3 py-1 bg-darkBg border border-cardBorder rounded text-[9px] md:text-[10px] font-mono text-zinc-300 uppercase tracking-wide" data-i18n="noMartingale">Kein Martingale</span>
+                <span class="px-2 md:px-3 py-1 bg-darkBg border border-cardBorder rounded text-[9px] md:text-[10px] font-mono text-zinc-300 uppercase tracking-wide" data-i18n="hardStopLoss">Hard Stop-Loss</span>
             </div>
         </div>
 
@@ -249,7 +249,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
             <div class="lg:col-span-2 glass-panel p-4 md:p-6 flex flex-col">
                 <h3 class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-300 mb-3 md:mb-4 flex justify-between items-center">
-                    Drawdown & PNL Analyse 
+                    <span data-i18n="ddPnlAnalysis">Drawdown & PNL Analyse</span>
                     <div class="tt-wrapper tt-right text-zinc-500"><i data-lucide="help-circle" class="w-3.5 md:w-4 h-3.5 md:h-4"></i><span class="tt-text">Visualisiert die "Underwater Curve" (Rot) sowie die Einzelgewinne und -verluste jedes Trades (Balken).</span></div>
                 </h3>
                 <div class="w-full h-full min-h-[180px] md:min-h-[200px] relative flex-1">
@@ -265,8 +265,8 @@
                     <canvas id="rrChart"></canvas>
                 </div>
                 <div class="flex justify-between text-[10px] md:text-xs font-mono bg-darkBg/50 p-2.5 md:p-3 rounded-lg border border-cardBorder/50">
-                    <div class="flex flex-col"><span class="text-zinc-500 text-[8px] md:text-[10px] uppercase">Typischer Win</span><span id="avg-win-text" class="text-emerald-400 font-bold">--</span></div>
-                    <div class="flex flex-col text-right"><span class="text-zinc-500 text-[8px] md:text-[10px] uppercase">Typischer Loss</span><span id="avg-loss-text" class="text-rose-400 font-bold">--</span></div>
+                    <div class="flex flex-col"><span class="text-zinc-500 text-[8px] md:text-[10px] uppercase" id="avg-win-label">Typischer Win</span><span id="avg-win-text" class="text-emerald-400 font-bold">--</span></div>
+                    <div class="flex flex-col text-right"><span class="text-zinc-500 text-[8px] md:text-[10px] uppercase" id="avg-loss-label">Typischer Loss</span><span id="avg-loss-text" class="text-rose-400 font-bold">--</span></div>
                 </div>
             </div>
         </div>
@@ -274,14 +274,14 @@
         <!-- Heatmap -->
         <div class="glass-panel p-4 md:p-6">
             <h3 class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-300 mb-3 md:mb-4 flex justify-between items-center">
-                Monatliche Performance Heatmap 
+                <span data-i18n="monthlyHeatmap">Monatliche Performance Heatmap</span>
                 <div class="tt-wrapper tt-right text-zinc-500"><i data-lucide="help-circle" class="w-3.5 md:w-4 h-3.5 md:h-4"></i><span class="tt-text">Monatliche Netto-Renditen im chronologischen Überblick.</span></div>
             </h3>
             <div class="overflow-x-auto table-scroll pb-2 w-full">
                 <table class="w-full text-center text-[10px] md:text-xs font-mono min-w-[600px]">
                     <thead>
                         <tr class="text-zinc-500 border-b border-cardBorder">
-                            <th class="p-1.5 md:p-2 font-semibold">Jahr</th>
+                            <th class="p-1.5 md:p-2 font-semibold" data-i18n="year">Jahr</th>
                             <th class="p-1.5 md:p-2 font-medium">Jan</th><th class="p-1.5 md:p-2 font-medium">Feb</th><th class="p-1.5 md:p-2 font-medium">Mär</th>
                             <th class="p-1.5 md:p-2 font-medium">Apr</th><th class="p-1.5 md:p-2 font-medium">Mai</th><th class="p-1.5 md:p-2 font-medium">Jun</th>
                             <th class="p-1.5 md:p-2 font-medium">Jul</th><th class="p-1.5 md:p-2 font-medium">Aug</th><th class="p-1.5 md:p-2 font-medium">Sep</th>
@@ -302,9 +302,9 @@
                     <span class="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-accentCyan"></span> Equity Curve
                 </div>
                 <h2 class="text-2xl sm:text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-2">
-                    Historischer <br class="block sm:hidden"><span class="text-accentCyan">Wachstumsverlauf.</span>
+                    Historischer <br class="block sm:hidden"><span class="text-accentCyan" data-i18n="histGrowth">Wachstumsverlauf.</span>
                 </h2>
-                <p class="text-[10px] md:text-xs lg:text-sm text-zinc-400 max-w-xl mx-auto px-4">
+                <p class="text-[10px] md:text-xs lg:text-sm text-zinc-400 max-w-xl mx-auto px-4" data-i18n="docStats">
                     Dokumentierte MyFXBook-Statistiken von Beginn bis heute.
                 </p>
             </div>
@@ -550,11 +550,11 @@
 
                     <div class="grid grid-cols-2 gap-3 md:gap-4 w-full">
                         <div class="glass-panel p-4 md:p-5 text-center">
-                            <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Konservativ (~5.00% / Mo)</p>
+                            <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="projCons">Konservativ (~5.00% / Mo)</p>
                             <p class="text-lg md:text-xl font-mono font-bold text-white mb-0.5" id="proj-cons-balance">$17'959</p>
                         </div>
                         <div class="glass-panel p-4 md:p-5 text-center">
-                            <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Optimistisch (~22.00% / Mo)</p>
+                            <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="projOpt">Optimistisch (~22.00% / Mo)</p>
                             <p class="text-lg md:text-xl font-mono font-bold text-white mb-0.5" id="proj-opt-balance">$108'722</p>
                         </div>
                     </div>
@@ -670,7 +670,7 @@
             </div>
             <p class="text-[10px] md:text-xs text-zinc-400 leading-relaxed font-sans">
                 <strong class="text-white font-semibold" data-i18n="disclaimerTitle">Nur zur Veranschaulichung — keine Erfolgsgarantie.</strong>
-                <span data-i18n="disclaimerText">Dies ist eine mathematische Veranschaulichung basierend auf der historischen Durchschnitts-Performance und keine verbindliche Prognose. Einzelne Monate schwankten ungehebelt zwischen +0.35% und +2.10%. Die 24-fache Hebelannahme ist eine rechnerische Näherung — realer gehebelter Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist keine Garantie für zukünftige Ergebnisse. Sie können Ihr investiertes Kapital teilweise oder ganz verlieren. Handeln Sie ausschließlich mit Kapital, dessen Totalverlust Sie verkraften können.</span>
+                <span data-i18n="disclaimerText">Dies ist eine mathematische Veranschaulichung basierend auf der historischen Durchschnitts-Performance und keine verbindliche Prognose. Einzelne Monate schwankten ungehebelt zwischen +0.35% und +2.10%. Die 24-fache Hebelannahme ist eine rechnerische Näherung — realer gehebelter Handel unterliegt Margin-Anforderungen sowie Liquidationsrisiken, die nicht linear verlaufen. Die vergangene Wertentwicklung ist keine Garantie für zukünftige Ergebnisse. Sie können Ihr investiertes Kapital teilweise oder ganz verlieren. Handeln Sie ausschliesslich mit Kapital, dessen Totalverlust Sie verkraften können.</span>
             </p>
         </div>
 
@@ -689,7 +689,7 @@
                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i> MyFXBook
                     </a>
                     <div class="flex-1 md:flex-none justify-center inline-flex items-center gap-1.5 md:gap-2 px-3 py-2 md:py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] md:text-xs font-semibold font-mono">
-                        <span class="w-1.5 md:w-2 h-1.5 md:h-2 rounded-full bg-emerald-400"></span> <span class="hidden sm:inline">Geschlossene</span> Trades (<span id="stat-total">0</span>)
+                        <span class="w-1.5 md:w-2 h-1.5 md:h-2 rounded-full bg-emerald-400"></span> <span class="hidden sm:inline" data-i18n="closedTrades">Geschlossene</span> Trades (<span id="stat-total">0</span>)
                     </div>
                 </div>
             </div>
@@ -698,15 +698,15 @@
                 <table class="w-full text-left text-[10px] md:text-xs whitespace-nowrap min-w-[900px]">
                     <thead class="sticky top-0 bg-darkBg/95 backdrop-blur z-10 shadow-md">
                         <tr class="text-zinc-400 uppercase tracking-wider text-[9px] md:text-[11px] border-b border-cardBorder">
-                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Strategie</th>
-                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Datum</th>
-                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">PnL (%)</th>
-                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Größe</th>
-                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Einstiegspreis</th>
-                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Ausstiegspreis</th>
-                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Einstiegszeit</th>
-                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold">Ausstiegszeit</th>
-                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold text-right">Typ</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold" data-i18n="colStrategy">Strategie</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold" data-i18n="colDate">Datum</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold" data-i18n="colPnl">PnL (%)</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold" data-i18n="colEntryTime">Einstiegszeit</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold" data-i18n="colExitTime">Ausstiegszeit</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold" data-i18n="colType">Typ</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold" data-i18n="colEntryPrice">Einstiegspreis</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold" data-i18n="colExitPrice">Ausstiegspreis</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold text-right" data-i18n="colSize">Grösse</th>
                         </tr>
                     </thead>
                     <tbody id="trades-table-body" class="divide-y divide-cardBorder/40 text-zinc-300 font-mono">

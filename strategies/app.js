@@ -64,6 +64,7 @@ class DualEngineApp {
         }
         this.applyTranslations();
 
+        // 1. STATISCHER LOAD
         await this.loadTradesData();
 
         const tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
@@ -85,6 +86,7 @@ class DualEngineApp {
         this.calcProjection();
         this.calcBacktest();
 
+        // 2. DYNAMISCHER LOAD
         if (!this.isNeo) {
             this.loadLiveTableData().then(() => {
                 if (this.liveTableTrades && this.liveTableTrades.length > 0) {
@@ -432,8 +434,8 @@ class DualEngineApp {
         
         const avgWinLabel = document.getElementById('avg-win-text')?.previousElementSibling;
         const avgLossLabel = document.getElementById('avg-loss-text')?.previousElementSibling;
-        if(avgWinLabel) avgWinLabel.innerText = "Typischer Win";
-        if(avgLossLabel) avgLossLabel.innerText = "Typischer Loss";
+        if(avgWinLabel) avgWinLabel.innerText = translations[this.currentLang].typWin || "Typischer Win";
+        if(avgLossLabel) avgLossLabel.innerText = translations[this.currentLang].typLoss || "Typischer Loss";
 
         const winLossHeaderEl = document.getElementById('kpi-win-loss-text');
         if (winLossHeaderEl) {
@@ -511,7 +513,6 @@ class DualEngineApp {
     }
 
     exportCSV() {
-        // Exportiert explizit die historischen CSV-Daten (rawTrades), wie vom Nutzer gewünscht
         let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
         if(tradesOnly.length === 0) return;
         
@@ -549,6 +550,9 @@ class DualEngineApp {
                 el.innerText = translations[this.currentLang][key];
             }
         });
+        
+        // Dynamische JS-Elemente aktualisieren
+        this.updateKPIs();
     }
 
     setupListeners() {
@@ -951,7 +955,8 @@ class DualEngineApp {
         let tableTrades = [...tradesOnly].sort((a, b) => new Date(b.dt) - new Date(a.dt));
 
         if (!tableTrades || tableTrades.length === 0) {
-            this.dom.tradesBody.innerHTML = `<tr><td colspan="9" class="px-6 py-8 text-center text-zinc-500 font-sans">Lade Live-Daten... Bitte warten.</td></tr>`;
+            const loadingText = translations[this.currentLang].loadingLive || "Lade Live-Daten... Bitte warten.";
+            this.dom.tradesBody.innerHTML = `<tr><td colspan="9" class="px-6 py-8 text-center text-zinc-500 font-sans">${loadingText}</td></tr>`;
             return;
         }
 
@@ -972,14 +977,12 @@ class DualEngineApp {
             
             if(t["Close Date"] && t["Close Date"].includes(" ")) exitTime = t["Close Date"].split(" ")[1];
 
-            const symbol = t["Symbol"] || (this.isNeo ? 'EURUSD' : 'XAUUSD');
-            const isForex = symbol.includes('EUR') || symbol.includes('USD') && !symbol.includes('XAU');
-            const decimals = isForex ? 5 : 2;
-
+            const decimals = this.isNeo ? 5 : 2;
             const openPrice = t["Open Price"] !== undefined && t["Open Price"] !== null ? Number(t["Open Price"]).toFixed(decimals) : '-';
             const closePrice = t["Close Price"] !== undefined && t["Close Price"] !== null ? Number(t["Close Price"]).toFixed(decimals) : '-';
             
             let rawLots = t["Units/Lots"];
+            if (typeof rawLots === 'object' && rawLots !== null) rawLots = rawLots.value;
             let lots = '-';
             if (rawLots !== undefined && rawLots !== null && rawLots !== '') {
                 let numLots = Number(rawLots);
@@ -995,17 +998,17 @@ class DualEngineApp {
 
             const logo = `<div class="flex items-center gap-2"><div class="w-5 h-5 rounded-full ${this.isNeo ? 'bg-emerald-500/20 text-emerald-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center text-[10px]"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5v-2.1c2.1-.3 3.5-1.7 3.5-3.4 0-1.6-1.2-2.7-2.8-2.9v-2c1.9.3 2.9 1.4 3 2.8h1.8c-.2-2.4-1.9-4.2-4.8-4.5V3h-1.4v1.4c-2.3.3-4.1 1.9-4.1 4 0 2 1.6 3.3 3.7 3.7v2.3c-2-.3-3.2-1.5-3.3-3.1H6.9c.2 2.6 2.1 4.5 4.7 4.8v2.4h1.4z"/></svg></div><span class="font-extrabold text-white text-xs tracking-wide">${stratName}</span></div>`;
 
-            // Spalten: Strategie, Datum, PnL (%), Größe, Einstiegspreis, Ausstiegspreis, Einstiegszeit, Ausstiegszeit, Typ
+            // Spalten: Strategie, Datum, PnL (%), Einstiegszeit, Ausstiegszeit, Typ, Einstiegspreis, Ausstiegspreis, Grösse
             html += `<tr class="hover:bg-cardBorder/25 transition-colors border-b border-cardBorder/30">
                 <td class="px-4 md:px-6 py-3 md:py-4 font-sans">${logo}</td>
                 <td class="px-4 md:px-6 py-3 md:py-4 text-zinc-300 font-semibold">${t.dt || "-"}</td>
                 <td class="px-4 md:px-6 py-3 md:py-4 font-extrabold ${profitClass} text-sm">${formattedGain}</td>
-                <td class="px-4 md:px-6 py-3 md:py-4 text-zinc-400">${lots}</td>
-                <td class="px-4 md:px-6 py-3 md:py-4 text-white font-bold">${openPrice}</td>
-                <td class="px-4 md:px-6 py-3 md:py-4 text-white font-bold">${closePrice}</td>
                 <td class="px-4 md:px-6 py-3 md:py-4 text-zinc-400">${entryTime}</td>
                 <td class="px-4 md:px-6 py-3 md:py-4 text-zinc-400">${exitTime}</td>
-                <td class="px-4 md:px-6 py-3 md:py-4 text-right font-semibold ${typeColor}">${typeLabel}</td>
+                <td class="px-4 md:px-6 py-3 md:py-4 font-semibold ${typeColor}">${typeLabel}</td>
+                <td class="px-4 md:px-6 py-3 md:py-4 text-white font-bold">${openPrice}</td>
+                <td class="px-4 md:px-6 py-3 md:py-4 text-white font-bold">${closePrice}</td>
+                <td class="px-4 md:px-6 py-3 md:py-4 text-zinc-400 text-right">${lots}</td>
             </tr>`;
         });
         this.dom.tradesBody.innerHTML = html;
