@@ -367,16 +367,14 @@
                         </div>
                     </div>
 
-                    <div class="lg:col-span-8 p-5 flex flex-col justify-between bg-cardBg h-full">
-                        <div>
-                            <div class="flex justify-between items-center border-b border-cardBorder pb-2 mb-3">
-                                <span class="text-[11px] font-semibold text-accentCyan uppercase tracking-widest">Equity Growth Chart</span>
-                                <i data-lucide="bar-chart-2" class="w-4 h-4 text-zinc-500"></i>
-                            </div>
-
-                            <div class="w-full min-h-[280px] relative">
-                                <canvas id="equityGrowthChart"></canvas>
-                            </div>
+                    <!-- GEÄNDERTE STRUKTUR FÜR DEN CHART CONTAINER -->
+                    <div class="lg:col-span-8 p-5 flex flex-col bg-cardBg h-full">
+                        <div class="flex justify-between items-center border-b border-cardBorder pb-2 mb-3 shrink-0">
+                            <span class="text-[11px] font-semibold text-accentCyan uppercase tracking-widest">Equity Growth Chart</span>
+                            <i data-lucide="bar-chart-2" class="w-4 h-4 text-zinc-500"></i>
+                        </div>
+                        <div class="w-full flex-1 relative min-h-[280px]">
+                            <canvas id="equityGrowthChart"></canvas>
                         </div>
                     </div>
 
