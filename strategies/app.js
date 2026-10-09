@@ -67,7 +67,7 @@ class DualEngineApp {
         }
         this.applyTranslations();
 
-        // Lädt statische JSON Daten für Charts und Berechnungen sofort
+        // Lädt statische JSON Daten für Charts und Berechnungen SOFORT
         await this.loadTradesData();
 
         const tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
@@ -85,16 +85,15 @@ class DualEngineApp {
         this.updateKPIs();
         this.initEquityGrowthChart();
         this.initBacktestChart();
-        this.renderStatsAndTable(); // Rendert Tabelle initial lokal
+        this.renderStatsAndTable(); // Rendert Tabelle initial mit lokalen Daten
         this.renderHeatmap();
         this.calcProjection();
         this.calcBacktest();
 
-        // Hintergrund-Prozess: Lädt Live-Daten vom Backend NUR für die Tabelle,
-        // ohne die Webseite während des "Cold Starts" von Render zu blockieren.
+        // Lade Live-Daten vom Backend NUR für die Sonic-Tabelle
         if (!this.isNeo) {
             this.loadLiveTableData().then(() => {
-                // Sobald der Server geantwortet hat (auch wenn es 50s dauert), wird die Tabelle geupdatet
+                // Sobald der Server antwortet, wird AUSSCHLIESSLICH die Tabelle unten geupdatet
                 if (this.liveTableTrades && this.liveTableTrades.length > 0) {
                     this.renderStatsAndTable(); 
                 }
@@ -153,9 +152,10 @@ class DualEngineApp {
         });
     }
 
-    // Funktion für das asynchrone Laden der Backend-Daten
+    // Lädt Daten exklusiv für die Live-Tabelle
     async loadLiveTableData() {
         try {
+            // Nutzt deine korrekte Render URL für das Backend
             const response = await fetch('https://tagmarkets-backend.onrender.com/api/live-trades?id=12076857');            
             if (response.ok) {
                 const data = await response.json();
@@ -225,7 +225,6 @@ class DualEngineApp {
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    // HIER IST DER FIX FÜR DAS ÜBERLAPPEN RECHTS (padding: right 15)
                     layout: { padding: { left: 0, right: 15, top: 10, bottom: 0 } },
                     plugins: { 
                         legend: { display: false }, 
@@ -298,6 +297,7 @@ class DualEngineApp {
     updateKPIs() {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
+        // KPIs werden NUR aus this.rawTrades berechnet (statische Daten)
         let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
         let chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
         let totalTrades = chronologicalTrades.length;
@@ -683,7 +683,6 @@ class DualEngineApp {
             let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
             let chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
             
-            // Tägliche Gruppierung auch für die Equity Kurve
             let dailyGrowth = {};
             let accumGain = 0;
             chronologicalTrades.forEach(t => {
@@ -758,6 +757,7 @@ class DualEngineApp {
     calcBacktest() {
         if (!this.rawTrades || this.rawTrades.length === 0) return;
 
+        // Backtester verwendet IMMER die statischen rawTrades
         let tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
         let chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
 
@@ -782,7 +782,6 @@ class DualEngineApp {
         let dataPoints = [];
         let investedPoints = [];
 
-        // Tägliche Gruppierung für korrekte Zeitleiste
         let dailyBacktest = {};
 
         const formatDate = (dateStr) => {
