@@ -64,7 +64,13 @@ class DualEngineApp {
         }
         this.applyTranslations();
 
-        // 1. STATISCHER LOAD
+        // Zeige initial einen Ladezustand an, wenn es sich nicht um NEO handelt
+        if (!this.isNeo && this.dom.tradesBody) {
+            const loadingText = translations[this.currentLang].loadingLive || "Lade Live-Daten... Bitte warten.";
+            this.dom.tradesBody.innerHTML = `<tr><td colspan="9" class="px-6 py-8 text-center text-zinc-500 font-sans">${loadingText}</td></tr>`;
+        }
+
+        // 1. STATISCHER LOAD für generelle Berechnungen (z.B. KPIs, Charts)
         await this.loadTradesData();
 
         const tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
@@ -81,18 +87,18 @@ class DualEngineApp {
         this.updateKPIs();
         this.initEquityGrowthChart();
         this.initBacktestChart();
-        this.renderStatsAndTable(); 
         this.renderHeatmap();
         this.calcProjection();
         this.calcBacktest();
 
-        // 2. DYNAMISCHER LOAD
+        // 2. DYNAMISCHER LOAD für die Live-Tabelle
         if (!this.isNeo) {
             this.loadLiveTableData().then(() => {
-                if (this.liveTableTrades && this.liveTableTrades.length > 0) {
-                    this.renderStatsAndTable(); 
-                }
+                this.renderStatsAndTable(); 
             });
+        } else {
+             // Für NEO rendern wir direkt die statischen Daten
+             this.renderStatsAndTable();
         }
     }
 
@@ -180,6 +186,8 @@ class DualEngineApp {
             }
         } catch (error) {
             console.warn("Fehler beim Laden der Live-Tabelle vom Backend:", error);
+            // Fallback auf leeres Array bei Fehler, damit die Tabelle zumindest leer rendert oder der Fehlertext bleibt
+            this.liveTableTrades = [];
         }
     }
 
@@ -949,14 +957,19 @@ class DualEngineApp {
     renderStatsAndTable() {
         if (!this.dom.tradesBody) return;
 
-        const dataSource = (this.liveTableTrades && this.liveTableTrades.length > 0) ? this.liveTableTrades : this.rawTrades;
+        // Wenn wir nicht auf Neo sind (also auf Sonic), prüfen wir ob liveTableTrades valide Daten hat. 
+        // Wenn nicht, wird nichts aus der rawTrades CSV geladen - die Tabelle bleibt leer/beim Loading Text.
+        const dataSource = this.isNeo 
+            ? this.rawTrades 
+            : (this.liveTableTrades && this.liveTableTrades.length > 0 ? this.liveTableTrades : []);
 
         let tradesOnly = dataSource.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
         let tableTrades = [...tradesOnly].sort((a, b) => new Date(b.dt) - new Date(a.dt));
 
         if (!tableTrades || tableTrades.length === 0) {
             const loadingText = translations[this.currentLang].loadingLive || "Lade Live-Daten... Bitte warten.";
-            this.dom.tradesBody.innerHTML = `<tr><td colspan="9" class="px-6 py-8 text-center text-zinc-500 font-sans">${loadingText}</td></tr>`;
+            this.dom.tradesBody.innerHTML = `<tr><td colspan="9" class="px-6 py-8 text-center text-zinc-500 font-sans"><div class="flex justify-center items-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>${loadingText}</span></div></td></tr>`;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
             return;
         }
 
@@ -1012,6 +1025,7 @@ class DualEngineApp {
             </tr>`;
         });
         this.dom.tradesBody.innerHTML = html;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 }
 
