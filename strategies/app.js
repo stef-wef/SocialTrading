@@ -67,7 +67,7 @@ class DualEngineApp {
         this.applyTranslations();
 
         if (!this.isNeo && this.dom.tradesBody) {
-            const loadingText = translations[this.currentLang].loadingLive || "Lade Live-Daten... Bitte warten.";
+            const loadingText = typeof translations !== 'undefined' && translations[this.currentLang] ? translations[this.currentLang].loadingLive || "Lade Live-Daten... Bitte warten." : "Lade Live-Daten... Bitte warten.";
             this.dom.tradesBody.innerHTML = `<tr><td colspan="9" class="px-6 py-8 text-center text-zinc-500 font-sans"><div class="flex justify-center items-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>${loadingText}</span></div></td></tr>`;
         }
 
@@ -102,6 +102,16 @@ class DualEngineApp {
         this.updateKPIs(filtered);
         this.initEquityGrowthChart(filtered);
         this.renderHeatmap(filtered);
+        
+        if (this.dom.btStart && this.dom.btEnd && filtered.length > 0) {
+            let tradesOnly = filtered.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+            if(tradesOnly.length > 0) {
+                let chronologicalTrades = [...tradesOnly].sort((a, b) => new Date(a.dt) - new Date(b.dt));
+                this.dom.btStart.value = chronologicalTrades[0].dt;
+                this.dom.btEnd.value = chronologicalTrades[chronologicalTrades.length - 1].dt;
+                this.calcBacktest();
+            }
+        }
     }
 
     getFilteredTrades(source) {
@@ -153,6 +163,7 @@ class DualEngineApp {
 
     async loadTradesData() {
         let data = null;
+        
         const candidateFiles = this.isNeo
             ? ['../data/Neo_TradesData.json', '../data/NEO_TradesData.json', '../data/NEO_tradesdata.json', '../data/neo_tradesdata.json', '/data/Neo_TradesData.json', 'data/Neo_TradesData.json']
             : ['../data/Sonic_TradesData.json', '../data/Sonic_tradesdata.json', '../data/trades_data.json', '/data/Sonic_TradesData.json', 'data/Sonic_TradesData.json'];
@@ -168,6 +179,7 @@ class DualEngineApp {
         }
 
         if (!data || !Array.isArray(data)) {
+            console.warn("Konnte lokale JSON Daten nicht laden.");
             this.rawTrades = [];
             return;
         }
@@ -209,6 +221,7 @@ class DualEngineApp {
                 }
             }
         } catch (error) {
+            console.warn("Fehler beim Laden der Live-Tabelle vom Backend:", error);
             this.liveTableTrades = [];
         }
     }
@@ -221,15 +234,103 @@ class DualEngineApp {
         if (ddCanvas) {
             const ctx = ddCanvas.getContext('2d');
             this.drawdownChart = new Chart(ctx, {
-                data: { labels: [], datasets: [{ type: 'line', label: 'Drawdown', data: [], borderColor: '#F43F5E', backgroundColor: 'rgba(244, 63, 94, 0.15)', borderWidth: 1.5, fill: true, pointRadius: 0, tension: 0.2, order: 2 }, { type: 'bar', label: 'Daily PnL', data: [], backgroundColor: (context) => { const val = context.raw || 0; return val > 0 ? '#34D399' : '#F43F5E'; }, borderRadius: 2, barPercentage: 0.6, order: 1 }] },
-                options: { responsive: true, maintainAspectRatio: false, layout: { padding: { left: 0, right: 15, top: 10, bottom: 0 } }, plugins: { legend: { display: false }, tooltip: { callbacks: { title: (items) => { let d = new Date(items[0].label); if(isNaN(d.getTime())) return `Datum: ${items[0].label}`; return `Datum: ${d.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`; }, label: (c) => { let isDe = this.currentLang === 'de'; if (c.datasetIndex === 0) return 'Drawdown: ' + c.parsed.y.toFixed(2) + '%'; return (isDe ? 'Tages-PnL: ' : 'Daily PnL: ') + (c.parsed.y > 0 ? '+' : '') + c.parsed.y.toFixed(2) + '%'; } } } }, interaction: { mode: 'index', intersect: false }, scales: { x: { display: true, offset: true, grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false }, border: { display: false }, ticks: { maxTicksLimit: 6, font: { size: 10 }, color: '#94A3B8', padding: 5, callback: function(val) { let label = this.getLabelForValue(val); if(!label) return ''; let d = new Date(label); if(isNaN(d.getTime())) return label; return d.toLocaleString('en-US', { month: 'short', day: '2-digit', year: '2-digit' }); } } }, y: { position: 'right', grid: { color: 'rgba(255, 255, 255, 0.05)', drawTicks: false }, border: { dash: [4, 4], display: false }, ticks: { callback: (v) => v + '%', color: '#94A3B8', font: { size: 10 }, padding: 8 } } } }
+                data: { 
+                    labels: [], 
+                    datasets: [
+                        { 
+                            type: 'line',
+                            label: 'Drawdown',
+                            data: [], 
+                            borderColor: '#F43F5E', 
+                            backgroundColor: 'rgba(244, 63, 94, 0.15)', 
+                            borderWidth: 1.5, 
+                            fill: true, 
+                            pointRadius: 0, 
+                            tension: 0.2,
+                            order: 2
+                        },
+                        {
+                            type: 'bar',
+                            label: 'Daily PnL',
+                            data: [],
+                            backgroundColor: (context) => {
+                                const val = context.raw || 0;
+                                return val > 0 ? '#34D399' : '#F43F5E';
+                            },
+                            borderRadius: 2,
+                            barPercentage: 0.6,
+                            order: 1
+                        }
+                    ] 
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    layout: { padding: { left: 0, right: 15, top: 10, bottom: 0 } },
+                    plugins: { 
+                        legend: { display: false }, 
+                        tooltip: { 
+                            callbacks: { 
+                                title: (items) => {
+                                    let d = new Date(items[0].label);
+                                    if(isNaN(d.getTime())) return `Datum: ${items[0].label}`;
+                                    return `Datum: ${d.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+                                },
+                                label: (c) => {
+                                    let isDe = this.currentLang === 'de';
+                                    if (c.datasetIndex === 0) return 'Drawdown: ' + c.parsed.y.toFixed(2) + '%';
+                                    return (isDe ? 'Tages-PnL: ' : 'Daily PnL: ') + (c.parsed.y > 0 ? '+' : '') + c.parsed.y.toFixed(2) + '%';
+                                } 
+                            } 
+                        } 
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    scales: {
+                        x: { 
+                            display: true, 
+                            offset: true, 
+                            grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false },
+                            border: { display: false },
+                            ticks: { 
+                                maxTicksLimit: 6, 
+                                font: { size: 10 }, 
+                                color: '#94A3B8',
+                                padding: 5,
+                                callback: function(val, index) {
+                                    let label = this.getLabelForValue(val);
+                                    if(!label) return '';
+                                    let d = new Date(label);
+                                    if(isNaN(d.getTime())) return label;
+                                    return d.toLocaleString('en-US', { month: 'short', day: '2-digit', year: '2-digit' });
+                                }
+                            }
+                        },
+                        y: { 
+                            position: 'right', 
+                            grid: { color: 'rgba(255, 255, 255, 0.05)', drawTicks: false }, 
+                            border: { dash: [4, 4], display: false }, 
+                            ticks: { 
+                                callback: (v) => v + '%',
+                                color: '#94A3B8',
+                                font: { size: 10 },
+                                padding: 8
+                            } 
+                        }
+                    }
+                }
             });
         }
 
         const rrCanvas = document.getElementById('rrChart');
         if (rrCanvas) {
             const ctx = rrCanvas.getContext('2d');
-            this.rrChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Typischer Win', 'Typischer Loss'], datasets: [{ data: [1, 1], backgroundColor: ['#34D399', '#FB7185'], borderWidth: 0, hoverOffset: 4 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => c.label + ': $' + c.raw.toFixed(2) } } } } });
+            this.rrChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: ['Typischer Win', 'Typischer Loss'], datasets: [{ data: [1, 1], backgroundColor: ['#34D399', '#FB7185'], borderWidth: 0, hoverOffset: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => c.label + ': $' + c.raw.toFixed(2) } } } }
+            });
         }
     }
 
@@ -363,6 +464,13 @@ class DualEngineApp {
         setEl('avg-win-text', '+$' + typWin.toFixed(2));
         setEl('avg-loss-text', '-$' + typLoss.toFixed(2));
         
+        if (typeof translations !== 'undefined' && translations[this.currentLang]) {
+            const avgWinLabel = document.getElementById('avg-win-text')?.previousElementSibling;
+            const avgLossLabel = document.getElementById('avg-loss-text')?.previousElementSibling;
+            if(avgWinLabel) avgWinLabel.innerText = translations[this.currentLang].typWin || "Typischer Win";
+            if(avgLossLabel) avgLossLabel.innerText = translations[this.currentLang].typLoss || "Typischer Loss";
+        }
+
         const winLossHeaderEl = document.getElementById('kpi-win-loss-text');
         if (winLossHeaderEl) winLossHeaderEl.innerHTML = `<span class="text-emerald-400 font-bold">${wins} Win</span> <span class="text-zinc-500 font-normal">/</span> <span class="text-rose-400 font-bold">${losses} Lose</span>`;
 
@@ -692,7 +800,7 @@ class DualEngineApp {
         let tableTrades = [...tradesOnly].sort((a, b) => new Date(b.dt) - new Date(a.dt));
 
         if (!tableTrades || tableTrades.length === 0) {
-            const loadingText = translations[this.currentLang].loadingLive || "Lade Live-Daten... Bitte warten.";
+            const loadingText = typeof translations !== 'undefined' && translations[this.currentLang] ? translations[this.currentLang].loadingLive || "Lade Live-Daten... Bitte warten." : "Lade Live-Daten... Bitte warten.";
             this.dom.tradesBody.innerHTML = `<tr><td colspan="9" class="px-6 py-8 text-center text-zinc-500 font-sans"><div class="flex justify-center items-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>${loadingText}</span></div></td></tr>`;
             if (typeof lucide !== 'undefined') lucide.createIcons();
             return;
