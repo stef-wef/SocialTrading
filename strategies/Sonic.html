@@ -63,54 +63,28 @@
         }
         .tt-wrapper:hover .tt-text { visibility: visible; opacity: 1; }
         
-        .tt-wrapper.tt-right .tt-text {
-            left: auto;
-            right: 0;
-            transform: none;
-        }
+        .tt-wrapper.tt-right .tt-text { left: auto; right: 0; transform: none; }
+        @media (max-width: 768px) { .tt-wrapper .tt-text { left: auto; right: 0; transform: none; } }
 
-        @media (max-width: 768px) {
-            .tt-wrapper .tt-text {
-                left: auto;
-                right: 0;
-                transform: none;
-            }
-        }
-
-        input[type=range] { 
-            -webkit-appearance: none; 
-            appearance: none;
-            width: 100%; 
-            background: transparent; 
-            height: 20px; 
-            cursor: pointer;
-        }
+        input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; height: 20px; cursor: pointer; }
         input[type=range]:focus { outline: none; }
-
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 3px; cursor: pointer; background: #1A2436; border-radius: 9999px; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #00E5FF; cursor: pointer; margin-top: -6.5px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); border: 2px solid #040914; transition: transform 0.1s ease-in-out; }
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-
         input[type=range]::-moz-range-track { width: 100%; height: 3px; cursor: pointer; background: #1A2436; border-radius: 9999px; border: none; }
         input[type=range]::-moz-range-thumb { height: 16px; width: 16px; border-radius: 50%; background: #00E5FF; cursor: pointer; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); border: 2px solid #040914; transition: transform 0.1s ease-in-out; }
         input[type=range]::-moz-range-thumb:hover { transform: scale(1.2); }
-        input[type=range]::-moz-range-progress { background-color: transparent; }
 
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; appearance: textfield; }
         input[type="date"] { color-scheme: dark; }
 
-        .table-scroll {
-            scrollbar-width: thin;
-            scrollbar-color: #1A2436 #0A101C;
-            -webkit-overflow-scrolling: touch; 
-        }
+        .table-scroll { scrollbar-width: thin; scrollbar-color: #1A2436 #0A101C; -webkit-overflow-scrolling: touch; }
         .table-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
         .table-scroll::-webkit-scrollbar-track { background: #0A101C; border-radius: 4px; }
         .table-scroll::-webkit-scrollbar-thumb { background: #1A2436; border-radius: 4px; }
         .table-scroll::-webkit-scrollbar-thumb:hover { background: #00E5FF; }
-        
         table { border-collapse: separate; border-spacing: 0; }
     </style>
 </head>
@@ -125,7 +99,11 @@
             
             <div class="text-center flex-1 px-4">
                 <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-1.5">SONIC.</h1>
-                <p class="text-[10px] md:text-sm text-zinc-400 font-medium mb-4 md:mb-5">Gold (XAU/USD) · Social Trading · 1:30 Hebel</p>
+                <p class="text-[10px] md:text-sm text-zinc-400 font-medium mb-2">Gold (XAU/USD) · Social Trading · 1:30 Hebel</p>
+                <div class="flex items-center gap-2 justify-center mt-2 opacity-80">
+                    <span class="px-2 py-1 bg-darkBg border border-cardBorder rounded text-[9px] md:text-[10px] font-mono text-zinc-300">👥 482 Copiers</span>
+                    <span class="px-2 py-1 bg-darkBg border border-cardBorder rounded text-[9px] md:text-[10px] font-mono text-zinc-300">💰 $2.1M AUM</span>
+                </div>
             </div>
             
             <button id="langToggle" class="text-[10px] md:text-xs font-bold text-zinc-400 hover:text-white px-2 md:px-2.5 py-1 border border-cardBorder rounded-lg transition-colors mt-1.5 md:mt-0">
@@ -133,7 +111,17 @@
             </button>
         </div>
 
-        <div class="flex flex-wrap justify-center items-center gap-2 md:gap-3 w-full max-w-3xl mx-auto mt-[-10px] md:mt-0">
+        <!-- Buttons Section -->
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-3 mt-4 w-full max-w-lg mx-auto">
+            <button class="w-full sm:w-auto px-6 py-2.5 bg-accentCyan text-darkBg font-bold text-xs md:text-sm rounded-lg hover:bg-[#00cce6] transition-colors shadow-[0_0_15px_rgba(0,229,255,0.3)]">
+                Strategie kopieren
+            </button>
+            <button class="w-full sm:w-auto px-6 py-2.5 bg-zinc-800 text-zinc-500 font-bold text-xs md:text-sm rounded-lg cursor-not-allowed border border-zinc-700" disabled>
+                Kontaktaufnahme
+            </button>
+        </div>
+
+        <div class="flex flex-wrap justify-center items-center gap-2 md:gap-3 w-full max-w-3xl mx-auto mt-6">
             <div class="inline-flex items-center gap-1.5 md:gap-2 px-3 py-1.5 rounded-xl bg-cardBg border border-cardBorder font-mono text-[9px] md:text-xs shadow-sm">
                 <span class="text-zinc-500 uppercase font-bold tracking-wider" data-i18n="lblInstrument">Instrument</span>
                 <span class="text-zinc-600">·</span>
@@ -164,6 +152,14 @@
             <a href="#backtest" class="text-[9px] md:text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-3 md:px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navBacktest">Backtest</a>
             <a href="#trades" class="text-[9px] md:text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-3 md:px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navTrades">Trades</a>
         </nav>
+
+        <!-- Timeframe Filter -->
+        <div class="flex justify-end gap-1.5 md:gap-2 mb-2 w-full max-w-full">
+            <button class="tf-btn px-3 md:px-4 py-1.5 text-[9px] md:text-[10px] font-mono rounded-lg bg-cardBg text-zinc-400 border border-cardBorder hover:text-white transition-all" data-tf="1M">1M</button>
+            <button class="tf-btn px-3 md:px-4 py-1.5 text-[9px] md:text-[10px] font-mono rounded-lg bg-cardBg text-zinc-400 border border-cardBorder hover:text-white transition-all" data-tf="3M">3M</button>
+            <button class="tf-btn px-3 md:px-4 py-1.5 text-[9px] md:text-[10px] font-mono rounded-lg bg-cardBg text-zinc-400 border border-cardBorder hover:text-white transition-all" data-tf="6M">6M</button>
+            <button class="tf-btn px-3 md:px-4 py-1.5 text-[9px] md:text-[10px] font-mono rounded-lg bg-accentCyan/20 text-accentCyan border border-accentCyan/30 transition-all" data-tf="ALL">ALL</button>
+        </div>
 
         <!-- 4 Haupt-KPIs -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
@@ -222,10 +218,11 @@
             <div class="flex items-center justify-between pb-3 md:pb-4 mb-3 md:mb-4 border-b border-cardBorder">
                 <div>
                     <h2 class="text-xs md:text-sm font-bold uppercase tracking-widest text-zinc-300">Performance Metrics</h2>
-                    <p class="text-[10px] md:text-xs text-zinc-500 mt-0.5" data-i18n="metricsSub">Statistische Auswertung des Myfxbook-Portfolios</p>
+                    <p class="text-[10px] md:text-xs text-zinc-500 mt-0.5" data-i18n="metricsSub">Erweiterte Auswertung der Strategie</p>
                 </div>
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4 font-mono text-left">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 font-mono text-left">
+                <!-- Zeile 1 -->
                 <div class="p-2.5 md:p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
                     <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase flex items-center gap-1" data-i18n="dailyAvg">Tages-Durchschnitt <div class="tt-wrapper hidden md:block"><i data-lucide="help-circle" class="w-3 h-3"></i><span class="tt-text">Durchschnittlicher Zuwachs pro gehandeltem Tag.</span></div></div>
                     <p class="text-base md:text-lg font-bold text-emerald-400 mt-0.5" id="kpi-daily-avg">---</p>
@@ -241,6 +238,23 @@
                 <div class="p-2.5 md:p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
                     <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase flex items-center gap-1" data-i18n="lossMonths">Verlust-Monate <div class="tt-wrapper hidden md:block"><i data-lucide="help-circle" class="w-3 h-3"></i><span class="tt-text">Anzahl der Monate, die mit einem negativen Gesamtergebnis abgeschlossen wurden.</span></div></div>
                     <p class="text-base md:text-lg font-bold text-emerald-400 mt-0.5" id="kpi-loss-months">0</p>
+                </div>
+                <!-- Zeile 2 -->
+                <div class="p-2.5 md:p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
+                    <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase flex items-center gap-1">Sharpe Ratio <div class="tt-wrapper hidden md:block"><i data-lucide="help-circle" class="w-3 h-3"></i><span class="tt-text">Misst die Überschussrendite pro Risikoeinheit (annualisiert).</span></div></div>
+                    <p class="text-base md:text-lg font-bold text-accentCyan mt-0.5" id="kpi-sharpe">---</p>
+                </div>
+                <div class="p-2.5 md:p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
+                    <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase flex items-center gap-1">Win-Rate (Long) <div class="tt-wrapper hidden md:block"><i data-lucide="help-circle" class="w-3 h-3"></i><span class="tt-text">Prozentsatz der profitablen Buy-Positionen.</span></div></div>
+                    <p class="text-base md:text-lg font-bold text-white mt-0.5" id="kpi-win-long">---</p>
+                </div>
+                <div class="p-2.5 md:p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
+                    <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase flex items-center gap-1">Win-Rate (Short) <div class="tt-wrapper hidden md:block"><i data-lucide="help-circle" class="w-3 h-3"></i><span class="tt-text">Prozentsatz der profitablen Sell-Positionen.</span></div></div>
+                    <p class="text-base md:text-lg font-bold text-white mt-0.5" id="kpi-win-short">---</p>
+                </div>
+                <div class="p-2.5 md:p-3 bg-darkBg/60 border border-cardBorder/60 rounded-lg">
+                    <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase flex items-center gap-1">Recovery Factor <div class="tt-wrapper hidden md:block"><i data-lucide="help-circle" class="w-3 h-3"></i><span class="tt-text">Verhältnis zwischen dem absoluten Nettogewinn und dem maximalen historischen Drawdown.</span></div></div>
+                    <p class="text-base md:text-lg font-bold text-white mt-0.5" id="kpi-recovery">---</p>
                 </div>
             </div>
         </div>
@@ -386,7 +400,6 @@
         
         <!-- FAQ Section -->
         <div class="pt-8 md:pt-10 pb-2 md:pb-4 w-full" id="faq">
-            <!-- About Sonic AI -->
             <div class="mb-8 md:mb-10 w-full">
                 <div class="inline-flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-[9px] md:text-[10px] font-mono font-bold tracking-widest uppercase mb-3 md:mb-4">
                     <span class="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-accentCyan"></span> <span data-i18n="faqBadge1">Über Sonic AI</span>
@@ -445,7 +458,6 @@
                 </div>
             </div>
 
-            <!-- Risk & Performance -->
             <div class="mb-2 w-full">
                 <div class="inline-flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-[9px] md:text-[10px] font-mono font-bold tracking-widest uppercase mb-3 md:mb-4">
                     <span class="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-accentCyan"></span> <span data-i18n="faqBadge2">Risiko & Performance</span>
@@ -680,7 +692,10 @@
                 <div>
                     <h2 class="text-lg md:text-xl font-extrabold text-white tracking-tight flex flex-wrap items-center gap-2">
                         <span data-i18n="tradesHeader">Trades</span>
-                        <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-mono uppercase tracking-widest mt-1 sm:mt-0" data-i18n="liveBadge">Live API</span>
+                        <div class="flex items-center gap-1.5 bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-mono uppercase tracking-widest mt-1 sm:mt-0">
+                            <span class="text-[9px]" data-i18n="liveBadge">Live API</span>
+                        </div>
+                        <span class="text-[9px] text-zinc-500 font-mono ml-1 mt-1 sm:mt-0" id="live-sync-time">Letzter Sync: ---</span>
                     </h2>
                     <p class="text-[10px] md:text-xs text-zinc-400 mt-1 md:mt-0.5" data-i18n="tradesSubLive">Aktuelle Live-Transaktionen aus dem Broker-Feed (API)</p>
                 </div>
