@@ -84,9 +84,12 @@ class DualEngineApp {
         this.initAdvancedCharts();
         this.setupListeners();
         this.setupAccordions();
+        
+        // Neu hinzugefügt: Hier wird das Backtest-Chart initialisiert, bevor Daten hineingeladen werden
+        this.initBacktestChart(); 
+
         this.refreshDash();
         this.calcProjection();
-        this.calcBacktest();
 
         if (!this.isNeo) {
             this.loadLiveTableData().then(() => {
