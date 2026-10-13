@@ -145,6 +145,7 @@
             updateLang();
         });
 
+        // maxDd standardmässig auf "—" gesetzt, da es nun dynamisch aus der JSON geladen wird
         const strategiesData = [
             {
                 id: "sonic-ai",
@@ -155,7 +156,7 @@
                 tradesLost: "—",
                 winRate: "—",
                 totalReturn: "—",
-                maxDd: "0.87%",
+                maxDd: "—", 
                 url: "strategies/Sonic.html",
                 active: true
             },
@@ -168,7 +169,7 @@
                 tradesLost: "—",
                 winRate: "—",
                 totalReturn: "—",
-                maxDd: "0.90%",
+                maxDd: "—",
                 url: "strategies/Neofx.html",
                 active: true
             },
@@ -187,52 +188,92 @@
             }
         ];
 
-        async function fetchStats(paths) {
+        // Diese Funktion parst die Daten und berechnet alle Werte (inkl. Drawdown)
+        function calculateStats(data) {
+            let trades = data.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
+            
+            // Sortieren nach Datum für korrekte Drawdown-Berechnung
+            trades.sort((a, b) => new Date(a["Open Date"] || a.d || 0) - new Date(b["Open Date"] || b.d || 0));
+
+            let total = trades.length;
+            let won = 0;
+            let lost = 0;
+            let currentGain = 0;
+            let peakGain = 0;
+            let maxDrawdown = 0;
+
+            trades.forEach(t => {
+                let profit = parseFloat(t.Profit) || 0;
+                if (profit > 0) won++;
+                else if (profit < 0) lost++;
+
+                let g = parseFloat(t.Gain) || 0;
+                currentGain += g;
+                if (currentGain > peakGain) peakGain = currentGain;
+                
+                let dd = currentGain - peakGain;
+                if (Math.abs(dd) > maxDrawdown) maxDrawdown = Math.abs(dd);
+            });
+
+            let wr = total > 0 ? ((won/total)*100).toFixed(2) + '%' : '0%';
+
+            return { 
+                total, 
+                won, 
+                lost, 
+                wr, 
+                totalGain: '+' + currentGain.toFixed(2) + '%',
+                maxDd: maxDrawdown.toFixed(2) + '%'
+            };
+        }
+
+        async function fetchLocalStats(paths) {
             for (let f of paths) {
                 try {
                     let res = await fetch(f);
                     if(res.ok) {
                         let data = await res.json();
-                        let trades = data.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
-                        let total = trades.length;
-                        let won = trades.filter(t => parseFloat(t.Profit) > 0).length;
-                        let lost = trades.filter(t => parseFloat(t.Profit) < 0).length;
-                        let wr = total > 0 ? ((won/total)*100).toFixed(2) + '%' : '0%';
-                        let totalGain = 0;
-                        trades.forEach(t => totalGain += (parseFloat(t.Gain) || 0));
-                        return { total, won, lost, wr, totalGain: '+' + totalGain.toFixed(2) + '%' };
+                        return calculateStats(data);
                     }
-                } catch(e) {}
+                } catch(e) {
+                    console.warn("Konnte Daten von " + f + " nicht laden.");
+                }
             }
             return null;
         }
 
         async function initData() {
-            let sonicRes = await fetchStats([
+            // Versucht Daten von verschiedenen möglichen Pfaden zu laden
+            let sonicRes = await fetchLocalStats([
                 'data/Sonic_TradesData.json',
                 'data/Sonic_tradesdata.json',
-                'data/trades_data.json'
+                'data/trades_data.json',
+                '../data/Sonic_TradesData.json'
             ]);
+            
             if(sonicRes) {
                 strategiesData[0].tradesMade = sonicRes.total;
                 strategiesData[0].tradesWon = sonicRes.won;
                 strategiesData[0].tradesLost = sonicRes.lost;
                 strategiesData[0].winRate = sonicRes.wr;
                 strategiesData[0].totalReturn = sonicRes.totalGain;
+                strategiesData[0].maxDd = sonicRes.maxDd;
             }
             
-            let neoRes = await fetchStats([
+            let neoRes = await fetchLocalStats([
                 'data/Neo_TradesData.json', 
                 'data/NEO_TradesData.json', 
-                'data/NEO_tradesdata.json',
-                'data/neo_tradesdata.json'
+                'data/neo_tradesdata.json',
+                '../data/Neo_TradesData.json'
             ]);
+            
             if(neoRes) {
                 strategiesData[1].tradesMade = neoRes.total;
                 strategiesData[1].tradesWon = neoRes.won;
                 strategiesData[1].tradesLost = neoRes.lost;
                 strategiesData[1].winRate = neoRes.wr;
                 strategiesData[1].totalReturn = neoRes.totalGain;
+                strategiesData[1].maxDd = neoRes.maxDd;
             }
 
             renderGrid();
