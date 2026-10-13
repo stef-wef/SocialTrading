@@ -110,11 +110,11 @@
             </button>
         </div>
 
-        <!-- Buttons Section -->
+        <!-- Buttons Section (Ausgegraut) -->
         <div class="flex flex-col sm:flex-row justify-center items-center mt-2 w-full max-w-lg mx-auto">
-            <a href="#projection" class="w-full sm:w-auto text-center px-6 py-2.5 bg-accentCyan/10 hover:bg-accentCyan/20 text-accentCyan font-bold text-xs md:text-sm rounded-lg border border-accentCyan/30 transition-colors" data-i18n="contactBtn">
+            <button class="w-full sm:w-auto px-6 py-2.5 bg-zinc-800 text-zinc-500 font-bold text-xs md:text-sm rounded-lg cursor-not-allowed border border-zinc-700 select-none" disabled data-i18n="contactBtn">
                 Kontaktaufnahme
-            </a>
+            </button>
         </div>
 
         <!-- Meta-Badges -->
@@ -138,7 +138,7 @@
             </button>
         </div>
 
-        <!-- Page Jump Navigation Menu (Swipeable on Mobile) -->
+        <!-- Page Jump Navigation Menu -->
         <nav class="flex flex-nowrap sm:flex-wrap justify-start sm:justify-center gap-1.5 md:gap-2 mt-5 md:mt-6 overflow-x-auto no-scrollbar pb-1 px-1">
             <a href="#metrics" class="shrink-0 text-[9px] md:text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-3.5 md:px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navMetrics">Metrics</a>
             <a href="#equity-curve" class="shrink-0 text-[9px] md:text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-accentCyan px-3.5 md:px-4 py-2 rounded-full border border-cardBorder bg-cardBg transition-colors" data-i18n="navEquity">Wachstum</a>
@@ -626,23 +626,23 @@
                 </p>
             </div>
 
-            <!-- Banner über die volle Breite -->
-            <div class="glass-panel p-4 md:p-6 mb-5 md:mb-6 grid grid-cols-2 lg:grid-cols-4 gap-y-5 gap-x-4 items-center w-full">
-                <div class="text-left">
+            <!-- Banner über die volle Breite (Saubere durchgehende Trennlinien) -->
+            <div class="glass-panel p-4 md:p-6 mb-5 md:mb-6 grid grid-cols-2 lg:grid-cols-4 gap-0 items-stretch w-full">
+                <div class="text-left pb-4 pr-3 sm:pr-4 lg:pb-0 lg:pr-6 flex flex-col justify-center">
                     <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" id="bt-sim-label" data-i18n="btSimBal">Simuliertes Endguthaben</p>
                     <div class="text-lg sm:text-xl md:text-3xl font-mono font-extrabold text-emerald-400 tracking-tight" id="bt-res-balance">$0.00</div>
                 </div>
-                <div class="text-left border-l border-cardBorder pl-3 sm:pl-4 md:pl-6">
+                <div class="text-left pb-4 pl-3 sm:pl-4 lg:pb-0 lg:px-6 border-l border-cardBorder flex flex-col justify-center">
                     <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btInvested">Investiertes Kapital</p>
-                    <p class="text-sm sm:text-base md:text-2xl font-mono font-bold text-zinc-300" id="bt-res-invested">$0.00</p>
+                    <p class="text-base sm:text-lg md:text-2xl font-mono font-bold text-zinc-300" id="bt-res-invested">$0.00</p>
                 </div>
-                <div class="text-left pt-4 lg:pt-0 border-t lg:border-t-0 border-cardBorder lg:border-l lg:pl-6">
+                <div class="text-left pt-4 pr-3 sm:pr-4 lg:pt-0 lg:px-6 border-t lg:border-t-0 lg:border-l border-cardBorder flex flex-col justify-center">
                     <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btProfit">Reingewinn</p>
-                    <p class="text-sm sm:text-base md:text-2xl font-mono font-bold text-white" id="bt-res-profit">+$0.00</p>
+                    <p class="text-base sm:text-lg md:text-2xl font-mono font-bold text-white" id="bt-res-profit">+$0.00</p>
                 </div>
-                <div class="text-left pt-4 lg:pt-0 border-t lg:border-t-0 border-l border-cardBorder pl-3 sm:pl-4 md:pl-6">
+                <div class="text-left pt-4 pl-3 sm:pl-4 lg:pt-0 lg:pl-6 border-t lg:border-t-0 border-l border-cardBorder flex flex-col justify-center">
                     <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" data-i18n="btGrowth">Wachstum</p>
-                    <p class="text-sm sm:text-base md:text-2xl font-mono font-bold text-emerald-400" id="bt-res-growth">+0.00%</p>
+                    <p class="text-base sm:text-lg md:text-2xl font-mono font-bold text-emerald-400" id="bt-res-growth">+0.00%</p>
                 </div>
             </div>
 
