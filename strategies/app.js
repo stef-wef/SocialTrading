@@ -200,9 +200,11 @@ class DualEngineApp {
         try {
             const response = await fetch('https://tagmarkets-backend.onrender.com/api/live-trades');            
             if (response.ok) {
-                const data = await response.json();
-                if (Array.isArray(data)) {
-                    this.liveTableTrades = data.map(t => {
+                const responseData = await response.json();
+                const rawTradesArray = responseData.trades || [];
+                
+                if (Array.isArray(rawTradesArray)) {
+                    this.liveTableTrades = rawTradesArray.map(t => {
                         const dateObj = this.parseDate(t["Open Date"]);
                         return {
                             ...t,
@@ -213,10 +215,17 @@ class DualEngineApp {
                     });
                     
                     const syncEl = document.getElementById('live-sync-time');
-                    if(syncEl) {
-                        const now = new Date();
-                        const timeStr = now.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
-                        syncEl.innerText = `Letzter Sync: heute um ${timeStr}`;
+                    if(syncEl && responseData.lastSync) {
+                        const syncDate = new Date(responseData.lastSync);
+                        const today = new Date();
+                        
+                        let datePrefix = "heute";
+                        if (syncDate.getDate() !== today.getDate() || syncDate.getMonth() !== today.getMonth()) {
+                            datePrefix = syncDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+                        }
+
+                        const timeStr = syncDate.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
+                        syncEl.innerText = `Letzter Sync: ${datePrefix} um ${timeStr}`;
                     }
                 }
             }
