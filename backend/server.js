@@ -1,20 +1,19 @@
 const express = require('express');
 const fetch = require('node-fetch');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+const ACCOUNT_ID = process.env.MYFXBOOK_ACCOUNT_ID || '12249114';
+const SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 Minuten
+
+let sessionToken = null;
+let cachedTrades = [];
+let lastSyncTime = null;
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     next();
 });
-
-let sessionToken = null;
-let cachedTrades = []; // Speichert die Daten im RAM
-let lastSyncTime = null; // Speichert den Zeitpunkt des letzten Syncs
-const accountId = process.env.MYFXBOOK_ACCOUNT_ID || '12249114';
-
-// Intervall in Millisekunden (z.B. 5 * 60 * 1000 = 5 Minuten)
-const SYNC_INTERVAL_MS = 5 * 60 * 1000;
 
 async function loginMyfxbook() {
     try {
@@ -22,6 +21,7 @@ async function loginMyfxbook() {
         const password = encodeURIComponent(process.env.MYFXBOOK_PASSWORD);
         const res = await fetch(`https://www.myfxbook.com/api/login.json?email=${email}&password=${password}`);
         const data = await res.json();
+
         if (data.error === false) {
             sessionToken = data.session;
             console.log("Myfxbook Login erfolgreich!");
@@ -45,8 +45,8 @@ function processTrades(rawList) {
             return action.startsWith('buy') || action.startsWith('sell');
         })
         .map(t => {
-            let lots = t["Units/Lots"] || (t.sizing ? t.sizing.value : null) || t.lots || t.volume || 0;
-            let profit = parseFloat(t["Profit"] !== undefined ? t["Profit"] : (t.profit || 0));
+            const lots = t["Units/Lots"] || (t.sizing ? t.sizing.value : null) || t.lots || t.volume || 0;
+            const profit = parseFloat(t["Profit"] !== undefined ? t["Profit"] : (t.profit || 0));
             let gain = t["Gain"] !== undefined ? parseFloat(t["Gain"]) : (t.gain !== undefined ? parseFloat(t.gain) : 0);
 
             // Fallback: Gain berechnen, falls MyFXBook 0 sendet (angepasst auf Basiswert)
@@ -68,7 +68,6 @@ function processTrades(rawList) {
         });
 }
 
-// Zentrale Funktion für den automatischen Hintergrund-Sync
 async function updateTradesBackground() {
     console.log("Starte Hintergrund-Sync mit MyFXBook...");
     try {
@@ -77,19 +76,17 @@ async function updateTradesBackground() {
             if (!loggedIn) return;
         }
 
-        let response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=${accountId}`);
+        let response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=${ACCOUNT_ID}`);
         let data = await response.json();
 
-        // Wenn die Session ungültig ist, erneut einloggen
+        // Wenn die Session abgelaufen ist, erneut einloggen
         if (data.error === true) {
             console.log("Session abgelaufen, Login wird wiederholt...");
             const loggedIn = await loginMyfxbook();
-            if (loggedIn) {
-                response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=${accountId}`);
-                data = await response.json();
-            } else {
-                return;
-            }
+            if (!loggedIn) return;
+
+            response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=${ACCOUNT_ID}`);
+            data = await response.json();
         }
 
         if (data.error === false) {
@@ -110,22 +107,17 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/live-trades', async (req, res) => {
-    // Falls der Server gerade erst gestartet (oder aufgewacht) ist und der Cache noch leer ist
     if (cachedTrades.length === 0) {
         await updateTradesBackground();
     }
     
-    // Gibt sofort die gespeicherten Daten inkl. Zeitstempel zurück
     res.json({
         lastSync: lastSyncTime,
         trades: cachedTrades
     });
 });
 
-// Starte den ersten Sync sofort beim Hochfahren des Servers
 updateTradesBackground();
-
-// Richte den Loop ein, der den Sync alle X Minuten wiederholt
 setInterval(updateTradesBackground, SYNC_INTERVAL_MS);
 
 app.listen(PORT, () => console.log(`Backend läuft auf Port ${PORT}`));
