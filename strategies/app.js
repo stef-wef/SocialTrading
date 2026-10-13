@@ -64,10 +64,11 @@ class DualEngineApp {
                 this.applyTranslations();
                 this.calcProjection();
                 this.calcBacktest();
-                if (this.btChart) this.btChart.update();
+                this.updateChartLocales();
             });
         }
         this.applyTranslations();
+        this.setupTooltips();
 
         if (!this.isNeo && this.dom.tradesBody) {
             const loadingText = (typeof translations !== 'undefined' && translations[this.currentLang])
@@ -100,6 +101,51 @@ class DualEngineApp {
         } else {
             this.renderStatsAndTable();
         }
+    }
+
+    setupTooltips() {
+        const wrappers = document.querySelectorAll('.tt-wrapper');
+
+        const adjustPosition = (wrapper) => {
+            wrapper.classList.remove('tt-left', 'tt-right');
+            const rect = wrapper.getBoundingClientRect();
+            const vw = window.innerWidth;
+
+            if (rect.left < 120) {
+                wrapper.classList.add('tt-left');
+            } else if (vw - rect.right < 120) {
+                wrapper.classList.add('tt-right');
+            }
+        };
+
+        wrappers.forEach(wrapper => {
+            wrapper.addEventListener('mouseenter', () => adjustPosition(wrapper));
+            wrapper.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isActive = wrapper.classList.contains('tt-active');
+                wrappers.forEach(w => w.classList.remove('tt-active'));
+                if (!isActive) {
+                    adjustPosition(wrapper);
+                    wrapper.classList.add('tt-active');
+                }
+            });
+        });
+
+        document.addEventListener('click', () => {
+            wrappers.forEach(w => w.classList.remove('tt-active'));
+        });
+    }
+
+    updateChartLocales() {
+        if (this.rrChart && typeof translations !== 'undefined' && translations[this.currentLang]) {
+            this.rrChart.data.labels = [
+                translations[this.currentLang].typWin || 'Typischer Win',
+                translations[this.currentLang].typLoss || 'Typischer Loss'
+            ];
+            this.rrChart.update();
+        }
+        if (this.btChart) this.btChart.update();
+        if (this.drawdownChart) this.drawdownChart.update();
     }
 
     refreshDash() {
@@ -272,7 +318,10 @@ class DualEngineApp {
                                 return val > 0 ? '#34D399' : '#F43F5E';
                             },
                             borderRadius: 2,
-                            barPercentage: 0.6,
+                            barPercentage: 0.75,
+                            categoryPercentage: 0.85,
+                            maxBarThickness: 12,
+                            minBarLength: 2,
                             order: 1
                         }
                     ]
@@ -280,15 +329,22 @@ class DualEngineApp {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: { padding: { left: 0, right: 15, top: 10, bottom: 0 } },
+                    layout: { padding: { left: 0, right: 8, top: 10, bottom: 0 } },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
+                            backgroundColor: '#0A101C',
+                            titleColor: '#00E5FF',
+                            bodyColor: '#E2E8F0',
+                            borderColor: '#1A2436',
+                            borderWidth: 1,
+                            padding: 10,
                             callbacks: {
                                 title: (items) => {
+                                    const isDe = this.currentLang === 'de';
                                     const d = new Date(items[0].label);
-                                    if (isNaN(d.getTime())) return `Datum: ${items[0].label}`;
-                                    return `Datum: ${d.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+                                    if (isNaN(d.getTime())) return `${isDe ? 'Datum' : 'Date'}: ${items[0].label}`;
+                                    return `${isDe ? 'Datum' : 'Date'}: ${d.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
                                 },
                                 label: (c) => {
                                     const isDe = this.currentLang === 'de';
@@ -343,10 +399,13 @@ class DualEngineApp {
         const rrCanvas = document.getElementById('rrChart');
         if (rrCanvas) {
             const ctx = rrCanvas.getContext('2d');
+            const winLbl = (typeof translations !== 'undefined' && translations[this.currentLang]?.typWin) || 'Typischer Win';
+            const lossLbl = (typeof translations !== 'undefined' && translations[this.currentLang]?.typLoss) || 'Typischer Loss';
+
             this.rrChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Typischer Win', 'Typischer Loss'],
+                    labels: [winLbl, lossLbl],
                     datasets: [{
                         data: [1, 1],
                         backgroundColor: ['#34D399', '#FB7185'],
@@ -361,6 +420,11 @@ class DualEngineApp {
                     plugins: {
                         legend: { display: false },
                         tooltip: {
+                            backgroundColor: '#0A101C',
+                            bodyColor: '#E2E8F0',
+                            borderColor: '#1A2436',
+                            borderWidth: 1,
+                            padding: 10,
                             callbacks: {
                                 label: (c) => c.label + ': $' + c.raw.toFixed(2)
                             }
@@ -513,13 +577,6 @@ class DualEngineApp {
         setEl('avg-win-text', '+$' + typWin.toFixed(2));
         setEl('avg-loss-text', '-$' + typLoss.toFixed(2));
 
-        if (typeof translations !== 'undefined' && translations[this.currentLang]) {
-            const avgWinLabel = document.getElementById('avg-win-text')?.previousElementSibling;
-            const avgLossLabel = document.getElementById('avg-loss-text')?.previousElementSibling;
-            if (avgWinLabel) avgWinLabel.innerText = translations[this.currentLang].typWin || "Typischer Win";
-            if (avgLossLabel) avgLossLabel.innerText = translations[this.currentLang].typLoss || "Typischer Loss";
-        }
-
         const winLossHeaderEl = document.getElementById('kpi-win-loss-text');
         if (winLossHeaderEl) {
             winLossHeaderEl.innerHTML = `<span class="text-emerald-400 font-bold">${wins} Win</span> <span class="text-zinc-500 font-normal">/</span> <span class="text-rose-400 font-bold">${losses} Lose</span>`;
@@ -634,15 +691,15 @@ class DualEngineApp {
                     tooltip: {
                         backgroundColor: '#0A101C',
                         titleColor: '#00E5FF',
-                        titleFont: { size: 13, family: "'JetBrains Mono', monospace", weight: 'bold' },
+                        titleFont: { size: 12, family: "'JetBrains Mono', monospace", weight: 'bold' },
                         bodyColor: '#E2E8F0',
-                        bodyFont: { size: 12, family: "'JetBrains Mono', monospace" },
+                        bodyFont: { size: 11, family: "'JetBrains Mono', monospace" },
                         borderColor: '#1A2436',
                         borderWidth: 1,
-                        padding: 14,
+                        padding: 12,
                         displayColors: false,
                         callbacks: {
-                            label: (context) => 'Growth: ' + context.parsed.y + '%'
+                            label: (context) => 'Growth: +' + context.parsed.y + '%'
                         }
                     }
                 },
@@ -694,20 +751,20 @@ class DualEngineApp {
 
         let html = '';
         Object.keys(dataByYear).sort((a, b) => b - a).forEach(y => {
-            html += `<tr class="hover:bg-cardBorder/10 transition-colors"><td class="p-3 font-bold text-white bg-darkBg/50 border-r border-cardBorder/40">${y}</td>`;
+            html += `<tr class="hover:bg-cardBorder/10 transition-colors"><td class="p-2.5 md:p-3 font-bold text-white bg-cardBg sticky left-0 z-10 border-r border-cardBorder/40">${y}</td>`;
             for (let i = 1; i <= 12; i++) {
                 const mStr = i.toString().padStart(2, '0');
                 const val = dataByYear[y][mStr];
                 if (val !== undefined) {
                     const colorClass = val > 0 ? 'bg-emerald-500/20 text-emerald-400 font-semibold' : (val < 0 ? 'bg-rose-500/20 text-rose-400 font-semibold' : 'text-zinc-500');
-                    html += `<td class="p-3 ${colorClass}">${val > 0 ? '+' : ''}${val.toFixed(2)}%</td>`;
+                    html += `<td class="p-2.5 md:p-3 ${colorClass}">${val > 0 ? '+' : ''}${val.toFixed(2)}%</td>`;
                 } else {
-                    html += `<td class="p-3 text-zinc-600">-</td>`;
+                    html += `<td class="p-2.5 md:p-3 text-zinc-600">-</td>`;
                 }
             }
             const ytd = dataByYear[y].sum;
             const ytdColor = ytd > 0 ? 'text-emerald-400 font-bold' : (ytd < 0 ? 'text-rose-400 font-bold' : 'text-zinc-500');
-            html += `<td class="p-3 bg-darkBg/50 border-l border-cardBorder/40 ${ytdColor}">${ytd > 0 ? '+' : ''}${ytd.toFixed(2)}%</td></tr>`;
+            html += `<td class="p-2.5 md:p-3 bg-darkBg/50 border-l border-cardBorder/40 ${ytdColor}">${ytd > 0 ? '+' : ''}${ytd.toFixed(2)}%</td></tr>`;
         });
         body.innerHTML = html;
     }
@@ -863,12 +920,12 @@ class DualEngineApp {
                     <div class="flex justify-center items-center gap-3 sm:gap-6 mt-2">
                         <div class="text-right">
                             <span class="block text-[8px] sm:text-[10px] text-zinc-500 uppercase tracking-widest mb-1 md:mb-2">${this.currentLang === 'de' ? 'Startkapital' : 'Capital'}</span>
-                            <span class="text-3xl sm:text-4xl md:text-5xl font-mono font-extrabold text-white leading-none">$${formatMoneyNum(resAvg.balance)}</span>
+                            <span class="text-2xl sm:text-4xl md:text-5xl font-mono font-extrabold text-white leading-none">$${formatMoneyNum(resAvg.balance)}</span>
                         </div>
-                        <div class="text-2xl sm:text-3xl md:text-4xl font-light text-zinc-600 mt-3 sm:mt-4 md:mt-5">+</div>
+                        <div class="text-xl sm:text-3xl md:text-4xl font-light text-zinc-600 mt-3 sm:mt-4 md:mt-5">+</div>
                         <div class="text-left">
                             <span class="block text-[8px] sm:text-[10px] text-accentCyan uppercase tracking-widest mb-1 md:mb-2">${this.currentLang === 'de' ? 'Auszahlungen' : 'Payouts'}</span>
-                            <span class="text-3xl sm:text-4xl md:text-5xl font-mono font-extrabold text-accentCyan drop-shadow-[0_0_15px_rgba(0,229,255,0.4)] leading-none">$${formatMoneyNum(resAvg.payouts)}</span>
+                            <span class="text-2xl sm:text-4xl md:text-5xl font-mono font-extrabold text-accentCyan drop-shadow-[0_0_15px_rgba(0,229,255,0.4)] leading-none">$${formatMoneyNum(resAvg.payouts)}</span>
                         </div>
                     </div>
                 `;
@@ -1009,9 +1066,24 @@ class DualEngineApp {
             Chart.Tooltip.positioners.followGreenLine = function(elements) {
                 if (!elements || elements.length === 0) return false;
                 const greenElement = elements.find(el => el.datasetIndex === 0) || elements[0];
-                return { x: greenElement.element.x, y: greenElement.element.y };
+                const chart = this.chart;
+                const isMobile = window.innerWidth < 768;
+
+                let x = greenElement.element.x;
+                let y = greenElement.element.y;
+
+                if (isMobile && chart && chart.chartArea) {
+                    const minX = chart.chartArea.left + 85;
+                    const maxX = chart.chartArea.right - 85;
+                    x = Math.max(minX, Math.min(maxX, x));
+                    y = Math.max(chart.chartArea.top + 20, y - 15);
+                }
+
+                return { x, y };
             };
         }
+
+        const isMobile = window.innerWidth < 768;
 
         this.btChart = new Chart(ctx, {
             type: 'line',
@@ -1062,17 +1134,17 @@ class DualEngineApp {
                         position: 'followGreenLine',
                         backgroundColor: '#0A101C',
                         titleColor: '#00E5FF',
-                        titleFont: { size: 13, family: "'JetBrains Mono', monospace", weight: 'bold' },
+                        titleFont: { size: isMobile ? 11 : 13, family: "'JetBrains Mono', monospace", weight: 'bold' },
                         bodyColor: '#E2E8F0',
-                        bodyFont: { size: 12, family: "'JetBrains Mono', monospace" },
-                        bodySpacing: 6,
+                        bodyFont: { size: isMobile ? 10 : 12, family: "'JetBrains Mono', monospace" },
+                        bodySpacing: isMobile ? 4 : 6,
                         borderColor: '#1A2436',
                         borderWidth: 1,
-                        padding: 14,
+                        padding: isMobile ? 10 : 14,
                         displayColors: false,
                         filter: (tooltipItem) => tooltipItem.datasetIndex === 0,
                         callbacks: {
-                            title: (items) => `Datum: ${items[0].label}`,
+                            title: (items) => `${this.currentLang === 'de' ? 'Datum' : 'Date'}: ${items[0].label}`,
                             label: (ctx) => {
                                 const total = ctx.parsed.y;
                                 const index = ctx.dataIndex;
@@ -1202,8 +1274,8 @@ class DualEngineApp {
             const logo = `<div class="flex items-center gap-2"><div class="w-5 h-5 rounded-full ${this.isNeo ? 'bg-emerald-500/20 text-emerald-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center text-[10px]"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5v-2.1c2.1-.3 3.5-1.7 3.5-3.4 0-1.6-1.2-2.7-2.8-2.9v-2c1.9.3 2.9 1.4 3 2.8h1.8c-.2-2.4-1.9-4.2-4.8-4.5V3h-1.4v1.4c-2.3.3-4.1 1.9-4.1 4 0 2 1.6 3.3 3.7 3.7v2.3c-2-.3-3.2-1.5-3.3-3.1H6.9c.2 2.6 2.1 4.5 4.7 4.8v2.4h1.4z"/></svg></div><span class="font-extrabold text-white text-xs tracking-wide">${stratName}</span></div>`;
 
             html += `<tr class="hover:bg-cardBorder/25 transition-colors border-b border-cardBorder/30">
-                <td class="px-4 md:px-6 py-3 md:py-4 font-sans">${logo}</td>
-                <td class="px-4 md:px-6 py-3 md:py-4 text-zinc-300 font-semibold">${displayDate}</td>
+                <td class="hidden sm:table-cell px-4 md:px-6 py-3 md:py-4 font-sans">${logo}</td>
+                <td class="sticky left-0 z-10 bg-cardBg px-3 sm:px-4 md:px-6 py-3 md:py-4 text-zinc-300 font-semibold border-r border-cardBorder/40 sm:border-r-0">${displayDate}</td>
                 <td class="px-4 md:px-6 py-3 md:py-4 font-extrabold ${profitClass} text-sm">${formattedGain}</td>
                 <td class="px-4 md:px-6 py-3 md:py-4 text-zinc-400">${entryTime}</td>
                 <td class="px-4 md:px-6 py-3 md:py-4 text-zinc-400">${exitTime}</td>
