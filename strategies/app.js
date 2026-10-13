@@ -934,6 +934,12 @@ class DualEngineApp {
             const typeLabel = isLong ? 'Long' : 'Short';
             const typeColor = isLong ? 'text-emerald-400' : 'text-rose-400';
             
+            let displayDate = "-";
+            if (t.dt) {
+                let dParts = t.dt.split('-');
+                displayDate = dParts.length === 3 ? `${dParts[2]}.${dParts[1]}.${dParts[0]}` : t.dt;
+            }
+            
             let entryTime = "-";
             let exitTime = "-";
             if(t["Open Date"] && t["Open Date"].includes(" ")) entryTime = t["Open Date"].split(" ")[1];
@@ -964,7 +970,7 @@ class DualEngineApp {
 
             html += `<tr class="hover:bg-cardBorder/25 transition-colors border-b border-cardBorder/30">
                 <td class="px-4 md:px-6 py-3 md:py-4 font-sans">${logo}</td>
-                <td class="px-4 md:px-6 py-3 md:py-4 text-zinc-300 font-semibold">${t.dt || "-"}</td>
+                <td class="px-4 md:px-6 py-3 md:py-4 text-zinc-300 font-semibold">${displayDate}</td>
                 <td class="px-4 md:px-6 py-3 md:py-4 font-extrabold ${profitClass} text-sm">${formattedGain}</td>
                 <td class="px-4 md:px-6 py-3 md:py-4 text-zinc-400">${entryTime}</td>
                 <td class="px-4 md:px-6 py-3 md:py-4 text-zinc-400">${exitTime}</td>
