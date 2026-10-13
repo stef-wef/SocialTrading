@@ -63,8 +63,11 @@
         }
         .tt-wrapper:hover .tt-text { visibility: visible; opacity: 1; }
         
-        .tt-wrapper.tt-right .tt-text { left: 50%; right: auto; transform: translateX(-50%); }
-        @media (max-width: 768px) { .tt-wrapper .tt-text { left: 50%; right: auto; transform: translateX(-50%); } }
+        .tt-wrapper.tt-right .tt-text { left: auto; right: 0; transform: none; }
+        @media (max-width: 768px) { 
+            .tt-wrapper .tt-text { left: 50%; right: auto; transform: translateX(-50%); } 
+            .tt-wrapper.tt-right .tt-text { left: auto; right: 0; transform: none; }
+        }
 
         input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; height: 20px; cursor: pointer; }
         input[type=range]:focus { outline: none; }
@@ -100,10 +103,6 @@
             <div class="text-center flex-1 px-4">
                 <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-1.5">SONIC.</h1>
                 <p class="text-[10px] md:text-sm text-zinc-400 font-medium mb-2">Gold (XAU/USD) · Social Trading · 1:30 Hebel</p>
-                <div class="flex items-center gap-2 justify-center mt-2 opacity-80">
-                    <span class="px-2 py-1 bg-darkBg border border-cardBorder rounded text-[9px] md:text-[10px] font-mono text-zinc-300">👥 482 Copiers</span>
-                    <span class="px-2 py-1 bg-darkBg border border-cardBorder rounded text-[9px] md:text-[10px] font-mono text-zinc-300">💰 $2.1M AUM</span>
-                </div>
             </div>
             
             <button id="langToggle" class="text-[10px] md:text-xs font-bold text-zinc-400 hover:text-white px-2 md:px-2.5 py-1 border border-cardBorder rounded-lg transition-colors mt-1.5 md:mt-0">
