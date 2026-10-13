@@ -43,6 +43,7 @@ class DualEngineApp {
             btResBal: document.getElementById('bt-res-balance'),
             btResProf: document.getElementById('bt-res-profit'),
             btResGrowth: document.getElementById('bt-res-growth'),
+            btSimLabel: document.getElementById('bt-sim-label'),
 
             statTotal: document.getElementById('stat-total'),
             tradesBody: document.getElementById('trades-table-body'),
@@ -670,7 +671,7 @@ class DualEngineApp {
             if (mode === 'payout') { payouts += balance * rate; if (m < months) { balance += topup; invested += topup; } } 
             else { balance = balance * (1 + rate); if (m < months) { balance += topup; invested += topup; } }
         }
-        return { balance: mode === 'payout' ? balance + payouts : balance, invested };
+        return { balance, payouts, total: balance + payouts, invested };
     }
 
     calcProjection() {
@@ -686,25 +687,56 @@ class DualEngineApp {
         let resCons = this.simulateProj(deposit, topup, months, this.rates.cons, mode);
         let resOpt = this.simulateProj(deposit, topup, months, this.rates.opt, mode);
 
-        let multiplier = resAvg.invested > 0 ? (resAvg.balance / resAvg.invested).toFixed(1) : '0.0';
-        const formatMoney = (val) => '$' + Math.round(val).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
-
-        if (this.dom.projResBal) this.dom.projResBal.innerText = formatMoney(resAvg.balance);
-        if (this.dom.projResInv) this.dom.projResInv.innerText = formatMoney(resAvg.invested);
-        if (this.dom.projResMult) this.dom.projResMult.innerText = multiplier + 'x';
-        if (this.dom.projConsBal) this.dom.projConsBal.innerText = formatMoney(resCons.balance);
-        if (this.dom.projOptBal) this.dom.projOptBal.innerText = formatMoney(resOpt.balance);
+        let multiplier = resAvg.invested > 0 ? (resAvg.total / resAvg.invested).toFixed(1) : '0.0';
+        const formatMoneyNum = (val) => Math.round(val).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
 
         const projScenTitle = document.getElementById('proj-scen-title');
         if (projScenTitle && typeof translations !== 'undefined' && translations[this.currentLang]) {
-            projScenTitle.innerHTML = mode === 'payout' 
-                ? (this.currentLang === 'de' ? `Gesamtkapital + Auszahlungen nach <span id="proj-res-month">${months}</span> Monaten` : `Total Capital + Payouts After <span id="proj-res-month">${months}</span> Months`)
-                : (this.currentLang === 'de' ? `Szenario nach <span id="proj-res-month">${months}</span> Monaten` : `Scenario After <span id="proj-res-month">${months}</span> Months`);
+            projScenTitle.innerHTML = this.currentLang === 'de' ? `Szenario nach <span id="proj-res-month">${months}</span> Monaten` : `Scenario After <span id="proj-res-month">${months}</span> Months`;
+        }
+
+        if (this.dom.projResBal) {
+            let totalVal = resAvg.balance + resAvg.payouts;
+            
+            if (mode === 'payout') {
+                this.dom.projResBal.innerHTML = `
+                    <div class="flex justify-center items-center gap-3 sm:gap-6 mt-2">
+                        <div class="text-right">
+                            <span class="block text-[8px] sm:text-[10px] text-zinc-500 uppercase tracking-widest mb-1">${this.currentLang === 'de' ? 'Startkapital' : 'Capital'}</span>
+                            <span class="text-xl sm:text-3xl md:text-4xl font-mono font-extrabold text-white">$${formatMoneyNum(resAvg.balance)}</span>
+                        </div>
+                        <div class="text-xl sm:text-3xl font-light text-zinc-600 mb-1">+</div>
+                        <div class="text-left">
+                            <span class="block text-[8px] sm:text-[10px] text-accentCyan uppercase tracking-widest mb-1">${this.currentLang === 'de' ? 'Auszahlungen' : 'Payouts'}</span>
+                            <span class="text-2xl sm:text-4xl md:text-5xl font-mono font-extrabold text-accentCyan drop-shadow-[0_0_15px_rgba(0,229,255,0.4)]">$${formatMoneyNum(resAvg.payouts)}</span>
+                        </div>
+                    </div>
+                `;
+                
+                if (this.dom.projResInv && this.dom.projResInv.parentElement) {
+                    this.dom.projResInv.parentElement.innerHTML = `<span class="text-zinc-400">${this.currentLang === 'de' ? 'Gesamtwert:' : 'Total Value:'} <strong class="text-white">$${formatMoneyNum(totalVal)}</strong></span>`;
+                }
+
+                if(this.dom.projConsBal) this.dom.projConsBal.innerHTML = `$${formatMoneyNum(resCons.payouts)} <span class="text-[10px] text-zinc-500 block font-normal mt-0.5">+ $${formatMoneyNum(resCons.balance)} Kap.</span>`;
+                if(this.dom.projOptBal) this.dom.projOptBal.innerHTML = `$${formatMoneyNum(resOpt.payouts)} <span class="text-[10px] text-zinc-500 block font-normal mt-0.5">+ $${formatMoneyNum(resOpt.balance)} Kap.</span>`;
+            } else {
+                this.dom.projResBal.innerHTML = `$${formatMoneyNum(resAvg.balance)}`;
+                
+                if (this.dom.projResInv && this.dom.projResInv.parentElement) {
+                    this.dom.projResInv.parentElement.innerHTML = `<span data-i18n="fromWord">${this.currentLang === 'de' ? 'Aus' : 'From'}</span> <span class="text-white font-bold" id="proj-res-invested">$${formatMoneyNum(resAvg.invested)}</span> <span data-i18n="investedWord">${this.currentLang === 'de' ? 'investiert' : 'invested'}</span> · <strong class="text-emerald-400" id="proj-res-mult">${multiplier}x</strong>`;
+                }
+
+                if(this.dom.projConsBal) this.dom.projConsBal.innerHTML = `$${formatMoneyNum(resCons.balance)}`;
+                if(this.dom.projOptBal) this.dom.projOptBal.innerHTML = `$${formatMoneyNum(resOpt.balance)}`;
+            }
         }
 
         [1, 3, 6, 12].forEach(m => {
             const elAvg = document.getElementById(`ms${m}-avg`);
-            if (elAvg) elAvg.innerText = formatMoney(this.simulateProj(deposit, topup, m, this.rates.avg, mode).balance);
+            if (elAvg) {
+                let mRes = this.simulateProj(deposit, topup, m, this.rates.avg, mode);
+                elAvg.innerText = '$' + formatMoneyNum(mRes.total);
+            }
         });
     }
 
@@ -726,7 +758,7 @@ class DualEngineApp {
 
         let currentBalance = capital, startOfDayBalance = capital, totalInvested = capital, totalPayouts = 0;
         let lastMonth = '', lastDay = ''; 
-        let labels = [], dataPoints = [], investedPoints = [], dailyBacktest = {};
+        let labels = [], dataPoints = [], investedPoints = [], payoutsPoints = [], dailyBacktest = {};
 
         const formatDate = (dateStr) => {
             if (!dateStr) return '';
@@ -749,27 +781,45 @@ class DualEngineApp {
             if (mode === 'reinvest') currentBalance += tradeProfit;
             else totalPayouts += tradeProfit;
             
-            dailyBacktest[t.dt] = { balance: mode === 'reinvest' ? currentBalance : currentBalance + totalPayouts, invested: totalInvested };
+            dailyBacktest[t.dt] = { balance: currentBalance, payouts: totalPayouts, total: currentBalance + totalPayouts, invested: totalInvested };
         });
 
         Object.keys(dailyBacktest).forEach(date => {
-            labels.push(formatDate(date)); dataPoints.push(dailyBacktest[date].balance); investedPoints.push(dailyBacktest[date].invested);
+            labels.push(formatDate(date)); 
+            dataPoints.push(dailyBacktest[date].total); 
+            investedPoints.push(dailyBacktest[date].invested);
+            payoutsPoints.push(dailyBacktest[date].payouts);
         });
 
-        let finalBalance = dataPoints[dataPoints.length - 1], totalInvestedEnd = investedPoints[investedPoints.length - 1];
-        let netProfit = finalBalance - totalInvestedEnd;
+        let finalTotal = dataPoints[dataPoints.length - 1], totalInvestedEnd = investedPoints[investedPoints.length - 1];
+        let netProfit = finalTotal - totalInvestedEnd;
         let growth = totalInvestedEnd > 0 ? (netProfit / totalInvestedEnd) * 100 : 0;
 
-        if (this.dom.btResBal) this.dom.btResBal.innerText = '$' + finalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const formatMoneyDec = (val) => '$' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        if (this.dom.btSimLabel) {
+            this.dom.btSimLabel.innerText = mode === 'payout' 
+                ? (this.currentLang === 'de' ? 'Generierte Auszahlungen' : 'Generated Payouts')
+                : (this.currentLang === 'de' ? 'Simuliertes Endguthaben' : 'Simulated Balance');
+        }
+
+        if (this.dom.btResBal) {
+            this.dom.btResBal.innerText = mode === 'payout' ? formatMoneyDec(totalPayouts) : formatMoneyDec(finalTotal);
+        }
+
         let resInvestedEl = document.getElementById('bt-res-invested');
-        if (resInvestedEl) resInvestedEl.innerText = '$' + totalInvestedEnd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        if (this.dom.btResProf) this.dom.btResProf.innerText = (netProfit >= 0 ? '+' : '-') + '$' + Math.abs(netProfit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (resInvestedEl) resInvestedEl.innerText = formatMoneyDec(totalInvestedEnd);
+        if (this.dom.btResProf) this.dom.btResProf.innerText = (netProfit >= 0 ? '+' : '-') + formatMoneyDec(Math.abs(netProfit));
         if (this.dom.btResGrowth) this.dom.btResGrowth.innerText = (growth >= 0 ? '+' : '') + growth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
 
         if (this.btChart) {
             this.btChart.data.labels = labels;
             this.btChart.data.datasets[0].data = dataPoints;
             this.btChart.data.datasets[1].data = investedPoints;
+            if(!this.btChart.data.datasets[2]) {
+                this.btChart.data.datasets.push({ label: 'Payouts', data: [], hidden: true });
+            }
+            this.btChart.data.datasets[2].data = payoutsPoints;
             this.btChart.update();
         }
     }
@@ -796,8 +846,64 @@ class DualEngineApp {
 
         this.btChart = new Chart(ctx, {
             type: 'line',
-            data: { labels: [], datasets: [{ label: 'Portfolio Balance', data: [], borderColor: '#34D399', backgroundColor: gradient, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointBackgroundColor: '#040914', pointBorderColor: '#34D399', pointBorderWidth: 2, fill: true, tension: 0.15 }, { label: 'Invested Capital', data: [], borderColor: 'transparent', backgroundColor: 'transparent', borderWidth: 0, pointRadius: 0, pointHoverRadius: 0, pointHitRadius: 0, fill: false, tension: 0, hidden: true }] },
-            options: { responsive: true, maintainAspectRatio: false, layout: { padding: { left: 0, right: 0, top: 10, bottom: 0 } }, plugins: { legend: { display: false }, tooltip: { position: 'followGreenLine', backgroundColor: '#0A101C', titleColor: '#00E5FF', titleFont: { size: 13, family: "'JetBrains Mono', monospace", weight: 'bold' }, bodyColor: '#E2E8F0', bodyFont: { size: 12, family: "'JetBrains Mono', monospace" }, bodySpacing: 6, borderColor: '#1A2436', borderWidth: 1, padding: 14, displayColors: false, filter: function(tooltipItem) { return tooltipItem.datasetIndex === 0; }, callbacks: { title: (items) => `Datum: ${items[0].label}`, label: (ctx) => { let balance = ctx.parsed.y; let index = ctx.dataIndex; let investedData = ctx.chart.data.datasets[1] ? ctx.chart.data.datasets[1].data : []; let invested = (investedData && investedData[index] !== undefined) ? investedData[index] : 0; let profit = balance - invested; let growth = invested > 0 ? (profit / invested) * 100 : 0; let signProfit = profit >= 0 ? '+' : '-'; let signGrowth = growth >= 0 ? '+' : '-'; let isDe = this.currentLang === 'de'; return [ `${isDe ? 'Endguthaben' : 'Portfolio Balance'}: $${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, `${isDe ? 'Investiert' : 'Invested Capital'}:  $${invested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, `${isDe ? 'Reingewinn' : 'Net Profit'}:  ${signProfit}$${Math.abs(profit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, `${isDe ? 'Wachstum' : 'Growth'}:    ${signGrowth}${Math.abs(growth).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%` ]; } } } }, interaction: { mode: 'index', intersect: false, axis: 'x' }, scales: { x: { grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false }, border: { display: false }, ticks: { maxTicksLimit: window.innerWidth < 768 ? 4 : 6, maxRotation: 0, font: { size: window.innerWidth < 768 ? 8 : 10 }, color: '#94A3B8', align: 'inner', padding: 5 } }, y: { position: 'right', grid: { color: 'rgba(255, 255, 255, 0.04)', drawTicks: false }, border: { dash: [4, 4], display: false }, ticks: { maxTicksLimit: 6, font: { size: window.innerWidth < 768 ? 8 : 10 }, color: '#94A3B8', padding: window.innerWidth < 768 ? 4 : 8, callback: (val) => val >= 1000 ? '$' + (val / 1000).toFixed(1) + 'k' : '$' + val } } } }
+            data: { 
+                labels: [], 
+                datasets: [
+                    { label: 'Portfolio Balance', data: [], borderColor: '#34D399', backgroundColor: gradient, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointBackgroundColor: '#040914', pointBorderColor: '#34D399', pointBorderWidth: 2, fill: true, tension: 0.15 }, 
+                    { label: 'Invested Capital', data: [], borderColor: 'transparent', backgroundColor: 'transparent', borderWidth: 0, pointRadius: 0, pointHoverRadius: 0, pointHitRadius: 0, fill: false, tension: 0, hidden: true },
+                    { label: 'Payouts', data: [], hidden: true }
+                ] 
+            },
+            options: { 
+                responsive: true, maintainAspectRatio: false, layout: { padding: { left: 0, right: 0, top: 10, bottom: 0 } }, 
+                plugins: { 
+                    legend: { display: false }, 
+                    tooltip: { 
+                        position: 'followGreenLine', backgroundColor: '#0A101C', titleColor: '#00E5FF', titleFont: { size: 13, family: "'JetBrains Mono', monospace", weight: 'bold' }, bodyColor: '#E2E8F0', bodyFont: { size: 12, family: "'JetBrains Mono', monospace" }, bodySpacing: 6, borderColor: '#1A2436', borderWidth: 1, padding: 14, displayColors: false, 
+                        filter: function(tooltipItem) { return tooltipItem.datasetIndex === 0; }, 
+                        callbacks: { 
+                            title: (items) => `Datum: ${items[0].label}`, 
+                            label: (ctx) => { 
+                                let total = ctx.parsed.y; 
+                                let index = ctx.dataIndex; 
+                                let investedData = ctx.chart.data.datasets[1] ? ctx.chart.data.datasets[1].data : []; 
+                                let payoutsData = ctx.chart.data.datasets[2] ? ctx.chart.data.datasets[2].data : [];
+                                
+                                let invested = (investedData && investedData[index] !== undefined) ? investedData[index] : 0; 
+                                let payouts = (payoutsData && payoutsData[index] !== undefined) ? payoutsData[index] : 0;
+                                let isPayoutMode = document.getElementById('bt-mode-select') && document.getElementById('bt-mode-select').value === 'payout';
+
+                                let profit = total - invested; 
+                                let growth = invested > 0 ? (profit / invested) * 100 : 0; 
+                                let signProfit = profit >= 0 ? '+' : '-'; 
+                                let signGrowth = growth >= 0 ? '+' : '-'; 
+                                let isDe = this.currentLang === 'de'; 
+                                
+                                let lines = [];
+                                if (isPayoutMode) {
+                                    let actualBal = total - payouts;
+                                    lines.push(`${isDe ? 'Gesamtwert' : 'Total Value'}: $${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+                                    lines.push(` ↳ ${isDe ? 'Kapital' : 'Capital'}:    $${actualBal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+                                    lines.push(` ↳ ${isDe ? 'Auszahlung' : 'Payouts'}:   $${payouts.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+                                } else {
+                                    lines.push(`${isDe ? 'Endguthaben' : 'Portfolio Balance'}: $${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+                                }
+                                
+                                lines.push(`${isDe ? 'Investiert' : 'Invested Capital'}:  $${invested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+                                lines.push(`${isDe ? 'Reingewinn' : 'Net Profit'}:  ${signProfit}$${Math.abs(profit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+                                lines.push(`${isDe ? 'Wachstum' : 'Growth'}:    ${signGrowth}${Math.abs(growth).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`);
+                                
+                                return lines;
+                            } 
+                        } 
+                    } 
+                }, 
+                interaction: { mode: 'index', intersect: false, axis: 'x' }, 
+                scales: { 
+                    x: { grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false }, border: { display: false }, ticks: { maxTicksLimit: window.innerWidth < 768 ? 4 : 6, maxRotation: 0, font: { size: window.innerWidth < 768 ? 8 : 10 }, color: '#94A3B8', align: 'inner', padding: 5 } }, 
+                    y: { position: 'right', grid: { color: 'rgba(255, 255, 255, 0.04)', drawTicks: false }, border: { dash: [4, 4], display: false }, ticks: { maxTicksLimit: 6, font: { size: window.innerWidth < 768 ? 8 : 10 }, color: '#94A3B8', padding: window.innerWidth < 768 ? 4 : 8, callback: (val) => val >= 1000 ? '$' + (val / 1000).toFixed(1) + 'k' : '$' + val } } 
+                } 
+            }
         });
     }
 
