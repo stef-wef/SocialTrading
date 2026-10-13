@@ -63,8 +63,8 @@
         }
         .tt-wrapper:hover .tt-text { visibility: visible; opacity: 1; }
         
-        .tt-wrapper.tt-right .tt-text { left: auto; right: 0; transform: none; }
-        @media (max-width: 768px) { .tt-wrapper .tt-text { left: auto; right: 0; transform: none; } }
+        .tt-wrapper.tt-right .tt-text { left: 50%; right: auto; transform: translateX(-50%); }
+        @media (max-width: 768px) { .tt-wrapper .tt-text { left: 50%; right: auto; transform: translateX(-50%); } }
 
         input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; height: 20px; cursor: pointer; }
         input[type=range]:focus { outline: none; }

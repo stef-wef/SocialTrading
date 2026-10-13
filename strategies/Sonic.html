@@ -63,8 +63,8 @@
         }
         .tt-wrapper:hover .tt-text { visibility: visible; opacity: 1; }
         
-        .tt-wrapper.tt-right .tt-text { left: auto; right: 0; transform: none; }
-        @media (max-width: 768px) { .tt-wrapper .tt-text { left: auto; right: 0; transform: none; } }
+        .tt-wrapper.tt-right .tt-text { left: 50%; right: auto; transform: translateX(-50%); }
+        @media (max-width: 768px) { .tt-wrapper .tt-text { left: 50%; right: auto; transform: translateX(-50%); } }
 
         input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; height: 20px; cursor: pointer; }
         input[type=range]:focus { outline: none; }
@@ -691,9 +691,7 @@
                 <div>
                     <h2 class="text-lg md:text-xl font-extrabold text-white tracking-tight flex flex-wrap items-center gap-2">
                         <span data-i18n="tradesHeader">Trades</span>
-                        <div class="flex items-center gap-1.5 bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-mono uppercase tracking-widest mt-1 sm:mt-0">
-                            <span class="text-[9px]" data-i18n="liveBadge">Live API</span>
-                        </div>
+                        <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-mono uppercase tracking-widest mt-1 sm:mt-0" data-i18n="liveBadge">Live API</span>
                         <span class="text-[9px] text-zinc-500 font-mono ml-1 mt-1 sm:mt-0" id="live-sync-time">Letzter Sync: ---</span>
                     </h2>
                     <p class="text-[10px] md:text-xs text-zinc-400 mt-1 md:mt-0.5" data-i18n="tradesSubLive">Aktuelle Live-Transaktionen aus dem Broker-Feed (API)</p>
