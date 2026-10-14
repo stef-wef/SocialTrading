@@ -6,6 +6,10 @@ const PORT = process.env.PORT || 3000;
 const ACCOUNT_ID = process.env.MYFXBOOK_ACCOUNT_ID || '12249114';
 const SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 Minuten
 
+// Referenzwerte für den 1x Basis-Account
+const BASE_REFERENCE_BALANCE = 1200.52;
+const BASE_REFERENCE_LOTS = 0.001;
+
 let sessionToken = null;
 let cachedTrades = [];
 let lastSyncTime = null;
@@ -45,13 +49,19 @@ function processTrades(rawList) {
             return action.startsWith('buy') || action.startsWith('sell');
         })
         .map(t => {
-            const lots = t["Units/Lots"] || (t.sizing ? t.sizing.value : null) || t.lots || t.volume || 0;
+            const rawLots = t["Units/Lots"] || (t.sizing ? t.sizing.value : null) || t.lots || t.volume || 0;
+            const lots = parseFloat(rawLots) || 0;
             const profit = parseFloat(t["Profit"] !== undefined ? t["Profit"] : (t.profit || 0));
             let gain = t["Gain"] !== undefined ? parseFloat(t["Gain"]) : (t.gain !== undefined ? parseFloat(t.gain) : 0);
 
-            // Fallback: Gain berechnen, falls MyFXBook 0 sendet (angepasst auf Basiswert)
+            // Fallback: 1x Basis-Gain berechnen, falls MyFXBook 0 sendet
             if (gain === 0 && profit !== 0) {
-                gain = (profit / 1200.52) * 100;
+                // Falls ein Trade mit deutlich höherer Lot-Grösse (> 0.005 Lots) ausgeführt wurde,
+                // auf die 1x-Basis-Lotgrösse (0.001 Lots) normieren, um doppelte Hebelung zu verhindern
+                const normalizedProfit = (lots > 0.005)
+                    ? (profit / lots) * BASE_REFERENCE_LOTS
+                    : profit;
+                gain = (normalizedProfit / BASE_REFERENCE_BALANCE) * 100;
             }
 
             return {

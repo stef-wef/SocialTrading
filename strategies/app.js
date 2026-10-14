@@ -329,7 +329,24 @@ class DualEngineApp {
                 if (Array.isArray(rawTradesArray)) {
                     this.liveTableTrades = rawTradesArray.map(t => {
                         const dateObj = this.parseDate(t["Open Date"]);
-                        const gain = parseFloat(t["Gain"] || 0);
+                        let rawLots = t["Units/Lots"];
+                        if (typeof rawLots === 'object' && rawLots !== null) rawLots = rawLots.value;
+                        const lots = parseFloat(rawLots) || 0;
+                        const profit = parseFloat(t["Profit"] || 0);
+                        let gain = parseFloat(t["Gain"] || 0);
+
+                        // Sicherheits-Korrektur: Falls das Backend den Gain aus einer stark erhöhten
+                        // Lot-Grösse (> 0.005 Lots) über den fixen Teiler 1200.52 berechnet hat,
+                        // normieren wir ihn hier auf die 1x-Basis-Lotgrösse (0.001 Lots).
+                        if (lots > 0.005 && Math.abs(gain) > 0.5) {
+                            if (profit !== 0) {
+                                const normalizedProfit = (profit / lots) * 0.001;
+                                gain = (normalizedProfit / 1200.52) * 100;
+                            } else {
+                                gain = (gain / lots) * 0.001;
+                            }
+                        }
+
                         return {
                             ...t,
                             dt: dateObj.dt,
