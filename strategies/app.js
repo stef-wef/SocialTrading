@@ -290,6 +290,8 @@ class DualEngineApp {
         Chart.defaults.font.family = "'JetBrains Mono', monospace";
         Chart.defaults.color = '#94A3B8';
 
+        const isMobile = window.innerWidth < 768;
+
         const ddCanvas = document.getElementById('drawdownChart');
         if (ddCanvas) {
             const ctx = ddCanvas.getContext('2d');
@@ -318,9 +320,9 @@ class DualEngineApp {
                                 return val > 0 ? '#34D399' : '#F43F5E';
                             },
                             borderRadius: 2,
-                            barPercentage: 0.75,
-                            categoryPercentage: 0.85,
-                            maxBarThickness: 12,
+                            barPercentage: 0.7,
+                            categoryPercentage: 0.82,
+                            maxBarThickness: isMobile ? 8 : 14,
                             minBarLength: 2,
                             order: 1
                         }
@@ -329,7 +331,14 @@ class DualEngineApp {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: { padding: { left: 0, right: 8, top: 10, bottom: 0 } },
+                    layout: {
+                        padding: {
+                            left: isMobile ? 2 : 4,
+                            right: isMobile ? 2 : 6,
+                            top: 8,
+                            bottom: 0
+                        }
+                    },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
@@ -365,12 +374,13 @@ class DualEngineApp {
                             grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false },
                             border: { display: false },
                             ticks: {
-                                maxTicksLimit: window.innerWidth < 768 ? 4 : 6,
+                                maxTicksLimit: isMobile ? 4 : 6,
                                 maxRotation: 0,
                                 autoSkip: true,
-                                font: { size: window.innerWidth < 768 ? 8 : 10 },
+                                align: 'inner',
+                                font: { size: isMobile ? 8 : 10 },
                                 color: '#94A3B8',
-                                padding: 5,
+                                padding: 6,
                                 callback: function(val) {
                                     const label = this.getLabelForValue(val);
                                     if (!label) return '';
@@ -385,10 +395,11 @@ class DualEngineApp {
                             grid: { color: 'rgba(255, 255, 255, 0.05)', drawTicks: false },
                             border: { dash: [4, 4], display: false },
                             ticks: {
+                                maxTicksLimit: 6,
                                 callback: (v) => v + '%',
                                 color: '#94A3B8',
-                                font: { size: window.innerWidth < 768 ? 8 : 10 },
-                                padding: window.innerWidth < 768 ? 4 : 8
+                                font: { size: isMobile ? 8 : 10 },
+                                padding: isMobile ? 6 : 8
                             }
                         }
                     }
@@ -663,6 +674,8 @@ class DualEngineApp {
             return;
         }
 
+        const isMobile = window.innerWidth < 768;
+
         this.equityChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -685,7 +698,7 @@ class DualEngineApp {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                layout: { padding: { left: 0, right: 0, top: 5, bottom: 0 } },
+                layout: { padding: { left: 2, right: 2, top: 5, bottom: 0 } },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -710,10 +723,11 @@ class DualEngineApp {
                         border: { display: false },
                         ticks: {
                             color: '#94A3B8',
-                            font: { size: window.innerWidth < 768 ? 8 : 10 },
-                            maxTicksLimit: window.innerWidth < 768 ? 4 : 6,
+                            font: { size: isMobile ? 8 : 10 },
+                            maxTicksLimit: isMobile ? 4 : 6,
                             maxRotation: 0,
-                            padding: 5
+                            align: 'inner',
+                            padding: 6
                         }
                     },
                     y: {
@@ -722,8 +736,8 @@ class DualEngineApp {
                         border: { dash: [4, 4], display: false },
                         ticks: {
                             color: '#94A3B8',
-                            font: { size: window.innerWidth < 768 ? 8 : 10 },
-                            padding: window.innerWidth < 768 ? 4 : 8,
+                            font: { size: isMobile ? 8 : 10 },
+                            padding: isMobile ? 6 : 8,
                             callback: (v) => v + '%'
                         }
                     }
@@ -918,12 +932,12 @@ class DualEngineApp {
             if (mode === 'payout') {
                 this.dom.projResBal.innerHTML = `
                     <div class="flex justify-center items-center gap-3 sm:gap-6 mt-2">
-                        <div class="text-right">
+                        <div class="text-center">
                             <span class="block text-[8px] sm:text-[10px] text-zinc-500 uppercase tracking-widest mb-1 md:mb-2">${this.currentLang === 'de' ? 'Startkapital' : 'Capital'}</span>
                             <span class="text-2xl sm:text-4xl md:text-5xl font-mono font-extrabold text-white leading-none">$${formatMoneyNum(resAvg.balance)}</span>
                         </div>
                         <div class="text-xl sm:text-3xl md:text-4xl font-light text-zinc-600 mt-3 sm:mt-4 md:mt-5">+</div>
-                        <div class="text-left">
+                        <div class="text-center">
                             <span class="block text-[8px] sm:text-[10px] text-accentCyan uppercase tracking-widest mb-1 md:mb-2">${this.currentLang === 'de' ? 'Auszahlungen' : 'Payouts'}</span>
                             <span class="text-2xl sm:text-4xl md:text-5xl font-mono font-extrabold text-accentCyan drop-shadow-[0_0_15px_rgba(0,229,255,0.4)] leading-none">$${formatMoneyNum(resAvg.payouts)}</span>
                         </div>
@@ -1127,7 +1141,7 @@ class DualEngineApp {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                layout: { padding: { left: 0, right: 0, top: 10, bottom: 0 } },
+                layout: { padding: { left: 2, right: 2, top: 10, bottom: 0 } },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -1186,12 +1200,12 @@ class DualEngineApp {
                         grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false },
                         border: { display: false },
                         ticks: {
-                            maxTicksLimit: window.innerWidth < 768 ? 4 : 6,
+                            maxTicksLimit: isMobile ? 4 : 6,
                             maxRotation: 0,
-                            font: { size: window.innerWidth < 768 ? 8 : 10 },
+                            font: { size: isMobile ? 8 : 10 },
                             color: '#94A3B8',
                             align: 'inner',
-                            padding: 5
+                            padding: 6
                         }
                     },
                     y: {
@@ -1200,9 +1214,9 @@ class DualEngineApp {
                         border: { dash: [4, 4], display: false },
                         ticks: {
                             maxTicksLimit: 6,
-                            font: { size: window.innerWidth < 768 ? 8 : 10 },
+                            font: { size: isMobile ? 8 : 10 },
                             color: '#94A3B8',
-                            padding: window.innerWidth < 768 ? 4 : 8,
+                            padding: isMobile ? 6 : 8,
                             callback: (val) => val >= 1000 ? '$' + (val / 1000).toFixed(1) + 'k' : '$' + val
                         }
                     }
