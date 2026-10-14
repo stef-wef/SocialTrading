@@ -3,15 +3,30 @@ const fetch = require('node-fetch');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const ACCOUNT_ID = process.env.MYFXBOOK_ACCOUNT_ID || '12249114';
 const SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 Minuten
 
-// Referenzwerte für den 1x Basis-Account
-const BASE_REFERENCE_BALANCE = 1200.52;
-const BASE_REFERENCE_LOTS = 0.001;
+const STRATEGIES = {
+    sonic: {
+        id: process.env.MYFXBOOK_SONIC_ID || process.env.MYFXBOOK_ACCOUNT_ID || '12249114',
+        symbol: 'XAUUSD',
+        baseBalance: 1200.52,
+        baseLots: 0.001,
+        maxNormalLots: 0.005
+    },
+    neofx: {
+        id: process.env.MYFXBOOK_NEO_ID || '12258114',
+        symbol: 'EURUSD',
+        baseBalance: 12000.00,
+        baseLots: 0.10,
+        maxNormalLots: 0.50
+    }
+};
 
 let sessionToken = null;
-let cachedTrades = [];
+let cachedTrades = {
+    sonic: [],
+    neofx: []
+};
 let lastSyncTime = null;
 
 app.use((req, res, next) => {
@@ -40,7 +55,7 @@ async function loginMyfxbook() {
     }
 }
 
-function processTrades(rawList) {
+function processTrades(rawList, config) {
     if (!Array.isArray(rawList)) return [];
 
     return rawList
@@ -54,20 +69,17 @@ function processTrades(rawList) {
             const profit = parseFloat(t["Profit"] !== undefined ? t["Profit"] : (t.profit || 0));
             let gain = t["Gain"] !== undefined ? parseFloat(t["Gain"]) : (t.gain !== undefined ? parseFloat(t.gain) : 0);
 
-            // Fallback: 1x Basis-Gain berechnen, falls MyFXBook 0 sendet
             if (gain === 0 && profit !== 0) {
-                // Falls ein Trade mit deutlich höherer Lot-Grösse (> 0.005 Lots) ausgeführt wurde,
-                // auf die 1x-Basis-Lotgrösse (0.001 Lots) normieren, um doppelte Hebelung zu verhindern
-                const normalizedProfit = (lots > 0.005)
-                    ? (profit / lots) * BASE_REFERENCE_LOTS
+                const normalizedProfit = (lots > config.maxNormalLots)
+                    ? (profit / lots) * config.baseLots
                     : profit;
-                gain = (normalizedProfit / BASE_REFERENCE_BALANCE) * 100;
+                gain = (normalizedProfit / config.baseBalance) * 100;
             }
 
             return {
                 "Open Date": t["Open Date"] || t.openTime || "",
                 "Close Date": t["Close Date"] || t.closeTime || "",
-                "Symbol": t["Symbol"] || t.symbol || "XAUUSD",
+                "Symbol": t["Symbol"] || t.symbol || config.symbol,
                 "Action": (t["Action"] || t.action || "").toUpperCase(),
                 "Units/Lots": lots,
                 "Open Price": t["Open Price"] !== undefined ? t["Open Price"] : t.openPrice,
@@ -78,6 +90,27 @@ function processTrades(rawList) {
         });
 }
 
+async function fetchAccountHistory(accountId) {
+    let response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=${accountId}`);
+    let data = await response.json();
+
+    if (data.error === true) {
+        console.log("Session abgelaufen, Login wird wiederholt...");
+        const loggedIn = await loginMyfxbook();
+        if (!loggedIn) return null;
+
+        response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=${accountId}`);
+        data = await response.json();
+    }
+
+    if (data && data.error === false) {
+        return data.history || data.trades || [];
+    }
+
+    console.error(`MyFXBook API Fehler (Account ${accountId}):`, data ? data.message : 'Unbekannt');
+    return null;
+}
+
 async function updateTradesBackground() {
     console.log("Starte Hintergrund-Sync mit MyFXBook...");
     try {
@@ -86,27 +119,15 @@ async function updateTradesBackground() {
             if (!loggedIn) return;
         }
 
-        let response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=${ACCOUNT_ID}`);
-        let data = await response.json();
-
-        // Wenn die Session abgelaufen ist, erneut einloggen
-        if (data.error === true) {
-            console.log("Session abgelaufen, Login wird wiederholt...");
-            const loggedIn = await loginMyfxbook();
-            if (!loggedIn) return;
-
-            response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=${ACCOUNT_ID}`);
-            data = await response.json();
+        for (const [key, config] of Object.entries(STRATEGIES)) {
+            const rawList = await fetchAccountHistory(config.id);
+            if (rawList) {
+                cachedTrades[key] = processTrades(rawList, config);
+                console.log(`[${key.toUpperCase()}] ${cachedTrades[key].length} Trades geladen.`);
+            }
         }
 
-        if (data.error === false) {
-            const rawList = data.history || data.trades || [];
-            cachedTrades = processTrades(rawList);
-            lastSyncTime = new Date().toISOString();
-            console.log(`Daten erfolgreich synchronisiert. ${cachedTrades.length} Trades geladen um ${lastSyncTime}.`);
-        } else {
-            console.error("MyFXBook API Fehler:", data.message);
-        }
+        lastSyncTime = new Date().toISOString();
     } catch (error) {
         console.error("Hintergrund-Sync Fehler:", error.message);
     }
@@ -117,13 +138,29 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/live-trades', async (req, res) => {
-    if (cachedTrades.length === 0) {
+    if (cachedTrades.sonic.length === 0 && cachedTrades.neofx.length === 0) {
         await updateTradesBackground();
     }
-    
+
+    const strat = (req.query.strategy || '').toLowerCase();
+    if (strat === 'neofx' || strat === 'neo') {
+        return res.json({
+            lastSync: lastSyncTime,
+            trades: cachedTrades.neofx
+        });
+    }
+    if (strat === 'sonic') {
+        return res.json({
+            lastSync: lastSyncTime,
+            trades: cachedTrades.sonic
+        });
+    }
+
     res.json({
         lastSync: lastSyncTime,
-        trades: cachedTrades
+        trades: cachedTrades.sonic,
+        sonic: cachedTrades.sonic,
+        neofx: cachedTrades.neofx
     });
 });
 

@@ -1,7 +1,7 @@
 class DualEngineApp {
     constructor() {
         this.rawTrades = [];
-        this.liveTableTrades = null;
+        this.liveTableTrades = [];
         this.isLiveMerged = false;
 
         this.btChart = null;
@@ -12,11 +12,12 @@ class DualEngineApp {
         this.timeframe = 'ALL';
 
         this.isNeo = window.location.pathname.toLowerCase().includes('neofx');
+        this.strategyKey = this.isNeo ? 'neofx' : 'sonic';
+        this.expectedSymbol = this.isNeo ? 'EURUSD' : 'XAUUSD';
 
         // 24x Broker-Skalierung abzgl. 30% Erfolgsbeteiligung = 16.8x Netto-Faktor
         this.backtestLeverageMult = 24 * 0.70;
 
-        // Werden nach dem Laden der Daten dynamisch aus den echten Trades berechnet
         this.baseMonthlyAvg = this.isNeo ? 0.57 : 1.14;
         this.rates = this.isNeo
             ? { cons: 0.050, avg: 0.145, opt: 0.220 }
@@ -73,7 +74,6 @@ class DualEngineApp {
         return this.currentLang === 'de' ? 'Basis' : 'Base';
     }
 
-    // Sorgt dafür, dass auf der X-Achse immer das erste und das aktuellste Datum angezeigt werden
     buildEvenAxisTicks(axis) {
         const maxTicks = window.innerWidth < 768 ? 4 : 6;
         const labels = axis.chart.data.labels || [];
@@ -96,30 +96,14 @@ class DualEngineApp {
                 this.applyTranslations();
                 this.refreshDash();
                 this.calcProjection();
-                this.renderStatsAndTable();
                 this.updateChartLocales();
             });
         }
         this.applyTranslations();
         this.setupTooltips();
 
-        if (!this.isNeo && this.dom.tradesBody) {
-            const loadingText = (typeof translations !== 'undefined' && translations[this.currentLang])
-                ? (translations[this.currentLang].loadingLive || "Lade Live-Daten... Bitte warten.")
-                : "Lade Live-Daten... Bitte warten.";
-            this.dom.tradesBody.innerHTML = `<tr><td colspan="9" class="px-6 py-8 text-center text-zinc-500 font-sans"><div class="flex justify-center items-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>${loadingText}</span></div></td></tr>`;
-        }
-
         await this.loadTradesData();
         this.calculateProjectionRatesFromData();
-
-        const tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
-        const chronologicalTrades = [...tradesOnly].sort((a, b) => a.ts - b.ts);
-
-        if (chronologicalTrades.length > 0 && this.dom.btStart && this.dom.btEnd) {
-            this.dom.btStart.value = chronologicalTrades[0].dt;
-            this.dom.btEnd.value = chronologicalTrades[chronologicalTrades.length - 1].dt;
-        }
 
         this.initAdvancedCharts();
         this.setupListeners();
@@ -128,24 +112,33 @@ class DualEngineApp {
         this.refreshDash();
         this.calcProjection();
 
-        if (!this.isNeo) {
-            this.loadLiveTableData().then(() => {
+        // Live-API-Daten für BEIDE Strategien (Sonic & Neo.fx) laden und nahtlos ergänzen
+        this.loadLiveTableData().then(() => {
+            if (this.liveTableTrades.length > 0) {
                 this.mergeLiveTradesIntoRaw();
                 this.calculateProjectionRatesFromData();
                 this.refreshDash();
                 this.calcProjection();
-                this.renderStatsAndTable();
-            });
-        } else {
-            this.renderStatsAndTable();
-        }
+            }
+        });
     }
 
-    // Ergänzt die historischen Daten (this.rawTrades) um alle neuen Live-Trades aus der API
+    // Ergänzt die historischen JSON-Daten um alle neuen Trades aus der MyFXBook-API
     mergeLiveTradesIntoRaw() {
         if (!this.liveTableTrades || this.liveTableTrades.length === 0) return;
 
-        // Aktuellen Master-Kontostand ermitteln, um für neue API-Trades den proportionalen Master-Profit zu berechnen
+        const existingTrades = this.rawTrades.filter(t => {
+            const act = (t.Action || "").toUpperCase();
+            return act === 'BUY' || act === 'SELL';
+        });
+
+        let maxRawTs = 0;
+        let maxRawDate = "";
+        existingTrades.forEach(t => {
+            if (t.ts > maxRawTs) maxRawTs = t.ts;
+            if (t.dt > maxRawDate) maxRawDate = t.dt;
+        });
+
         let masterBalance = 0;
         let deposits = 0;
         const sortedRaw = [...this.rawTrades].sort((a, b) => a.ts - b.ts);
@@ -156,70 +149,67 @@ class DualEngineApp {
             else if (act === 'WITHDRAWAL') { masterBalance += p; }
             else if (act === 'BUY' || act === 'SELL') { masterBalance += p; }
         });
-        if (deposits === 0 || masterBalance <= 0) masterBalance = 139296.91;
+        if (deposits === 0 || masterBalance <= 0) {
+            masterBalance = this.isNeo ? 12000 : 139296.91;
+        }
 
         let addedCount = 0;
-
-        // Chronologisch durchgehen (älteste zuerst)
         const chronologicalLive = [...this.liveTableTrades].sort((a, b) => a.ts - b.ts);
 
         chronologicalLive.forEach(lt => {
             const ltAction = (lt.Action || "").toUpperCase();
             if (ltAction !== 'BUY' && ltAction !== 'SELL') return;
 
-            // Prüfen, ob dieser Trade bereits in this.rawTrades existiert (gleiche Action & Zeitfenster +/- 10 Min.)
-            const matchIdx = this.rawTrades.findIndex(rt => {
-                const rtAction = (rt.Action || "").toUpperCase();
-                if (rtAction !== ltAction) return false;
-                if (rt.ts && lt.ts && Math.abs(rt.ts - lt.ts) <= 10 * 60 * 1000) return true;
-                const rtTime = (rt.d.split(" ")[1] || "").substring(0, 5);
-                const ltTime = (lt.d.split(" ")[1] || "").substring(0, 5);
-                return rt.dt === lt.dt && rtTime === ltTime;
-            });
+            // Sicherheitscheck: Nur Trades des jeweiligen Instruments (XAUUSD vs. EURUSD) zulassen
+            const sym = (lt.Symbol || "").toUpperCase();
+            if (sym && !sym.includes(this.expectedSymbol)) return;
 
-            if (matchIdx !== -1) {
-                // Existierender Trade: Gain synchronisieren, damit Tabelle und Charts/Heatmap exakt übereinstimmen
-                const existingGain = this.rawTrades[matchIdx].parsedGain;
-                if (existingGain !== 0) {
-                    lt.parsedGain = existingGain;
-                    lt.Gain = existingGain;
-                } else if (lt.parsedGain !== 0) {
-                    this.rawTrades[matchIdx].parsedGain = lt.parsedGain;
-                    this.rawTrades[matchIdx].Gain = lt.parsedGain;
-                }
-            } else {
-                // Neuer Trade aus der API, der noch nicht in der JSON-Datei ist!
-                const openObj = this.parseDate(lt["Open Date"]);
-                const closeObj = this.parseDate(lt["Close Date"]);
-                let durationStr = lt["Duration (DD:HH:MM:SS)"] || "";
+            // Alte Trades vor dem letzten dokumentierten JSON-Tag überspringen (verhindert Duplikate)
+            if (maxRawDate && lt.dt < maxRawDate) return;
 
-                if (!durationStr && openObj.ts && closeObj.ts && closeObj.ts >= openObj.ts) {
-                    const diffSec = Math.floor((closeObj.ts - openObj.ts) / 1000);
-                    const dd = String(Math.floor(diffSec / 86400)).padStart(2, '0');
-                    const hh = String(Math.floor((diffSec % 86400) / 3600)).padStart(2, '0');
-                    const mm = String(Math.floor((diffSec % 3600) / 60)).padStart(2, '0');
-                    const ss = String(diffSec % 60).padStart(2, '0');
-                    durationStr = `${dd}:${hh}:${mm}:${ss}`;
-                }
-
-                const estimatedMasterProfit = Number((masterBalance * (lt.parsedGain / 100)).toFixed(2));
-                masterBalance += estimatedMasterProfit;
-
-                this.rawTrades.push({
-                    ...lt,
-                    Profit: estimatedMasterProfit,
-                    Gain: lt.parsedGain,
-                    "Duration (DD:HH:MM:SS)": durationStr
+            // Auf dem letzten JSON-Tag prüfen, ob der Trade bereits vorhanden ist
+            if (maxRawDate && lt.dt === maxRawDate) {
+                const alreadyExists = existingTrades.some(rt => {
+                    if (rt.dt !== lt.dt) return false;
+                    if ((rt.Action || "").toUpperCase() !== ltAction) return false;
+                    return Math.abs(rt.ts - lt.ts) <= 30 * 60 * 1000;
                 });
-                addedCount++;
+                if (alreadyExists || lt.ts <= maxRawTs) return;
             }
+
+            const openObj = this.parseDate(lt["Open Date"]);
+            const closeObj = this.parseDate(lt["Close Date"]);
+            let durationStr = lt["Duration (DD:HH:MM:SS)"] || "";
+
+            if (!durationStr && openObj.ts && closeObj.ts && closeObj.ts >= openObj.ts) {
+                const diffSec = Math.floor((closeObj.ts - openObj.ts) / 1000);
+                const dd = String(Math.floor(diffSec / 86400)).padStart(2, '0');
+                const hh = String(Math.floor((diffSec % 86400) / 3600)).padStart(2, '0');
+                const mm = String(Math.floor((diffSec % 3600) / 60)).padStart(2, '0');
+                const ss = String(diffSec % 60).padStart(2, '0');
+                durationStr = `${dd}:${hh}:${mm}:${ss}`;
+            }
+
+            const estimatedMasterProfit = Number((masterBalance * (lt.parsedGain / 100)).toFixed(2));
+            masterBalance += estimatedMasterProfit;
+
+            const newTradeObj = {
+                ...lt,
+                Profit: estimatedMasterProfit,
+                Gain: lt.parsedGain,
+                "Duration (DD:HH:MM:SS)": durationStr
+            };
+
+            this.rawTrades.push(newTradeObj);
+            existingTrades.push(newTradeObj);
+            addedCount++;
         });
 
         this.isLiveMerged = true;
         this.updateDataStatusBadge();
 
         if (addedCount > 0) {
-            console.log(`${addedCount} neue Live-Trades aus der API zu den historischen Daten ergänzt.`);
+            console.log(`[${this.strategyKey.toUpperCase()}] ${addedCount} neue Live-Trades aus der API ergänzt.`);
         }
     }
 
@@ -247,7 +237,6 @@ class DualEngineApp {
         }
     }
 
-    // Berechnet die monatlichen Raten (avg, cons, opt) für die Projektions-Engine direkt aus den Daten
     calculateProjectionRatesFromData() {
         const tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
         if (tradesOnly.length === 0) return;
@@ -354,6 +343,7 @@ class DualEngineApp {
         this.updateKPIs(filtered);
         this.initEquityGrowthChart(filtered);
         this.renderHeatmap(filtered);
+        this.renderStatsAndTable(filtered);
 
         if (this.dom.btStart && this.dom.btEnd && filtered.length > 0) {
             const tradesOnly = filtered.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
@@ -441,9 +431,20 @@ class DualEngineApp {
             return;
         }
 
+        const refBalance = this.isNeo ? 12000 : 120000;
+
         this.rawTrades = data.map(t => {
             const dateObj = this.parseDate(t["Open Date"]);
-            const gain = parseFloat(t["Gain"] || 0);
+            const profit = parseFloat(t["Profit"] || 0);
+            let gain = parseFloat(t["Gain"] || 0);
+
+            if ((isNaN(gain) || gain === 0) && profit !== 0) {
+                const act = (t.Action || "").toUpperCase();
+                if (act === 'BUY' || act === 'SELL') {
+                    gain = (profit / refBalance) * 100;
+                }
+            }
+
             return {
                 ...t,
                 dt: dateObj.dt,
@@ -456,40 +457,48 @@ class DualEngineApp {
 
     async loadLiveTableData() {
         try {
-            const response = await fetch('https://tagmarkets-backend.onrender.com/api/live-trades');
+            const response = await fetch(`https://tagmarkets-backend.onrender.com/api/live-trades?strategy=${this.strategyKey}`);
             if (response.ok) {
                 const responseData = await response.json();
-                const rawTradesArray = responseData.trades || [];
+                const rawTradesArray = (this.isNeo && responseData.neofx)
+                    ? responseData.neofx
+                    : (responseData.trades || []);
+
+                const maxNormalLots = this.isNeo ? 0.50 : 0.005;
+                const baseLots = this.isNeo ? 0.10 : 0.001;
+                const baseBal = this.isNeo ? 12000 : 1200.52;
 
                 if (Array.isArray(rawTradesArray)) {
-                    this.liveTableTrades = rawTradesArray.map(t => {
-                        const dateObj = this.parseDate(t["Open Date"]);
-                        let rawLots = t["Units/Lots"];
-                        if (typeof rawLots === 'object' && rawLots !== null) rawLots = rawLots.value;
-                        const lots = parseFloat(rawLots) || 0;
-                        const profit = parseFloat(t["Profit"] || 0);
-                        let gain = parseFloat(t["Gain"] || 0);
+                    this.liveTableTrades = rawTradesArray
+                        .filter(t => {
+                            const sym = (t.Symbol || t.symbol || "").toUpperCase();
+                            return !sym || sym.includes(this.expectedSymbol);
+                        })
+                        .map(t => {
+                            const dateObj = this.parseDate(t["Open Date"]);
+                            let rawLots = t["Units/Lots"];
+                            if (typeof rawLots === 'object' && rawLots !== null) rawLots = rawLots.value;
+                            const lots = parseFloat(rawLots) || 0;
+                            const profit = parseFloat(t["Profit"] || 0);
+                            let gain = parseFloat(t["Gain"] || 0);
 
-                        // Sicherheits-Korrektur: Falls das Backend den Gain aus einer stark erhöhten
-                        // Lot-Grösse (> 0.005 Lots) über den fixen Teiler 1200.52 berechnet hat,
-                        // normieren wir ihn auf die 1x-Basis-Lotgrösse (0.001 Lots).
-                        if (lots > 0.005 && Math.abs(gain) > 0.5) {
-                            if (profit !== 0) {
-                                const normalizedProfit = (profit / lots) * 0.001;
-                                gain = (normalizedProfit / 1200.52) * 100;
-                            } else {
-                                gain = (gain / lots) * 0.001;
+                            if (lots > maxNormalLots && Math.abs(gain) > 0.5) {
+                                if (profit !== 0) {
+                                    const normalizedProfit = (profit / lots) * baseLots;
+                                    gain = (normalizedProfit / baseBal) * 100;
+                                } else {
+                                    gain = (gain / lots) * baseLots;
+                                }
                             }
-                        }
 
-                        return {
-                            ...t,
-                            dt: dateObj.dt,
-                            d: dateObj.d,
-                            ts: dateObj.ts,
-                            parsedGain: isNaN(gain) ? 0 : gain
-                        };
-                    });
+                            return {
+                                ...t,
+                                dt: dateObj.dt,
+                                d: dateObj.d,
+                                ts: dateObj.ts,
+                                parsedGain: isNaN(gain) ? 0 : gain
+                            };
+                        });
 
                     const syncEl = document.getElementById('live-sync-time');
                     if (syncEl && responseData.lastSync) {
@@ -507,7 +516,7 @@ class DualEngineApp {
                 }
             }
         } catch (error) {
-            console.warn("Fehler beim Laden der Live-Tabelle vom Backend:", error);
+            console.warn("Fehler beim Laden der Live-Daten vom Backend:", error);
             this.liveTableTrades = [];
         }
     }
@@ -712,16 +721,16 @@ class DualEngineApp {
                 const simulatedBaseProfit = simCurrentBal * (g / 100);
                 simCurrentBal += simulatedBaseProfit;
 
-                if (g > 0 || (g === 0 && rawProfit > 0)) {
-                    wins++;
-                    const winAmt = simulatedBaseProfit > 0 ? simulatedBaseProfit : 0.1;
-                    grossProfit += winAmt;
-                    winBaseArray.push(winAmt);
-                } else if (g < 0 || (g === 0 && rawProfit < 0)) {
+                if (g < 0 || (g === 0 && rawProfit < 0)) {
                     losses++;
                     const lossAmt = simulatedBaseProfit < 0 ? Math.abs(simulatedBaseProfit) : 0.1;
                     grossLoss += lossAmt;
                     lossBaseArray.push(lossAmt);
+                } else {
+                    wins++;
+                    const winAmt = simulatedBaseProfit > 0 ? simulatedBaseProfit : 0.1;
+                    grossProfit += winAmt;
+                    winBaseArray.push(winAmt);
                 }
 
                 currentBaseGain += g;
@@ -801,7 +810,7 @@ class DualEngineApp {
             if (stdDev > 0) sharpe = ((mean / stdDev) * Math.sqrt(252)).toFixed(2);
         }
 
-        const isTradeWin = (t) => (t.parsedGain || 0) > 0 || ((t.parsedGain || 0) === 0 && (parseFloat(t.Profit) || 0) > 0);
+        const isTradeWin = (t) => !((t.parsedGain || 0) < 0 || ((t.parsedGain || 0) === 0 && (parseFloat(t.Profit) || 0) < 0));
         const longs = chronologicalTrades.filter(t => t.Action.toUpperCase() === 'BUY');
         const shorts = chronologicalTrades.filter(t => t.Action.toUpperCase() === 'SELL');
         const winRateLong = longs.length > 0 ? ((longs.filter(isTradeWin).length / longs.length) * 100).toFixed(1) + '%' : '-';
@@ -810,7 +819,6 @@ class DualEngineApp {
 
         const baseLbl = this.getBaseLabel();
 
-        // Option A: 16.8x Netto oben, 1x Basis darunter
         setEl('kpi-total-gain', (currentNetGain >= 0 ? '+' : '') + currentNetGain.toFixed(2) + '%');
         setEl('kpi-total-gain-sub', `${baseLbl}: ${currentBaseGain >= 0 ? '+' : ''}${currentBaseGain.toFixed(2)}%`);
 
@@ -846,14 +854,12 @@ class DualEngineApp {
         if (mGain < 0) lossMonths++;
         setEl('kpi-loss-months', lossMonths);
 
-        // Live Metrics Panel (Option A)
         setHtml('myfx-gain', `${currentNetGain >= 0 ? '+' : ''}${currentNetGain.toFixed(2)}% <span class="text-[9px] text-zinc-500 font-normal block">${baseLbl}: +${currentBaseGain.toFixed(2)}%</span>`);
         setHtml('myfx-abs-gain', `${currentNetGain >= 0 ? '+' : ''}${currentNetGain.toFixed(2)}% <span class="text-[9px] text-zinc-500 font-normal block">${baseLbl}: +${currentBaseGain.toFixed(2)}%</span>`);
         setHtml('myfx-daily', `${dailyNetGain >= 0 ? '+' : ''}${dailyNetGain.toFixed(2)}% <span class="text-[9px] text-zinc-500 font-normal block">${baseLbl}: +${dailyBaseGain.toFixed(2)}%</span>`);
         setHtml('myfx-monthly', `${monthlyNetGain >= 0 ? '+' : ''}${monthlyNetGain.toFixed(2)}% <span class="text-[9px] text-zinc-500 font-normal block">${baseLbl}: +${monthlyBaseGain.toFixed(2)}%</span>`);
         setHtml('myfx-drawdown', `${maxNetDrawdown.toFixed(2)}% <span class="text-[9px] text-zinc-500 font-normal block">${baseLbl}: ${maxBaseDrawdown.toFixed(2)}%</span>`);
 
-        // Risk / Reward (Option A)
         setEl('avg-win-text', '+$' + typNetWin.toFixed(2));
         setEl('avg-win-sub', `${baseLbl}: +$${typBaseWin.toFixed(2)}`);
         setEl('avg-loss-text', '-$' + typNetLoss.toFixed(2));
@@ -1103,7 +1109,7 @@ class DualEngineApp {
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `${this.isNeo ? 'NEO_FX' : 'SONIC'}_Historical_Trades.csv`);
+        link.setAttribute("download", `${this.isNeo ? 'NEO_FX' : 'SONIC'}_Trades.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -1303,7 +1309,6 @@ class DualEngineApp {
         const filteredTrades = chronologicalTrades.filter(t => t.dt >= startStr && t.dt <= endStr);
         if (filteredTrades.length === 0) return;
 
-        // 16.8x Netto-Simulation & 1x Basis-Simulation parallel berechnen
         let currentBalance = capital, startOfDayBalance = capital, totalInvested = capital, totalPayouts = 0;
         let baseBalance = capital, baseStartOfDayBalance = capital, baseTotalPayouts = 0;
         let lastMonth = '', lastDay = '';
@@ -1600,14 +1605,11 @@ class DualEngineApp {
         });
     }
 
-    renderStatsAndTable() {
+    renderStatsAndTable(activeTrades) {
         if (!this.dom.tradesBody) return;
 
-        // Nutzt die Live-API-Trades (oder fällt auf this.rawTrades zurück)
-        const dataSource = this.isNeo
-            ? this.rawTrades
-            : (this.liveTableTrades && this.liveTableTrades.length > 0 ? this.liveTableTrades : this.rawTrades);
-
+        // Verwendet denselben zusammengeführten & gefilterten Datensatz wie die oberen KPIs
+        const dataSource = activeTrades || this.getFilteredTrades(this.rawTrades);
         const tradesOnly = dataSource.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
         const tableTrades = [...tradesOnly].sort((a, b) => b.ts - a.ts);
 
@@ -1669,7 +1671,6 @@ class DualEngineApp {
 
             const logo = `<div class="flex items-center gap-2"><div class="w-5 h-5 rounded-full ${this.isNeo ? 'bg-emerald-500/20 text-emerald-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center text-[10px]"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5v-2.1c2.1-.3 3.5-1.7 3.5-3.4 0-1.6-1.2-2.7-2.8-2.9v-2c1.9.3 2.9 1.4 3 2.8h1.8c-.2-2.4-1.9-4.2-4.8-4.5V3h-1.4v1.4c-2.3.3-4.1 1.9-4.1 4 0 2 1.6 3.3 3.7 3.7v2.3c-2-.3-3.2-1.5-3.3-3.1H6.9c.2 2.6 2.1 4.5 4.7 4.8v2.4h1.4z"/></svg></div><span class="font-extrabold text-white text-xs tracking-wide">${stratName}</span></div>`;
 
-            // Option A in der PnL-Zelle: Gross 16.8x Netto und direkt darunter klein Basis 1x
             html += `<tr class="hover:bg-cardBorder/25 transition-colors border-b border-cardBorder/30">
                 <td class="hidden sm:table-cell px-4 md:px-6 py-3 md:py-4 font-sans">${logo}</td>
                 <td class="sticky left-0 z-10 bg-cardBg px-3 sm:px-4 md:px-6 py-3 md:py-4 text-zinc-300 font-semibold border-r border-cardBorder/40 sm:border-r-0">${displayDate}</td>

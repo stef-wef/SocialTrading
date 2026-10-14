@@ -156,7 +156,7 @@
             <button class="tf-btn px-3 md:px-4 py-1.5 text-[9px] md:text-[10px] font-mono rounded-lg bg-accentCyan/20 text-accentCyan border border-accentCyan/30 transition-all" data-tf="ALL">ALL</button>
         </div>
 
-        <!-- 4 Haupt-KPIs (Option A: 16.8x Netto + 1x Basis darunter) -->
+        <!-- 4 Haupt-KPIs -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             <div class="glass-panel p-4 md:p-6 text-center">
                 <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1 md:mb-2 flex justify-center items-center gap-1">
@@ -208,7 +208,7 @@
             </div>
         </div>
 
-        <!-- Performance Metrics (Einheitlich zentriert) -->
+        <!-- Performance Metrics -->
         <div class="glass-panel p-4 md:p-6" id="metrics">
             <div class="flex items-center justify-between pb-3 md:pb-4 mb-3 md:mb-4 border-b border-cardBorder">
                 <div>
@@ -217,7 +217,6 @@
                 </div>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 font-mono text-center">
-                <!-- Zeile 1 -->
                 <div class="p-3 md:p-4 bg-darkBg/60 border border-cardBorder/60 rounded-lg flex flex-col items-center justify-center">
                     <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase flex items-center justify-center gap-1">
                         <span data-i18n="dailyAvg">Tages-Durchschnitt</span>
@@ -247,7 +246,6 @@
                     </div>
                     <p class="text-base md:text-lg font-bold text-emerald-400 mt-1" id="kpi-loss-months">0</p>
                 </div>
-                <!-- Zeile 2 -->
                 <div class="p-3 md:p-4 bg-darkBg/60 border border-cardBorder/60 rounded-lg flex flex-col items-center justify-center">
                     <div class="text-[9px] md:text-[10px] text-zinc-500 uppercase flex items-center justify-center gap-1">
                         <span>Sharpe Ratio</span>
@@ -358,7 +356,7 @@
                         <div>
                             <div class="flex items-center justify-between mb-3 md:mb-4 border-b border-cardBorder pb-2">
                                 <span class="text-[9px] md:text-[11px] font-semibold text-accentCyan uppercase tracking-widest">Live Metrics</span>
-                                <a href="https://www.myfxbook.com/members/WordSmithyFx/neofx/11800152" target="_blank" rel="noopener noreferrer" class="text-[9px] md:text-[10px] font-semibold text-zinc-500 hover:text-white flex items-center gap-1 transition-colors">
+                                <a href="https://www.myfxbook.com/portfolio/neofx/12258114" target="_blank" rel="noopener noreferrer" class="text-[9px] md:text-[10px] font-semibold text-zinc-500 hover:text-white flex items-center gap-1 transition-colors">
                                     MyFXBook <i data-lucide="external-link" class="w-3 h-3"></i>
                                 </a>
                             </div>
@@ -428,7 +426,6 @@
         
         <!-- FAQ Section -->
         <div class="pt-8 md:pt-10 pb-2 md:pb-4 w-full" id="faq">
-            <!-- About NEO.FX -->
             <div class="mb-8 md:mb-10 w-full">
                 <div class="inline-flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 rounded-full bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-[9px] md:text-[10px] font-mono font-bold tracking-widest uppercase mb-3 md:mb-4">
                     <span class="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-accentCyan"></span> <span data-i18n="faqNeoBadge1">Über NEO.FX</span>
@@ -532,7 +529,6 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 items-stretch w-full">
-                <!-- Linke Spalte: Rechner & Schalter -->
                 <div class="lg:col-span-5 glass-panel p-5 md:p-8 space-y-6 md:space-y-7 flex flex-col justify-between w-full">
                     <div class="space-y-6 md:space-y-7">
                         <div>
@@ -635,7 +631,7 @@
                 </p>
             </div>
 
-            <!-- Banner über die volle Breite (Einheitlich zentriert & Option A Basis-Werte) -->
+            <!-- Banner über die volle Breite -->
             <div class="glass-panel p-4 md:p-6 mb-5 md:mb-6 grid grid-cols-2 lg:grid-cols-4 gap-0 items-stretch text-center w-full">
                 <div class="pb-4 px-2 sm:px-4 lg:pb-0 lg:px-6 flex flex-col items-center justify-center">
                     <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-bold mb-1" id="bt-sim-label" data-i18n="btSimBal">Simuliertes Endguthaben</p>
@@ -731,18 +727,19 @@
             </p>
         </div>
 
-        <!-- Trade Historie Tabelle -->
+        <!-- Trade Historie Tabelle (Synchronisiert mit Live API & Historie) -->
         <div class="glass-panel overflow-hidden mt-5 md:mt-6 w-full" id="trades">
             <div class="px-4 md:px-6 py-4 md:py-5 border-b border-cardBorder flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-darkBg/40">
                 <div>
                     <h2 class="text-lg md:text-xl font-extrabold text-white tracking-tight flex flex-wrap items-center gap-2">
                         <span data-i18n="tradesHeader">Trades</span>
-                        <span class="text-[9px] bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded font-mono uppercase tracking-widest mt-1 sm:mt-0" data-i18n="staticBadge">Statisch</span>
+                        <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-mono uppercase tracking-widest mt-1 sm:mt-0" data-i18n="liveBadge">Live API</span>
+                        <span class="text-[9px] text-zinc-500 font-mono ml-1 mt-1 sm:mt-0" id="live-sync-time">Letzter Sync: ---</span>
                     </h2>
-                    <p class="text-[10px] md:text-xs text-zinc-400 mt-1 md:mt-0.5" data-i18n="tradesSubStatic">Historische Transaktionen aus lokalem CSV-Datenexport</p>
+                    <p class="text-[10px] md:text-xs text-zinc-400 mt-1 md:mt-0.5" data-i18n="tradesSubLive">Aktuelle Live-Transaktionen (16.8x Netto & 1x Basis aus dem Broker-Feed)</p>
                 </div>
                 <div class="flex items-center flex-wrap gap-2 w-full md:w-auto">
-                    <a href="https://www.myfxbook.com/members/WordSmithyFx/neofx/11800152" target="_blank" rel="noopener noreferrer" class="flex-1 md:flex-none justify-center inline-flex items-center gap-1.5 px-3 py-2 md:py-1.5 rounded-lg bg-accentCyan/10 border border-accentCyan/20 text-accentCyan text-[10px] md:text-xs font-semibold font-mono hover:bg-accentCyan/20 transition-colors">
+                    <a href="https://www.myfxbook.com/portfolio/neofx/12258114" target="_blank" rel="noopener noreferrer" class="flex-1 md:flex-none justify-center inline-flex items-center gap-1.5 px-3 py-2 md:py-1.5 rounded-lg bg-accentCyan/10 border border-accentCyan/20 text-accentCyan text-[10px] md:text-xs font-semibold font-mono hover:bg-accentCyan/20 transition-colors">
                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i> MyFXBook
                     </a>
                     <div class="flex-1 md:flex-none justify-center inline-flex items-center gap-1.5 md:gap-2 px-3 py-2 md:py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] md:text-xs font-semibold font-mono">
@@ -757,7 +754,7 @@
                         <tr class="text-zinc-400 uppercase tracking-wider text-[9px] md:text-[11px] border-b border-cardBorder">
                             <th class="hidden sm:table-cell px-4 md:px-6 py-3 md:py-3.5 font-semibold" data-i18n="colStrategy">Strategie</th>
                             <th class="sticky left-0 z-20 bg-darkBg/95 px-4 md:px-6 py-3 md:py-3.5 font-semibold border-r border-cardBorder/40 sm:border-r-0" data-i18n="colDate">Datum</th>
-                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold" data-i18n="colPnl">PnL (%)</th>
+                            <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold" data-i18n="colPnl">PnL (Netto / Basis)</th>
                             <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold" data-i18n="colEntryTime">Einstiegszeit</th>
                             <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold" data-i18n="colExitTime">Ausstiegszeit</th>
                             <th class="px-4 md:px-6 py-3 md:py-3.5 font-semibold" data-i18n="colType">Typ</th>

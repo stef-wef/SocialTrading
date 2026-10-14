@@ -195,8 +195,11 @@
             }
         ];
 
-        function parseSortableDate(dateStr) {
-            if (!dateStr) return 0;
+        function parseDateInfo(dateStr) {
+            let dt = "2025-01-01";
+            let ts = 0;
+            if (!dateStr) return { dt, ts };
+
             const parts = dateStr.trim().split(" ");
             const datePart = parts[0];
             const timePart = parts[1] || "00:00";
@@ -204,18 +207,15 @@
 
             if (datePart.includes("/")) {
                 const p = datePart.split("/");
-                if (p.length === 3) {
-                    return new Date(`${p[2]}-${p[0].padStart(2, '0')}-${p[1].padStart(2, '0')}T${timeNorm}`).getTime() || 0;
-                }
+                if (p.length === 3) dt = `${p[2]}-${p[0].padStart(2, '0')}-${p[1].padStart(2, '0')}`;
             } else if (datePart.includes(".")) {
                 const p = datePart.split(".");
-                if (p.length === 3) {
-                    return new Date(`${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}T${timeNorm}`).getTime() || 0;
-                }
+                if (p.length === 3) dt = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
             } else if (datePart.includes("-")) {
-                return new Date(`${datePart}T${timeNorm}`).getTime() || 0;
+                dt = datePart;
             }
-            return new Date(dateStr).getTime() || 0;
+            ts = new Date(`${dt}T${timeNorm}`).getTime() || 0;
+            return { dt, ts };
         }
 
         function updateLang() {
@@ -227,9 +227,21 @@
             renderGrid();
         }
 
-        function calculateStats(data) {
-            const trades = data.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
-            trades.sort((a, b) => parseSortableDate(a["Open Date"] || a.d) - parseSortableDate(b["Open Date"] || b.d));
+        function calculateStats(data, isNeo = false) {
+            const refBalance = isNeo ? 12000 : 120000;
+            const trades = data
+                .filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'))
+                .map(t => {
+                    const info = parseDateInfo(t["Open Date"] || t.d);
+                    const profit = parseFloat(t.Profit) || 0;
+                    let gain = parseFloat(t.Gain) || 0;
+                    if (gain === 0 && profit !== 0) {
+                        gain = (profit / refBalance) * 100;
+                    }
+                    return { ...t, dt: info.dt, ts: info.ts, parsedGain: gain, parsedProfit: profit };
+                });
+
+            trades.sort((a, b) => a.ts - b.ts);
 
             const total = trades.length;
             let won = 0;
@@ -239,13 +251,10 @@
             let maxBaseDrawdown = 0;
 
             trades.forEach(t => {
-                const profit = parseFloat(t.Profit) || 0;
-                const g = parseFloat(t.Gain) || 0;
+                if (t.parsedGain < 0 || (t.parsedGain === 0 && t.parsedProfit < 0)) lost++;
+                else won++;
 
-                if (g > 0 || (g === 0 && profit > 0)) won++;
-                else if (g < 0 || (g === 0 && profit < 0)) lost++;
-
-                currentBaseGain += g;
+                currentBaseGain += t.parsedGain;
                 if (currentBaseGain > peakBaseGain) peakBaseGain = currentBaseGain;
                 
                 const dd = currentBaseGain - peakBaseGain;
@@ -266,6 +275,56 @@
                 maxDd: netMaxDd.toFixed(2) + '%',
                 baseMaxDd: maxBaseDrawdown.toFixed(2) + '%'
             };
+        }
+
+        function mergeLiveIntoRaw(rawList, liveList, isNeo) {
+            if (!Array.isArray(liveList) || liveList.length === 0) return rawList;
+            const expectedSym = isNeo ? 'EURUSD' : 'XAUUSD';
+            const maxNormalLots = isNeo ? 0.50 : 0.005;
+            const baseLots = isNeo ? 0.10 : 0.001;
+            const baseBal = isNeo ? 12000 : 1200.52;
+
+            const merged = [...rawList];
+            let maxRawTs = 0;
+            let maxRawDate = "";
+
+            merged.forEach(t => {
+                const act = (t.Action || "").toUpperCase();
+                if (act === 'BUY' || act === 'SELL') {
+                    const info = parseDateInfo(t["Open Date"]);
+                    if (info.ts > maxRawTs) maxRawTs = info.ts;
+                    if (info.dt > maxRawDate) maxRawDate = info.dt;
+                }
+            });
+
+            liveList.forEach(lt => {
+                const ltAct = (lt.Action || "").toUpperCase();
+                if (ltAct !== 'BUY' && ltAct !== 'SELL') return;
+                const sym = (lt.Symbol || lt.symbol || "").toUpperCase();
+                if (sym && !sym.includes(expectedSym)) return;
+
+                const ltInfo = parseDateInfo(lt["Open Date"]);
+                if (maxRawDate && ltInfo.dt < maxRawDate) return;
+                if (maxRawDate && ltInfo.dt === maxRawDate && ltInfo.ts <= maxRawTs) return;
+
+                let rawLots = lt["Units/Lots"];
+                if (typeof rawLots === 'object' && rawLots !== null) rawLots = rawLots.value;
+                const lots = parseFloat(rawLots) || 0;
+                const profit = parseFloat(lt.Profit || 0);
+                let gain = parseFloat(lt.Gain || 0);
+
+                if (lots > maxNormalLots && Math.abs(gain) > 0.5) {
+                    if (profit !== 0) {
+                        gain = (((profit / lots) * baseLots) / baseBal) * 100;
+                    } else {
+                        gain = (gain / lots) * baseLots;
+                    }
+                }
+
+                merged.push({ ...lt, Gain: gain });
+            });
+
+            return merged;
         }
 
         async function fetchRawList(paths) {
@@ -302,10 +361,7 @@
                 'data/trades_data.json',
                 '../data/Sonic_TradesData.json'
             ]);
-            
-            if (sonicRaw) {
-                applyStatsToStrategy(0, calculateStats(sonicRaw));
-            }
+            if (sonicRaw) applyStatsToStrategy(0, calculateStats(sonicRaw, false));
             
             const neoRaw = await fetchRawList([
                 'data/NEO_TradesData.json',
@@ -313,63 +369,30 @@
                 'data/neo_tradesdata.json',
                 '../data/NEO_TradesData.json'
             ]);
-            
-            if (neoRaw) {
-                applyStatsToStrategy(1, calculateStats(neoRaw));
-            }
+            if (neoRaw) applyStatsToStrategy(1, calculateStats(neoRaw, true));
 
             renderGrid();
 
-            // Ergänze SONIC-Daten asynchron um die neuesten Live-API-Trades
-            if (sonicRaw) {
-                try {
-                    const liveRes = await fetch('https://tagmarkets-backend.onrender.com/api/live-trades');
-                    if (liveRes.ok) {
-                        const liveData = await liveRes.json();
-                        const liveTrades = liveData.trades || [];
-                        if (Array.isArray(liveTrades) && liveTrades.length > 0) {
-                            const mergedSonic = [...sonicRaw];
-                            liveTrades.forEach(lt => {
-                                const ltAct = (lt.Action || "").toUpperCase();
-                                if (ltAct !== 'BUY' && ltAct !== 'SELL') return;
-                                const ltTs = parseSortableDate(lt["Open Date"]);
+            // Live-API-Daten für SONIC & NEO.FX abrufen und nahtlos ergänzen
+            try {
+                const liveRes = await fetch('https://tagmarkets-backend.onrender.com/api/live-trades');
+                if (liveRes.ok) {
+                    const liveData = await liveRes.json();
+                    const sonicLive = liveData.sonic || liveData.trades || [];
+                    const neoLive = liveData.neofx || [];
 
-                                let rawLots = lt["Units/Lots"];
-                                if (typeof rawLots === 'object' && rawLots !== null) rawLots = rawLots.value;
-                                const lots = parseFloat(rawLots) || 0;
-                                const profit = parseFloat(lt.Profit || 0);
-                                let gain = parseFloat(lt.Gain || 0);
-
-                                if (lots > 0.005 && Math.abs(gain) > 0.5) {
-                                    if (profit !== 0) {
-                                        gain = (((profit / lots) * 0.001) / 1200.52) * 100;
-                                    } else {
-                                        gain = (gain / lots) * 0.001;
-                                    }
-                                }
-
-                                const exists = mergedSonic.some(rt => {
-                                    const rtAct = (rt.Action || "").toUpperCase();
-                                    if (rtAct !== ltAct) return false;
-                                    const rtTs = parseSortableDate(rt["Open Date"]);
-                                    return rtTs && ltTs && Math.abs(rtTs - ltTs) <= 10 * 60 * 1000;
-                                });
-
-                                if (!exists) {
-                                    mergedSonic.push({
-                                        ...lt,
-                                        Gain: gain
-                                    });
-                                }
-                            });
-
-                            applyStatsToStrategy(0, calculateStats(mergedSonic));
-                            renderGrid();
-                        }
+                    if (sonicRaw && sonicLive.length > 0) {
+                        const mergedSonic = mergeLiveIntoRaw(sonicRaw, sonicLive, false);
+                        applyStatsToStrategy(0, calculateStats(mergedSonic, false));
                     }
-                } catch (e) {
-                    console.warn("Live-API-Ergänzung auf Startseite übersprungen:", e);
+                    if (neoRaw && neoLive.length > 0) {
+                        const mergedNeo = mergeLiveIntoRaw(neoRaw, neoLive, true);
+                        applyStatsToStrategy(1, calculateStats(mergedNeo, true));
+                    }
+                    renderGrid();
                 }
+            } catch (e) {
+                console.warn("Live-API-Sync auf Startseite übersprungen:", e);
             }
         }
 
