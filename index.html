@@ -102,6 +102,8 @@
     </footer>
 
     <script>
+        const NET_LEVERAGE_MULT = 24 * 0.70; // 16.8x Netto (24x Hebel abzgl. 30% Performance Fee)
+
         const i18n = {
             de: {
                 heroTitle1: "Transparenz im Fokus.",
@@ -119,7 +121,8 @@
                 checkPerformance: "Performance analysieren",
                 comingSoon: "In Vorbereitung...",
                 accountType: "Konto-Typ",
-                leverage: "Hebel"
+                leverage: "Hebel",
+                baseLabel: "Basis"
             },
             en: {
                 heroTitle1: "Transparency first.",
@@ -137,7 +140,8 @@
                 checkPerformance: "Analyze Performance",
                 comingSoon: "Coming Soon...",
                 accountType: "Account Type",
-                leverage: "Leverage"
+                leverage: "Leverage",
+                baseLabel: "Base"
             }
         };
 
@@ -153,7 +157,9 @@
                 tradesLost: "—",
                 winRate: "—",
                 totalReturn: "—",
+                baseReturn: "—",
                 maxDd: "—",
+                baseMaxDd: "—",
                 url: "strategies/Sonic.html",
                 active: true
             },
@@ -166,7 +172,9 @@
                 tradesLost: "—",
                 winRate: "—",
                 totalReturn: "—",
+                baseReturn: "—",
                 maxDd: "—",
+                baseMaxDd: "—",
                 url: "strategies/Neofx.html",
                 active: true
             },
@@ -179,11 +187,25 @@
                 tradesLost: "—",
                 winRate: "—",
                 totalReturn: "—",
+                baseReturn: "—",
                 maxDd: "—",
+                baseMaxDd: "—",
                 url: "#",
                 active: false
             }
         ];
+
+        function parseSortableDate(dateStr) {
+            if (!dateStr) return 0;
+            const parts = dateStr.trim().split(" ");
+            const datePart = parts[0];
+            const timePart = parts[1] || "00:00";
+            if (datePart.includes("/")) {
+                const [m, d, y] = datePart.split("/");
+                return new Date(`${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}T${timePart}:00`).getTime() || 0;
+            }
+            return new Date(dateStr).getTime() || 0;
+        }
 
         function updateLang() {
             document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -196,14 +218,14 @@
 
         function calculateStats(data) {
             const trades = data.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
-            trades.sort((a, b) => new Date(a["Open Date"] || a.d || 0) - new Date(b["Open Date"] || b.d || 0));
+            trades.sort((a, b) => parseSortableDate(a["Open Date"] || a.d) - parseSortableDate(b["Open Date"] || b.d));
 
             const total = trades.length;
             let won = 0;
             let lost = 0;
-            let currentGain = 0;
-            let peakGain = 0;
-            let maxDrawdown = 0;
+            let currentBaseGain = 0;
+            let peakBaseGain = 0;
+            let maxBaseDrawdown = 0;
 
             trades.forEach(t => {
                 const profit = parseFloat(t.Profit) || 0;
@@ -211,13 +233,15 @@
                 else if (profit < 0) lost++;
 
                 const g = parseFloat(t.Gain) || 0;
-                currentGain += g;
-                if (currentGain > peakGain) peakGain = currentGain;
+                currentBaseGain += g;
+                if (currentBaseGain > peakBaseGain) peakBaseGain = currentBaseGain;
                 
-                const dd = currentGain - peakGain;
-                if (Math.abs(dd) > maxDrawdown) maxDrawdown = Math.abs(dd);
+                const dd = currentBaseGain - peakBaseGain;
+                if (Math.abs(dd) > maxBaseDrawdown) maxBaseDrawdown = Math.abs(dd);
             });
 
+            const netGain = currentBaseGain * NET_LEVERAGE_MULT;
+            const netMaxDd = maxBaseDrawdown * NET_LEVERAGE_MULT;
             const wr = total > 0 ? ((won / total) * 100).toFixed(2) + '%' : '0%';
 
             return { 
@@ -225,8 +249,10 @@
                 won, 
                 lost, 
                 wr, 
-                totalGain: '+' + currentGain.toFixed(2) + '%',
-                maxDd: maxDrawdown.toFixed(2) + '%'
+                totalGain: (netGain >= 0 ? '+' : '') + netGain.toFixed(2) + '%',
+                baseGain: (currentBaseGain >= 0 ? '+' : '') + currentBaseGain.toFixed(2) + '%',
+                maxDd: netMaxDd.toFixed(2) + '%',
+                baseMaxDd: maxBaseDrawdown.toFixed(2) + '%'
             };
         }
 
@@ -259,7 +285,9 @@
                 strategiesData[0].tradesLost = sonicRes.lost;
                 strategiesData[0].winRate = sonicRes.wr;
                 strategiesData[0].totalReturn = sonicRes.totalGain;
+                strategiesData[0].baseReturn = sonicRes.baseGain;
                 strategiesData[0].maxDd = sonicRes.maxDd;
+                strategiesData[0].baseMaxDd = sonicRes.baseMaxDd;
             }
             
             const neoRes = await fetchLocalStats([
@@ -275,7 +303,9 @@
                 strategiesData[1].tradesLost = neoRes.lost;
                 strategiesData[1].winRate = neoRes.wr;
                 strategiesData[1].totalReturn = neoRes.totalGain;
+                strategiesData[1].baseReturn = neoRes.baseGain;
                 strategiesData[1].maxDd = neoRes.maxDd;
+                strategiesData[1].baseMaxDd = neoRes.baseMaxDd;
             }
 
             renderGrid();
@@ -301,6 +331,13 @@
                 const sumTrades = wonNum + lostNum;
                 const winPct = sumTrades > 0 ? (wonNum / sumTrades) * 100 : 50;
 
+                const subReturnHtml = strat.active && strat.baseReturn !== "—"
+                    ? `<p class="text-[9px] text-zinc-500 font-mono mt-0.5">${i18n[currentLang].baseLabel}: ${strat.baseReturn}</p>`
+                    : '';
+                const subDdHtml = strat.active && strat.baseMaxDd !== "—"
+                    ? `<p class="text-[9px] text-zinc-500 font-mono mt-0.5">${i18n[currentLang].baseLabel}: ${strat.baseMaxDd}</p>`
+                    : '';
+
                 const cardHTML = `
                     <div class="${cardClasses}" onclick="${clickAction}">
                         <div>
@@ -313,15 +350,17 @@
 
                             <h3 class="text-2xl md:text-3xl font-extrabold text-white mb-4 md:mb-6 ${strat.active ? 'group-hover:text-accentCyan' : ''} transition-colors tracking-tight">${strat.name}</h3>
                             
-                            <!-- Haupt-Zahlen (Gain & Max Drawdown) -->
-                            <div class="grid grid-cols-2 gap-2 md:gap-3 mb-5 md:mb-6 p-3 md:p-4 rounded-xl bg-darkBg/60 border border-cardBorder">
-                                <div>
+                            <!-- Haupt-Zahlen (Gain & Max Drawdown - Option A) -->
+                            <div class="grid grid-cols-2 gap-2 md:gap-3 mb-5 md:mb-6 p-3 md:p-4 rounded-xl bg-darkBg/60 border border-cardBorder text-center divide-x divide-cardBorder/60">
+                                <div class="pr-1">
                                     <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-mono">${i18n[currentLang].totalReturn}</p>
-                                    <p class="text-lg md:text-xl font-extrabold text-emerald-400 font-mono mt-0.5">${strat.totalReturn}</p>
+                                    <p class="text-lg md:text-xl font-extrabold text-emerald-400 font-mono mt-0.5 leading-tight">${strat.totalReturn}</p>
+                                    ${subReturnHtml}
                                 </div>
-                                <div>
+                                <div class="pl-1">
                                     <p class="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-widest font-mono">${i18n[currentLang].maxDrawdown}</p>
-                                    <p class="text-lg md:text-xl font-extrabold text-rose-400 font-mono mt-0.5">${strat.maxDd}</p>
+                                    <p class="text-lg md:text-xl font-extrabold text-rose-400 font-mono mt-0.5 leading-tight">${strat.maxDd}</p>
+                                    ${subDdHtml}
                                 </div>
                             </div>
 
