@@ -2,6 +2,7 @@ class DualEngineApp {
     constructor() {
         this.rawTrades = [];
         this.liveTableTrades = null;
+        this.isLiveMerged = false;
 
         this.btChart = null;
         this.equityChart = null;
@@ -15,7 +16,7 @@ class DualEngineApp {
         // 24x Broker-Skalierung abzgl. 30% Erfolgsbeteiligung = 16.8x Netto-Faktor
         this.backtestLeverageMult = 24 * 0.70;
 
-        // Werden nach dem Laden der JSON-Daten dynamisch aus den echten Trades berechnet
+        // Werden nach dem Laden der Daten dynamisch aus den echten Trades berechnet
         this.baseMonthlyAvg = this.isNeo ? 0.57 : 1.14;
         this.rates = this.isNeo
             ? { cons: 0.050, avg: 0.145, opt: 0.220 }
@@ -72,6 +73,21 @@ class DualEngineApp {
         return this.currentLang === 'de' ? 'Basis' : 'Base';
     }
 
+    // Sorgt dafür, dass auf der X-Achse immer das erste und das aktuellste Datum angezeigt werden
+    buildEvenAxisTicks(axis) {
+        const maxTicks = window.innerWidth < 768 ? 4 : 6;
+        const labels = axis.chart.data.labels || [];
+        const count = labels.length;
+        if (count <= maxTicks) return;
+
+        const newTicks = [];
+        for (let i = 0; i < maxTicks; i++) {
+            const idx = Math.round((i * (count - 1)) / (maxTicks - 1));
+            newTicks.push({ value: idx });
+        }
+        axis.ticks = newTicks;
+    }
+
     async init() {
         if (this.dom.langToggle) {
             this.dom.langToggle.addEventListener('click', () => {
@@ -114,6 +130,10 @@ class DualEngineApp {
 
         if (!this.isNeo) {
             this.loadLiveTableData().then(() => {
+                this.mergeLiveTradesIntoRaw();
+                this.calculateProjectionRatesFromData();
+                this.refreshDash();
+                this.calcProjection();
                 this.renderStatsAndTable();
             });
         } else {
@@ -121,14 +141,120 @@ class DualEngineApp {
         }
     }
 
-    // Berechnet die monatlichen Raten (avg, cons, opt) für die Projektions-Engine direkt aus den JSON-Daten
+    // Ergänzt die historischen Daten (this.rawTrades) um alle neuen Live-Trades aus der API
+    mergeLiveTradesIntoRaw() {
+        if (!this.liveTableTrades || this.liveTableTrades.length === 0) return;
+
+        // Aktuellen Master-Kontostand ermitteln, um für neue API-Trades den proportionalen Master-Profit zu berechnen
+        let masterBalance = 0;
+        let deposits = 0;
+        const sortedRaw = [...this.rawTrades].sort((a, b) => a.ts - b.ts);
+        sortedRaw.forEach(t => {
+            const act = (t.Action || "").toUpperCase();
+            const p = parseFloat(t.Profit) || 0;
+            if (act === 'DEPOSIT') { deposits += p; masterBalance += p; }
+            else if (act === 'WITHDRAWAL') { masterBalance += p; }
+            else if (act === 'BUY' || act === 'SELL') { masterBalance += p; }
+        });
+        if (deposits === 0 || masterBalance <= 0) masterBalance = 139296.91;
+
+        let addedCount = 0;
+
+        // Chronologisch durchgehen (älteste zuerst)
+        const chronologicalLive = [...this.liveTableTrades].sort((a, b) => a.ts - b.ts);
+
+        chronologicalLive.forEach(lt => {
+            const ltAction = (lt.Action || "").toUpperCase();
+            if (ltAction !== 'BUY' && ltAction !== 'SELL') return;
+
+            // Prüfen, ob dieser Trade bereits in this.rawTrades existiert (gleiche Action & Zeitfenster +/- 10 Min.)
+            const matchIdx = this.rawTrades.findIndex(rt => {
+                const rtAction = (rt.Action || "").toUpperCase();
+                if (rtAction !== ltAction) return false;
+                if (rt.ts && lt.ts && Math.abs(rt.ts - lt.ts) <= 10 * 60 * 1000) return true;
+                const rtTime = (rt.d.split(" ")[1] || "").substring(0, 5);
+                const ltTime = (lt.d.split(" ")[1] || "").substring(0, 5);
+                return rt.dt === lt.dt && rtTime === ltTime;
+            });
+
+            if (matchIdx !== -1) {
+                // Existierender Trade: Gain synchronisieren, damit Tabelle und Charts/Heatmap exakt übereinstimmen
+                const existingGain = this.rawTrades[matchIdx].parsedGain;
+                if (existingGain !== 0) {
+                    lt.parsedGain = existingGain;
+                    lt.Gain = existingGain;
+                } else if (lt.parsedGain !== 0) {
+                    this.rawTrades[matchIdx].parsedGain = lt.parsedGain;
+                    this.rawTrades[matchIdx].Gain = lt.parsedGain;
+                }
+            } else {
+                // Neuer Trade aus der API, der noch nicht in der JSON-Datei ist!
+                const openObj = this.parseDate(lt["Open Date"]);
+                const closeObj = this.parseDate(lt["Close Date"]);
+                let durationStr = lt["Duration (DD:HH:MM:SS)"] || "";
+
+                if (!durationStr && openObj.ts && closeObj.ts && closeObj.ts >= openObj.ts) {
+                    const diffSec = Math.floor((closeObj.ts - openObj.ts) / 1000);
+                    const dd = String(Math.floor(diffSec / 86400)).padStart(2, '0');
+                    const hh = String(Math.floor((diffSec % 86400) / 3600)).padStart(2, '0');
+                    const mm = String(Math.floor((diffSec % 3600) / 60)).padStart(2, '0');
+                    const ss = String(diffSec % 60).padStart(2, '0');
+                    durationStr = `${dd}:${hh}:${mm}:${ss}`;
+                }
+
+                const estimatedMasterProfit = Number((masterBalance * (lt.parsedGain / 100)).toFixed(2));
+                masterBalance += estimatedMasterProfit;
+
+                this.rawTrades.push({
+                    ...lt,
+                    Profit: estimatedMasterProfit,
+                    Gain: lt.parsedGain,
+                    "Duration (DD:HH:MM:SS)": durationStr
+                });
+                addedCount++;
+            }
+        });
+
+        this.isLiveMerged = true;
+        this.updateDataStatusBadge();
+
+        if (addedCount > 0) {
+            console.log(`${addedCount} neue Live-Trades aus der API zu den historischen Daten ergänzt.`);
+        }
+    }
+
+    updateDataStatusBadge() {
+        if (!this.isLiveMerged) return;
+        const statusSpan = document.querySelector('[data-i18n="dataStatusStatic"], [data-i18n="dataStatusLiveMerged"]');
+        if (statusSpan) {
+            statusSpan.setAttribute('data-i18n', 'dataStatusLiveMerged');
+            statusSpan.innerText = (typeof translations !== 'undefined' && translations[this.currentLang]?.dataStatusLiveMerged)
+                ? translations[this.currentLang].dataStatusLiveMerged
+                : (this.currentLang === 'de' ? 'Live-API & Historie' : 'Live API & History');
+            statusSpan.classList.remove('text-rose-400');
+            statusSpan.classList.add('text-emerald-400');
+
+            const badgeBox = statusSpan.parentElement;
+            if (badgeBox) {
+                badgeBox.classList.remove('bg-rose-500/10', 'border-rose-500/20');
+                badgeBox.classList.add('bg-emerald-500/10', 'border-emerald-500/20');
+                const dot = badgeBox.querySelector('div');
+                if (dot) {
+                    dot.classList.remove('bg-rose-500');
+                    dot.classList.add('bg-emerald-400');
+                }
+            }
+        }
+    }
+
+    // Berechnet die monatlichen Raten (avg, cons, opt) für die Projektions-Engine direkt aus den Daten
     calculateProjectionRatesFromData() {
         const tradesOnly = this.rawTrades.filter(t => t.Action && (t.Action.toUpperCase() === 'BUY' || t.Action.toUpperCase() === 'SELL'));
         if (tradesOnly.length === 0) return;
 
         const chronological = [...tradesOnly].sort((a, b) => a.ts - b.ts);
-        const firstDate = new Date(chronological[0].dt);
-        const lastDate = new Date(chronological[chronological.length - 1].dt);
+        const firstDate = this.parseIsoDateLocal(chronological[0].dt);
+        const lastDate = this.parseIsoDateLocal(chronological[chronological.length - 1].dt);
         const daysDiff = Math.max((lastDate - firstDate) / (1000 * 60 * 60 * 24), 1);
         const monthsDiff = Math.max(daysDiff / 30.44, 1);
 
@@ -166,6 +292,15 @@ class DualEngineApp {
             avg: Math.max(avgNetMonthlyPercent / 100, 0.01),
             opt: Math.max(optNetPercent / 100, 0.02)
         };
+    }
+
+    parseIsoDateLocal(dtStr) {
+        if (!dtStr) return new Date(2025, 0, 1);
+        const p = dtStr.split('-');
+        if (p.length === 3) {
+            return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]), 12, 0, 0);
+        }
+        return new Date(dtStr);
     }
 
     setupTooltips() {
@@ -238,14 +373,14 @@ class DualEngineApp {
         const sorted = [...tradesOnly].sort((a, b) => a.ts - b.ts);
         if (sorted.length === 0) return source;
 
-        const lastDate = new Date(sorted[sorted.length - 1].dt);
+        const lastDate = this.parseIsoDateLocal(sorted[sorted.length - 1].dt);
         const cutoff = new Date(lastDate);
 
         if (this.timeframe === '1M') cutoff.setMonth(cutoff.getMonth() - 1);
         if (this.timeframe === '3M') cutoff.setMonth(cutoff.getMonth() - 3);
         if (this.timeframe === '6M') cutoff.setMonth(cutoff.getMonth() - 6);
 
-        return source.filter(t => !t.Action || (t.Action.toUpperCase() !== 'BUY' && t.Action.toUpperCase() !== 'SELL') || new Date(t.dt) >= cutoff);
+        return source.filter(t => !t.Action || (t.Action.toUpperCase() !== 'BUY' && t.Action.toUpperCase() !== 'SELL') || this.parseIsoDateLocal(t.dt) >= cutoff);
     }
 
     parseDate(dateStr) {
@@ -279,7 +414,7 @@ class DualEngineApp {
         }
 
         const timeNorm = timePart.length === 5 ? `${timePart}:00` : timePart;
-        ts = new Date(`${dt}T${timeNorm}`).getTime() || new Date(dt).getTime() || 0;
+        ts = new Date(`${dt}T${timeNorm}`).getTime() || this.parseIsoDateLocal(dt).getTime() || 0;
         return { dt, d, ts };
     }
 
@@ -337,7 +472,7 @@ class DualEngineApp {
 
                         // Sicherheits-Korrektur: Falls das Backend den Gain aus einer stark erhöhten
                         // Lot-Grösse (> 0.005 Lots) über den fixen Teiler 1200.52 berechnet hat,
-                        // normieren wir ihn hier auf die 1x-Basis-Lotgrösse (0.001 Lots).
+                        // normieren wir ihn auf die 1x-Basis-Lotgrösse (0.001 Lots).
                         if (lots > 0.005 && Math.abs(gain) > 0.5) {
                             if (profit !== 0) {
                                 const normalizedProfit = (profit / lots) * 0.001;
@@ -442,7 +577,7 @@ class DualEngineApp {
                             callbacks: {
                                 title: (items) => {
                                     const isDe = this.currentLang === 'de';
-                                    const d = new Date(items[0].label);
+                                    const d = this.parseIsoDateLocal(items[0].label);
                                     if (isNaN(d.getTime())) return `${isDe ? 'Datum' : 'Date'}: ${items[0].label}`;
                                     return `${isDe ? 'Datum' : 'Date'}: ${d.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
                                 },
@@ -470,18 +605,18 @@ class DualEngineApp {
                             offset: true,
                             grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false },
                             border: { display: false },
+                            afterBuildTicks: (axis) => this.buildEvenAxisTicks(axis),
                             ticks: {
-                                maxTicksLimit: isMobile ? 4 : 6,
+                                autoSkip: false,
                                 maxRotation: 0,
-                                autoSkip: true,
                                 align: 'inner',
                                 font: { size: isMobile ? 8 : 10 },
                                 color: '#94A3B8',
                                 padding: 6,
-                                callback: function(val) {
-                                    const label = this.getLabelForValue(val);
+                                callback: (val) => {
+                                    const label = this.drawdownChart ? this.drawdownChart.data.labels[val] : '';
                                     if (!label) return '';
-                                    const d = new Date(label);
+                                    const d = this.parseIsoDateLocal(label);
                                     if (isNaN(d.getTime())) return label;
                                     return d.toLocaleString('en-US', { month: 'short', day: '2-digit', year: '2-digit' });
                                 }
@@ -570,20 +705,23 @@ class DualEngineApp {
         chronologicalTrades.forEach(t => {
             const action = (t.Action || "").toUpperCase();
             const g = t.parsedGain || 0;
+            const rawProfit = parseFloat(t.Profit) || 0;
             const date = t.dt;
 
             if (action === 'BUY' || action === 'SELL') {
                 const simulatedBaseProfit = simCurrentBal * (g / 100);
                 simCurrentBal += simulatedBaseProfit;
 
-                if (simulatedBaseProfit > 0) {
+                if (g > 0 || (g === 0 && rawProfit > 0)) {
                     wins++;
-                    grossProfit += simulatedBaseProfit;
-                    winBaseArray.push(simulatedBaseProfit);
-                } else if (simulatedBaseProfit < 0) {
+                    const winAmt = simulatedBaseProfit > 0 ? simulatedBaseProfit : 0.1;
+                    grossProfit += winAmt;
+                    winBaseArray.push(winAmt);
+                } else if (g < 0 || (g === 0 && rawProfit < 0)) {
                     losses++;
-                    grossLoss += Math.abs(simulatedBaseProfit);
-                    lossBaseArray.push(Math.abs(simulatedBaseProfit));
+                    const lossAmt = simulatedBaseProfit < 0 ? Math.abs(simulatedBaseProfit) : 0.1;
+                    grossLoss += lossAmt;
+                    lossBaseArray.push(lossAmt);
                 }
 
                 currentBaseGain += g;
@@ -641,8 +779,8 @@ class DualEngineApp {
             if (el) el.innerHTML = val;
         };
 
-        const firstDate = new Date(chronologicalTrades[0].dt);
-        const lastDate = new Date(chronologicalTrades[chronologicalTrades.length - 1].dt);
+        const firstDate = this.parseIsoDateLocal(chronologicalTrades[0].dt);
+        const lastDate = this.parseIsoDateLocal(chronologicalTrades[chronologicalTrades.length - 1].dt);
         const daysDiff = Math.max((lastDate - firstDate) / (1000 * 60 * 60 * 24), 1);
         const monthsDiff = Math.max(daysDiff / 30.44, 1);
 
@@ -663,10 +801,11 @@ class DualEngineApp {
             if (stdDev > 0) sharpe = ((mean / stdDev) * Math.sqrt(252)).toFixed(2);
         }
 
+        const isTradeWin = (t) => (t.parsedGain || 0) > 0 || ((t.parsedGain || 0) === 0 && (parseFloat(t.Profit) || 0) > 0);
         const longs = chronologicalTrades.filter(t => t.Action.toUpperCase() === 'BUY');
         const shorts = chronologicalTrades.filter(t => t.Action.toUpperCase() === 'SELL');
-        const winRateLong = longs.length > 0 ? ((longs.filter(t => (t.parsedGain || 0) > 0).length / longs.length) * 100).toFixed(1) + '%' : '-';
-        const winRateShort = shorts.length > 0 ? ((shorts.filter(t => (t.parsedGain || 0) > 0).length / shorts.length) * 100).toFixed(1) + '%' : '-';
+        const winRateLong = longs.length > 0 ? ((longs.filter(isTradeWin).length / longs.length) * 100).toFixed(1) + '%' : '-';
+        const winRateShort = shorts.length > 0 ? ((shorts.filter(isTradeWin).length / shorts.length) * 100).toFixed(1) + '%' : '-';
         const recoveryFactor = maxBaseDrawdown > 0 ? (currentBaseGain / maxBaseDrawdown).toFixed(2) : "0.00";
 
         const baseLbl = this.getBaseLabel();
@@ -790,7 +929,7 @@ class DualEngineApp {
             });
 
             Object.keys(dailyGrowth).forEach(date => {
-                const d = new Date(date);
+                const d = this.parseIsoDateLocal(date);
                 labels.push(d.toLocaleString('en-US', { month: 'short', day: '2-digit', year: '2-digit' }));
                 netGrowthData.push((dailyGrowth[date] * this.backtestLeverageMult).toFixed(2));
             });
@@ -859,13 +998,19 @@ class DualEngineApp {
                     x: {
                         grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false },
                         border: { display: false },
+                        afterBuildTicks: (axis) => this.buildEvenAxisTicks(axis),
                         ticks: {
+                            autoSkip: false,
                             color: '#94A3B8',
                             font: { size: isMobile ? 8 : 10 },
-                            maxTicksLimit: isMobile ? 4 : 6,
                             maxRotation: 0,
                             align: 'inner',
-                            padding: 6
+                            padding: 6,
+                            callback: (val) => {
+                                return this.equityChart && this.equityChart.data.labels[val]
+                                    ? this.equityChart.data.labels[val]
+                                    : '';
+                            }
                         }
                     },
                     y: {
@@ -1423,13 +1568,19 @@ class DualEngineApp {
                     x: {
                         grid: { color: 'rgba(255, 255, 255, 0.02)', drawTicks: false },
                         border: { display: false },
+                        afterBuildTicks: (axis) => this.buildEvenAxisTicks(axis),
                         ticks: {
-                            maxTicksLimit: isMobile ? 4 : 6,
+                            autoSkip: false,
                             maxRotation: 0,
                             font: { size: isMobile ? 8 : 10 },
                             color: '#94A3B8',
                             align: 'inner',
-                            padding: 6
+                            padding: 6,
+                            callback: (val) => {
+                                return this.btChart && this.btChart.data.labels[val]
+                                    ? this.btChart.data.labels[val]
+                                    : '';
+                            }
                         }
                     },
                     y: {
@@ -1452,7 +1603,7 @@ class DualEngineApp {
     renderStatsAndTable() {
         if (!this.dom.tradesBody) return;
 
-        // Nutzt Live-Trades vom Backend, oder fällt automatisch auf die lokalen JSON-Daten zurück
+        // Nutzt die Live-API-Trades (oder fällt auf this.rawTrades zurück)
         const dataSource = this.isNeo
             ? this.rawTrades
             : (this.liveTableTrades && this.liveTableTrades.length > 0 ? this.liveTableTrades : this.rawTrades);

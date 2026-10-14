@@ -200,9 +200,20 @@
             const parts = dateStr.trim().split(" ");
             const datePart = parts[0];
             const timePart = parts[1] || "00:00";
+            const timeNorm = timePart.length === 5 ? `${timePart}:00` : timePart;
+
             if (datePart.includes("/")) {
-                const [m, d, y] = datePart.split("/");
-                return new Date(`${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}T${timePart}:00`).getTime() || 0;
+                const p = datePart.split("/");
+                if (p.length === 3) {
+                    return new Date(`${p[2]}-${p[0].padStart(2, '0')}-${p[1].padStart(2, '0')}T${timeNorm}`).getTime() || 0;
+                }
+            } else if (datePart.includes(".")) {
+                const p = datePart.split(".");
+                if (p.length === 3) {
+                    return new Date(`${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}T${timeNorm}`).getTime() || 0;
+                }
+            } else if (datePart.includes("-")) {
+                return new Date(`${datePart}T${timeNorm}`).getTime() || 0;
             }
             return new Date(dateStr).getTime() || 0;
         }
@@ -229,10 +240,11 @@
 
             trades.forEach(t => {
                 const profit = parseFloat(t.Profit) || 0;
-                if (profit > 0) won++;
-                else if (profit < 0) lost++;
-
                 const g = parseFloat(t.Gain) || 0;
+
+                if (g > 0 || (g === 0 && profit > 0)) won++;
+                else if (g < 0 || (g === 0 && profit < 0)) lost++;
+
                 currentBaseGain += g;
                 if (currentBaseGain > peakBaseGain) peakBaseGain = currentBaseGain;
                 
@@ -256,13 +268,13 @@
             };
         }
 
-        async function fetchLocalStats(paths) {
+        async function fetchRawList(paths) {
             for (const f of paths) {
                 try {
                     const res = await fetch(f);
                     if (res.ok) {
                         const data = await res.json();
-                        return calculateStats(data);
+                        if (Array.isArray(data)) return data;
                     }
                 } catch (e) {
                     console.warn("Konnte Daten von " + f + " nicht laden.");
@@ -271,44 +283,94 @@
             return null;
         }
 
+        function applyStatsToStrategy(index, stats) {
+            if (!stats) return;
+            strategiesData[index].tradesMade = stats.total;
+            strategiesData[index].tradesWon = stats.won;
+            strategiesData[index].tradesLost = stats.lost;
+            strategiesData[index].winRate = stats.wr;
+            strategiesData[index].totalReturn = stats.totalGain;
+            strategiesData[index].baseReturn = stats.baseGain;
+            strategiesData[index].maxDd = stats.maxDd;
+            strategiesData[index].baseMaxDd = stats.baseMaxDd;
+        }
+
         async function initData() {
-            const sonicRes = await fetchLocalStats([
+            const sonicRaw = await fetchRawList([
                 'data/Sonic_TradesData.json',
                 'data/Sonic_tradesdata.json',
                 'data/trades_data.json',
                 '../data/Sonic_TradesData.json'
             ]);
             
-            if (sonicRes) {
-                strategiesData[0].tradesMade = sonicRes.total;
-                strategiesData[0].tradesWon = sonicRes.won;
-                strategiesData[0].tradesLost = sonicRes.lost;
-                strategiesData[0].winRate = sonicRes.wr;
-                strategiesData[0].totalReturn = sonicRes.totalGain;
-                strategiesData[0].baseReturn = sonicRes.baseGain;
-                strategiesData[0].maxDd = sonicRes.maxDd;
-                strategiesData[0].baseMaxDd = sonicRes.baseMaxDd;
+            if (sonicRaw) {
+                applyStatsToStrategy(0, calculateStats(sonicRaw));
             }
             
-            const neoRes = await fetchLocalStats([
+            const neoRaw = await fetchRawList([
                 'data/NEO_TradesData.json',
                 'data/Neo_TradesData.json',
                 'data/neo_tradesdata.json',
                 '../data/NEO_TradesData.json'
             ]);
             
-            if (neoRes) {
-                strategiesData[1].tradesMade = neoRes.total;
-                strategiesData[1].tradesWon = neoRes.won;
-                strategiesData[1].tradesLost = neoRes.lost;
-                strategiesData[1].winRate = neoRes.wr;
-                strategiesData[1].totalReturn = neoRes.totalGain;
-                strategiesData[1].baseReturn = neoRes.baseGain;
-                strategiesData[1].maxDd = neoRes.maxDd;
-                strategiesData[1].baseMaxDd = neoRes.baseMaxDd;
+            if (neoRaw) {
+                applyStatsToStrategy(1, calculateStats(neoRaw));
             }
 
             renderGrid();
+
+            // Ergänze SONIC-Daten asynchron um die neuesten Live-API-Trades
+            if (sonicRaw) {
+                try {
+                    const liveRes = await fetch('https://tagmarkets-backend.onrender.com/api/live-trades');
+                    if (liveRes.ok) {
+                        const liveData = await liveRes.json();
+                        const liveTrades = liveData.trades || [];
+                        if (Array.isArray(liveTrades) && liveTrades.length > 0) {
+                            const mergedSonic = [...sonicRaw];
+                            liveTrades.forEach(lt => {
+                                const ltAct = (lt.Action || "").toUpperCase();
+                                if (ltAct !== 'BUY' && ltAct !== 'SELL') return;
+                                const ltTs = parseSortableDate(lt["Open Date"]);
+
+                                let rawLots = lt["Units/Lots"];
+                                if (typeof rawLots === 'object' && rawLots !== null) rawLots = rawLots.value;
+                                const lots = parseFloat(rawLots) || 0;
+                                const profit = parseFloat(lt.Profit || 0);
+                                let gain = parseFloat(lt.Gain || 0);
+
+                                if (lots > 0.005 && Math.abs(gain) > 0.5) {
+                                    if (profit !== 0) {
+                                        gain = (((profit / lots) * 0.001) / 1200.52) * 100;
+                                    } else {
+                                        gain = (gain / lots) * 0.001;
+                                    }
+                                }
+
+                                const exists = mergedSonic.some(rt => {
+                                    const rtAct = (rt.Action || "").toUpperCase();
+                                    if (rtAct !== ltAct) return false;
+                                    const rtTs = parseSortableDate(rt["Open Date"]);
+                                    return rtTs && ltTs && Math.abs(rtTs - ltTs) <= 10 * 60 * 1000;
+                                });
+
+                                if (!exists) {
+                                    mergedSonic.push({
+                                        ...lt,
+                                        Gain: gain
+                                    });
+                                }
+                            });
+
+                            applyStatsToStrategy(0, calculateStats(mergedSonic));
+                            renderGrid();
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Live-API-Ergänzung auf Startseite übersprungen:", e);
+                }
+            }
         }
 
         function renderGrid() {

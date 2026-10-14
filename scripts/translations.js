@@ -38,6 +38,7 @@ const translations = {
         ttHeatmap: "Monatliche Netto-Renditen (16.8x) und MyFXBook-Basiswerte (1x) im chronologischen Überblick.",
         
         dataStatusStatic: "Historische Daten (CSV)",
+        dataStatusLiveMerged: "Live-API & Historie",
         tradesSubLive: "Aktuelle Live-Transaktionen (16.8x Netto & 1x Basis aus dem Broker-Feed)",
         tradesSubStatic: "Historische Transaktionen (16.8x Netto & 1x Basis aus lokalem Datenexport)",
         liveBadge: "Live API",
@@ -189,6 +190,7 @@ const translations = {
         ttHeatmap: "Monthly net returns (16.8x) and MyFXBook base values (1x) in chronological overview.",
         
         dataStatusStatic: "Historical Data (CSV)",
+        dataStatusLiveMerged: "Live API & History",
         tradesSubLive: "Current live transactions (16.8x Net & 1x Base from broker feed)",
         tradesSubStatic: "Historical transactions (16.8x Net & 1x Base from local CSV export)",
         liveBadge: "Live API",
