@@ -3,7 +3,6 @@ class DualEngineApp {
         this.rawTrades = [];
         this.liveTableTrades = [];
         this.isLiveMerged = false;
-        this.lastSyncIso = null;
 
         this.btChart = null;
         this.equityChart = null;
@@ -134,8 +133,10 @@ class DualEngineApp {
         });
 
         let maxRawTs = 0;
+        let maxRawDate = "";
         existingTrades.forEach(t => {
             if (t.ts > maxRawTs) maxRawTs = t.ts;
+            if (t.dt > maxRawDate) maxRawDate = t.dt;
         });
 
         let masterBalance = 0;
@@ -163,13 +164,17 @@ class DualEngineApp {
             const sym = (lt.Symbol || "").toUpperCase();
             if (sym && !sym.includes(this.expectedSymbol)) return;
 
-            // Nur basierend auf dem Timestamp prüfen, ob der Trade älter oder bereits vorhanden ist (kein Blockieren nach Datum mehr!)
-            if (lt.ts <= maxRawTs) {
+            // Alte Trades vor dem letzten dokumentierten JSON-Tag überspringen (verhindert Duplikate)
+            if (maxRawDate && lt.dt < maxRawDate) return;
+
+            // Auf dem letzten JSON-Tag prüfen, ob der Trade bereits vorhanden ist
+            if (maxRawDate && lt.dt === maxRawDate) {
                 const alreadyExists = existingTrades.some(rt => {
+                    if (rt.dt !== lt.dt) return false;
                     if ((rt.Action || "").toUpperCase() !== ltAction) return false;
                     return Math.abs(rt.ts - lt.ts) <= 30 * 60 * 1000;
                 });
-                if (alreadyExists) return;
+                if (alreadyExists || lt.ts <= maxRawTs) return;
             }
 
             const openObj = this.parseDate(lt["Open Date"]);
@@ -230,34 +235,6 @@ class DualEngineApp {
                 }
             }
         }
-    }
-
-    updateSyncTimeText() {
-        const syncEl = document.getElementById('live-sync-time');
-        if (!syncEl) return;
-
-        const isDe = this.currentLang === 'de';
-        const tObj = (typeof translations !== 'undefined' && translations[this.currentLang]) ? translations[this.currentLang] : {};
-        const prefix = tObj.lastSyncPrefix || (isDe ? 'Letzter Sync' : 'Last sync');
-        const todayWord = tObj.todayWord || (isDe ? 'heute' : 'today');
-        const atWord = tObj.atWord || (isDe ? 'um' : 'at');
-
-        if (!this.lastSyncIso) {
-            syncEl.innerText = `${prefix}: ---`;
-            return;
-        }
-
-        const syncDate = new Date(this.lastSyncIso);
-        const today = new Date();
-        const locale = isDe ? 'de-DE' : 'en-GB';
-
-        let datePart = todayWord;
-        if (syncDate.getDate() !== today.getDate() || syncDate.getMonth() !== today.getMonth() || syncDate.getFullYear() !== today.getFullYear()) {
-            datePart = syncDate.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
-        }
-
-        const timeStr = syncDate.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
-        syncEl.innerText = `${prefix}: ${datePart} ${atWord} ${timeStr}`;
     }
 
     calculateProjectionRatesFromData() {
@@ -402,24 +379,9 @@ class DualEngineApp {
         let ts = 0;
         if (!dateStr) return { dt, d, ts };
 
-        // Falls ein ISO-String mit 'T' kommt (z.B. 2026-10-13T06:55:00)
-        let cleanStr = String(dateStr).trim();
-        if (cleanStr.includes('T')) {
-            const isoParts = cleanStr.split('T');
-            const datePartIso = isoParts[0]; // 2026-10-13
-            const timePartIso = (isoParts[1] || "00:00").substring(0, 5); // 06:55
-            const p = datePartIso.split('-');
-            if (p.length === 3) {
-                dt = datePartIso;
-                d = `${p[2]}.${p[1]}.${p[0]} ${timePartIso}`;
-                ts = new Date(cleanStr).getTime() || 0;
-                return { dt, d, ts };
-            }
-        }
-
-        const parts = cleanStr.split(" ");
+        const parts = dateStr.trim().split(" ");
         const datePart = parts[0];
-        const timePart = (parts[1] || "00:00").substring(0, 5);
+        const timePart = parts[1] || "00:00";
 
         if (datePart.includes("/")) {
             const p = datePart.split("/");
@@ -538,9 +500,18 @@ class DualEngineApp {
                             };
                         });
 
-                    if (responseData.lastSync) {
-                        this.lastSyncIso = responseData.lastSync;
-                        this.updateSyncTimeText();
+                    const syncEl = document.getElementById('live-sync-time');
+                    if (syncEl && responseData.lastSync) {
+                        const syncDate = new Date(responseData.lastSync);
+                        const today = new Date();
+
+                        let datePrefix = "heute";
+                        if (syncDate.getDate() !== today.getDate() || syncDate.getMonth() !== today.getMonth()) {
+                            datePrefix = syncDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+                        }
+
+                        const timeStr = syncDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+                        syncEl.innerText = `Letzter Sync: ${datePrefix} um ${timeStr}`;
                     }
                 }
             }
@@ -1152,7 +1123,6 @@ class DualEngineApp {
                 el.innerText = translations[this.currentLang][key];
             }
         });
-        this.updateSyncTimeText();
     }
 
     setupListeners() {
@@ -1300,8 +1270,8 @@ class DualEngineApp {
                     this.dom.projResSub.innerHTML = `<span class="text-zinc-400">${this.currentLang === 'de' ? 'Gesamtwert:' : 'Total Value:'} <strong class="text-white">$${formatMoneyNum(totalVal)}</strong> · (${baseLbl} 1x: +$${formatMoneyNum(resBase.payouts)})</span>`;
                 }
 
-                if (this.dom.projConsBal) this.dom.projConsBal.innerHTML = `$${formatMoneyNum(resCons.payouts)} <span class="text-[10px] text-zinc-500 block font-normal mt-0.5">+ $${formatMoneyNum(resCons.balance)} ${this.currentLang === 'de' ? 'Kap.' : 'Cap.'}</span>`;
-                if (this.dom.projOptBal) this.dom.projOptBal.innerHTML = `$${formatMoneyNum(resOpt.payouts)} <span class="text-[10px] text-zinc-500 block font-normal mt-0.5">+ $${formatMoneyNum(resOpt.balance)} ${this.currentLang === 'de' ? 'Kap.' : 'Cap.'}</span>`;
+                if (this.dom.projConsBal) this.dom.projConsBal.innerHTML = `$${formatMoneyNum(resCons.payouts)} <span class="text-[10px] text-zinc-500 block font-normal mt-0.5">+ $${formatMoneyNum(resCons.balance)} Kap.</span>`;
+                if (this.dom.projOptBal) this.dom.projOptBal.innerHTML = `$${formatMoneyNum(resOpt.payouts)} <span class="text-[10px] text-zinc-500 block font-normal mt-0.5">+ $${formatMoneyNum(resOpt.balance)} Kap.</span>`;
             } else {
                 this.dom.projResBal.innerHTML = `$${formatMoneyNum(resAvg.balance)}`;
 
@@ -1665,10 +1635,7 @@ class DualEngineApp {
             const typeColor = isLong ? 'text-emerald-400' : 'text-rose-400';
 
             let displayDate = "-";
-            if (t.d) {
-                // Nimmt das formatierte Datum inkl. Uhrzeit (DD.MM.YYYY HH:MM)
-                displayDate = t.d;
-            } else if (t.dt) {
+            if (t.dt) {
                 const dParts = t.dt.split('-');
                 displayDate = dParts.length === 3 ? `${dParts[2]}.${dParts[1]}.${dParts[0]}` : t.dt;
             }
@@ -1726,4 +1693,4 @@ class DualEngineApp {
 
 document.addEventListener('DOMContentLoaded', () => {
     new DualEngineApp();
-});
+}); 
