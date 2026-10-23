@@ -1693,4 +1693,4 @@ class DualEngineApp {
 
 document.addEventListener('DOMContentLoaded', () => {
     new DualEngineApp();
-}); 
+});
