@@ -408,9 +408,24 @@ class DualEngineApp {
         let ts = 0;
         if (!dateStr) return { dt, d, ts };
 
-        const parts = dateStr.trim().split(" ");
+        // Falls ein ISO-String mit 'T' kommt (z.B. 2026-10-13T06:55:00)
+        let cleanStr = String(dateStr).trim();
+        if (cleanStr.includes('T')) {
+            const isoParts = cleanStr.split('T');
+            const datePartIso = isoParts[0]; // 2026-10-13
+            const timePartIso = (isoParts[1] || "00:00").substring(0, 5); // 06:55
+            const p = datePartIso.split('-');
+            if (p.length === 3) {
+                dt = datePartIso;
+                d = `${p[2]}.${p[1]}.${p[0]} ${timePartIso}`;
+                ts = new Date(cleanStr).getTime() || 0;
+                return { dt, d, ts };
+            }
+        }
+
+        const parts = cleanStr.split(" ");
         const datePart = parts[0];
-        const timePart = parts[1] || "00:00";
+        const timePart = (parts[1] || "00:00").substring(0, 5);
 
         if (datePart.includes("/")) {
             const p = datePart.split("/");
