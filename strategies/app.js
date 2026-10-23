@@ -701,7 +701,8 @@ class DualEngineApp {
                                     const baseLbl = this.getBaseLabel();
                                     const netVal = c.raw || 0;
                                     const baseVal = netVal / this.backtestLeverageMult;
-                                    return `${c.label}: $${netVal.toFixed(2)} (${baseLbl}: $${baseVal.toFixed(2)})`;
+                                    const sign = c.dataIndex === 0 ? '+' : '-';
+                                    return `${c.label}: ${sign}${netVal.toFixed(2)}% (${baseLbl}: ${sign}${baseVal.toFixed(2)}%)`;
                                 }
                             }
                         }
@@ -722,13 +723,14 @@ class DualEngineApp {
         let wins = 0, losses = 0;
         let grossProfit = 0, grossLoss = 0;
         const durations = [];
-        const winBaseArray = [], lossBaseArray = [];
+        const winGainPctArray = [], lossGainPctArray = [];
 
         let deposits = 0, withdrawals = 0, currentBal = 0, highestBal = 0;
         let currentBaseGain = 0, peakBaseGain = 0, maxBaseDrawdown = 0;
         const dailyData = {};
         const baseCapital = 1000;
         let simCurrentBal = baseCapital;
+        const fallbackRefBal = this.isNeo ? 12000 : 120000;
 
         chronologicalTrades.forEach(t => {
             const action = (t.Action || "").toUpperCase();
@@ -740,16 +742,20 @@ class DualEngineApp {
                 const simulatedBaseProfit = simCurrentBal * (g / 100);
                 simCurrentBal += simulatedBaseProfit;
 
+                const pctMag = Math.abs(g) > 0
+                    ? Math.abs(g)
+                    : (rawProfit !== 0 ? (Math.abs(rawProfit) / fallbackRefBal) * 100 : 0.01);
+
                 if (g < 0 || (g === 0 && rawProfit < 0)) {
                     losses++;
                     const lossAmt = simulatedBaseProfit < 0 ? Math.abs(simulatedBaseProfit) : 0.1;
                     grossLoss += lossAmt;
-                    lossBaseArray.push(lossAmt);
+                    lossGainPctArray.push(pctMag);
                 } else {
                     wins++;
                     const winAmt = simulatedBaseProfit > 0 ? simulatedBaseProfit : 0.1;
                     grossProfit += winAmt;
-                    winBaseArray.push(winAmt);
+                    winGainPctArray.push(pctMag);
                 }
 
                 currentBaseGain += g;
@@ -781,10 +787,10 @@ class DualEngineApp {
             return arr.length % 2 !== 0 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2;
         };
 
-        const typBaseWin = getMedian(winBaseArray);
-        const typBaseLoss = getMedian(lossBaseArray);
-        const typNetWin = typBaseWin * this.backtestLeverageMult;
-        const typNetLoss = typBaseLoss * this.backtestLeverageMult;
+        const typBaseWinPct = getMedian(winGainPctArray);
+        const typBaseLossPct = getMedian(lossGainPctArray);
+        const typNetWinPct = typBaseWinPct * this.backtestLeverageMult;
+        const typNetLossPct = typBaseLossPct * this.backtestLeverageMult;
 
         const profitFactor = grossLoss > 0 ? (grossProfit / grossLoss).toFixed(2) : (grossProfit > 0 ? grossProfit.toFixed(2) : "0.00");
 
@@ -879,10 +885,10 @@ class DualEngineApp {
         setHtml('myfx-monthly', `${monthlyNetGain >= 0 ? '+' : ''}${monthlyNetGain.toFixed(2)}% <span class="text-[9px] text-zinc-500 font-normal block">${baseLbl}: +${monthlyBaseGain.toFixed(2)}%</span>`);
         setHtml('myfx-drawdown', `${maxNetDrawdown.toFixed(2)}% <span class="text-[9px] text-zinc-500 font-normal block">${baseLbl}: ${maxBaseDrawdown.toFixed(2)}%</span>`);
 
-        setEl('avg-win-text', '+$' + typNetWin.toFixed(2));
-        setEl('avg-win-sub', `${baseLbl}: +$${typBaseWin.toFixed(2)}`);
-        setEl('avg-loss-text', '-$' + typNetLoss.toFixed(2));
-        setEl('avg-loss-sub', `${baseLbl}: -$${typBaseLoss.toFixed(2)}`);
+        setEl('avg-win-text', '+' + typNetWinPct.toFixed(2) + '%');
+        setEl('avg-win-sub', `${baseLbl}: +${typBaseWinPct.toFixed(2)}%`);
+        setEl('avg-loss-text', '-' + typNetLossPct.toFixed(2) + '%');
+        setEl('avg-loss-sub', `${baseLbl}: -${typBaseLossPct.toFixed(2)}%`);
 
         const winLossHeaderEl = document.getElementById('kpi-win-loss-text');
         if (winLossHeaderEl) {
@@ -890,7 +896,7 @@ class DualEngineApp {
         }
 
         if (this.rrChart) {
-            this.rrChart.data.datasets[0].data = [typNetWin, typNetLoss];
+            this.rrChart.data.datasets[0].data = [typNetWinPct, typNetLossPct];
             this.rrChart.update();
         }
         if (this.drawdownChart) {
