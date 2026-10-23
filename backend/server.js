@@ -7,14 +7,14 @@ const SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 Minuten
 
 const STRATEGIES = {
     sonic: {
-        id: process.env.MYFXBOOK_SONIC_ID || process.env.MYFXBOOK_ACCOUNT_ID || '12249114',
+        id: process.env.MYFXBOOK_SONIC_ID || process.env.MYFXBOOK_ACCOUNT_ID,
         symbol: 'XAUUSD',
         baseBalance: 1200.52,
         baseLots: 0.001,
         maxNormalLots: 0.005
     },
     neofx: {
-        id: process.env.MYFXBOOK_NEO_ID || '12258114',
+        id: process.env.MYFXBOOK_NEO_ID,
         symbol: 'EURUSD',
         baseBalance: 12000.00,
         baseLots: 0.10,
@@ -91,6 +91,11 @@ function processTrades(rawList, config) {
 }
 
 async function fetchAccountHistory(accountId) {
+    if (!accountId) {
+        console.error("Keine MyFXBook Account-ID konfiguriert.");
+        return null;
+    }
+
     let response = await fetch(`https://www.myfxbook.com/api/get-history.json?session=${sessionToken}&id=${accountId}`);
     let data = await response.json();
 
@@ -134,7 +139,7 @@ async function updateTradesBackground() {
 }
 
 app.get('/', (req, res) => {
-    res.send('TAG Markets Backend läuft erfolgreich! API erreichbar unter /api/live-trades');
+    res.send('SocialTrading Backend läuft erfolgreich! API erreichbar unter /api/live-trades');
 });
 
 app.get('/api/live-trades', async (req, res) => {

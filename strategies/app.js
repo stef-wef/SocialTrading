@@ -3,6 +3,7 @@ class DualEngineApp {
         this.rawTrades = [];
         this.liveTableTrades = [];
         this.isLiveMerged = false;
+        this.lastSyncIso = null;
 
         this.btChart = null;
         this.equityChart = null;
@@ -235,6 +236,34 @@ class DualEngineApp {
                 }
             }
         }
+    }
+
+    updateSyncTimeText() {
+        const syncEl = document.getElementById('live-sync-time');
+        if (!syncEl) return;
+
+        const isDe = this.currentLang === 'de';
+        const tObj = (typeof translations !== 'undefined' && translations[this.currentLang]) ? translations[this.currentLang] : {};
+        const prefix = tObj.lastSyncPrefix || (isDe ? 'Letzter Sync' : 'Last sync');
+        const todayWord = tObj.todayWord || (isDe ? 'heute' : 'today');
+        const atWord = tObj.atWord || (isDe ? 'um' : 'at');
+
+        if (!this.lastSyncIso) {
+            syncEl.innerText = `${prefix}: ---`;
+            return;
+        }
+
+        const syncDate = new Date(this.lastSyncIso);
+        const today = new Date();
+        const locale = isDe ? 'de-DE' : 'en-GB';
+
+        let datePart = todayWord;
+        if (syncDate.getDate() !== today.getDate() || syncDate.getMonth() !== today.getMonth() || syncDate.getFullYear() !== today.getFullYear()) {
+            datePart = syncDate.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
+        }
+
+        const timeStr = syncDate.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+        syncEl.innerText = `${prefix}: ${datePart} ${atWord} ${timeStr}`;
     }
 
     calculateProjectionRatesFromData() {
@@ -500,18 +529,9 @@ class DualEngineApp {
                             };
                         });
 
-                    const syncEl = document.getElementById('live-sync-time');
-                    if (syncEl && responseData.lastSync) {
-                        const syncDate = new Date(responseData.lastSync);
-                        const today = new Date();
-
-                        let datePrefix = "heute";
-                        if (syncDate.getDate() !== today.getDate() || syncDate.getMonth() !== today.getMonth()) {
-                            datePrefix = syncDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
-                        }
-
-                        const timeStr = syncDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-                        syncEl.innerText = `Letzter Sync: ${datePrefix} um ${timeStr}`;
+                    if (responseData.lastSync) {
+                        this.lastSyncIso = responseData.lastSync;
+                        this.updateSyncTimeText();
                     }
                 }
             }
@@ -1123,6 +1143,7 @@ class DualEngineApp {
                 el.innerText = translations[this.currentLang][key];
             }
         });
+        this.updateSyncTimeText();
     }
 
     setupListeners() {
@@ -1270,8 +1291,8 @@ class DualEngineApp {
                     this.dom.projResSub.innerHTML = `<span class="text-zinc-400">${this.currentLang === 'de' ? 'Gesamtwert:' : 'Total Value:'} <strong class="text-white">$${formatMoneyNum(totalVal)}</strong> · (${baseLbl} 1x: +$${formatMoneyNum(resBase.payouts)})</span>`;
                 }
 
-                if (this.dom.projConsBal) this.dom.projConsBal.innerHTML = `$${formatMoneyNum(resCons.payouts)} <span class="text-[10px] text-zinc-500 block font-normal mt-0.5">+ $${formatMoneyNum(resCons.balance)} Kap.</span>`;
-                if (this.dom.projOptBal) this.dom.projOptBal.innerHTML = `$${formatMoneyNum(resOpt.payouts)} <span class="text-[10px] text-zinc-500 block font-normal mt-0.5">+ $${formatMoneyNum(resOpt.balance)} Kap.</span>`;
+                if (this.dom.projConsBal) this.dom.projConsBal.innerHTML = `$${formatMoneyNum(resCons.payouts)} <span class="text-[10px] text-zinc-500 block font-normal mt-0.5">+ $${formatMoneyNum(resCons.balance)} ${this.currentLang === 'de' ? 'Kap.' : 'Cap.'}</span>`;
+                if (this.dom.projOptBal) this.dom.projOptBal.innerHTML = `$${formatMoneyNum(resOpt.payouts)} <span class="text-[10px] text-zinc-500 block font-normal mt-0.5">+ $${formatMoneyNum(resOpt.balance)} ${this.currentLang === 'de' ? 'Kap.' : 'Cap.'}</span>`;
             } else {
                 this.dom.projResBal.innerHTML = `$${formatMoneyNum(resAvg.balance)}`;
 
