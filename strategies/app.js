@@ -3,6 +3,7 @@ class DualEngineApp {
         this.rawTrades = [];
         this.liveTableTrades = [];
         this.isLiveMerged = false;
+        this.lastSyncIso = null;
 
         this.btChart = null;
         this.equityChart = null;
@@ -235,6 +236,33 @@ class DualEngineApp {
                 }
             }
         }
+    }
+
+    updateSyncTimeText() {
+        const syncEl = document.getElementById('live-sync-time');
+        if (!syncEl) return;
+
+        const t = (typeof translations !== 'undefined' && translations[this.currentLang]) ? translations[this.currentLang] : null;
+        const prefix = t?.lastSyncPrefix || (this.currentLang === 'de' ? 'Letzter Sync' : 'Last sync');
+        const todayWord = t?.todayWord || (this.currentLang === 'de' ? 'heute' : 'today');
+        const atWord = t?.atWord || (this.currentLang === 'de' ? 'um' : 'at');
+
+        if (!this.lastSyncIso) {
+            syncEl.innerText = `${prefix}: ---`;
+            return;
+        }
+
+        const syncDate = new Date(this.lastSyncIso);
+        const today = new Date();
+        const locale = this.currentLang === 'de' ? 'de-DE' : 'en-GB';
+
+        let datePrefix = todayWord;
+        if (syncDate.getDate() !== today.getDate() || syncDate.getMonth() !== today.getMonth() || syncDate.getFullYear() !== today.getFullYear()) {
+            datePrefix = syncDate.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
+        }
+
+        const timeStr = syncDate.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+        syncEl.innerText = `${prefix}: ${datePrefix} ${atWord} ${timeStr}`;
     }
 
     calculateProjectionRatesFromData() {
@@ -500,18 +528,9 @@ class DualEngineApp {
                             };
                         });
 
-                    const syncEl = document.getElementById('live-sync-time');
-                    if (syncEl && responseData.lastSync) {
-                        const syncDate = new Date(responseData.lastSync);
-                        const today = new Date();
-
-                        let datePrefix = "heute";
-                        if (syncDate.getDate() !== today.getDate() || syncDate.getMonth() !== today.getMonth()) {
-                            datePrefix = syncDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
-                        }
-
-                        const timeStr = syncDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-                        syncEl.innerText = `Letzter Sync: ${datePrefix} um ${timeStr}`;
+                    if (responseData.lastSync) {
+                        this.lastSyncIso = responseData.lastSync;
+                        this.updateSyncTimeText();
                     }
                 }
             }
@@ -1123,6 +1142,7 @@ class DualEngineApp {
                 el.innerText = translations[this.currentLang][key];
             }
         });
+        this.updateSyncTimeText();
     }
 
     setupListeners() {
