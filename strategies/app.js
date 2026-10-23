@@ -134,10 +134,8 @@ class DualEngineApp {
         });
 
         let maxRawTs = 0;
-        let maxRawDate = "";
         existingTrades.forEach(t => {
             if (t.ts > maxRawTs) maxRawTs = t.ts;
-            if (t.dt > maxRawDate) maxRawDate = t.dt;
         });
 
         let masterBalance = 0;
@@ -165,17 +163,13 @@ class DualEngineApp {
             const sym = (lt.Symbol || "").toUpperCase();
             if (sym && !sym.includes(this.expectedSymbol)) return;
 
-            // Alte Trades vor dem letzten dokumentierten JSON-Tag überspringen (verhindert Duplikate)
-            if (maxRawDate && lt.dt < maxRawDate) return;
-
-            // Auf dem letzten JSON-Tag prüfen, ob der Trade bereits vorhanden ist
-            if (maxRawDate && lt.dt === maxRawDate) {
+            // Nur basierend auf dem Timestamp prüfen, ob der Trade älter oder bereits vorhanden ist (kein Blockieren nach Datum mehr!)
+            if (lt.ts <= maxRawTs) {
                 const alreadyExists = existingTrades.some(rt => {
-                    if (rt.dt !== lt.dt) return false;
                     if ((rt.Action || "").toUpperCase() !== ltAction) return false;
                     return Math.abs(rt.ts - lt.ts) <= 30 * 60 * 1000;
                 });
-                if (alreadyExists || lt.ts <= maxRawTs) return;
+                if (alreadyExists) return;
             }
 
             const openObj = this.parseDate(lt["Open Date"]);
@@ -1671,7 +1665,10 @@ class DualEngineApp {
             const typeColor = isLong ? 'text-emerald-400' : 'text-rose-400';
 
             let displayDate = "-";
-            if (t.dt) {
+            if (t.d) {
+                // Nimmt das formatierte Datum inkl. Uhrzeit (DD.MM.YYYY HH:MM)
+                displayDate = t.d;
+            } else if (t.dt) {
                 const dParts = t.dt.split('-');
                 displayDate = dParts.length === 3 ? `${dParts[2]}.${dParts[1]}.${dParts[0]}` : t.dt;
             }
